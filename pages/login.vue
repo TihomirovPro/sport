@@ -68,7 +68,7 @@ const loginWithGoogle = () => {
         gap 20px
         width 300px
         padding 16px
-        background var(--color-second-bg)
+        background #fafafa
         border-radius 10px
 
     &__btns
