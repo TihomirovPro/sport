@@ -8,6 +8,14 @@ export default defineNuxtConfig({
     ],
 
     pwa: {
+        manifest: {
+            name: 'Sport',
+            lang: 'ru',
+            useWebmanifestExtension: false
+        },
+        meta: {
+            title: 'Sport'
+        },
         workbox: {
             enabled: true
         }

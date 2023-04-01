@@ -17,6 +17,7 @@ const active = async (id) => {
 
 <template lang="pug">
 .exercisesList
+    .exercisesList__header Упражнения
     .exercisesList__items
         NuxtLink.exercisesList__item(
             v-for="(item, i) in allExercises"
@@ -39,19 +40,31 @@ const active = async (id) => {
 <style lang="stylus" scoped>
 .exercisesList
     height 100%
-    border-right: 1px solid var(--color-border)
+    border-right: 1px solid rgba(#dcdcdc,.5)
+
+    &__header
+        position fixed
+        top 0
+        left 0
+        width 100%
+        padding 15px
+        background #5182dc
+        color rgba(#fff,.8)
+        font-size 20px
 
     &__items
-        height calc(100vh - 126px)
+        padding-top 50px
+        height calc(100vh - 126px - 50px)
         overflow auto
 
     &__item
         display block
         cursor pointer
-        font-size 18px
+        font-size 20px
         text-align center
-        padding 16px 12px
-        border-bottom: 1px solid var(--color-border)
+        padding 18px 12px
+        border-bottom: 1px solid rgba(#dcdcdc,.5)
+        color #5182dc
 
     &__actions
         position fixed
@@ -61,8 +74,8 @@ const active = async (id) => {
         display grid
         gap 24px
         width 100%
-        background var(--color-main-bg)
-        border-top: 1px solid var(--color-border)
+        background #fafafa
+        border-top: 1px solid rgba(#dcdcdc,1)
 
     &__btn
         width 100%

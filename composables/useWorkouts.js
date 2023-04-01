@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue, set, child, push } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
 
-export const createWorkout = async (exercisesId, date, interval, desc, approach) => {
+export const createWorkout = async (exercisesId, date, interval, ease, approach, weight, desc) => {
     const auth = getAuth()
     const db = getDatabase()
 
@@ -9,12 +9,16 @@ export const createWorkout = async (exercisesId, date, interval, desc, approach)
         return +sum + +current;
     })
 
+    if (ease === "placeholder") ease = false
+
     const newWorkout = {
         exercisesId: exercisesId,
         date: date,
         interval: interval,
-        desc: desc,
+        ease: ease,
         approach: approach,
+        weight: weight,
+        desc: desc,
         res: res
     }
 
@@ -42,8 +46,10 @@ export const getWorkouts = async (userId, exercisesId) => {
                         exercisesId: workout.exercisesId,
                         date: workout.date,
                         interval: workout.interval,
-                        desc: workout.desc,
+                        ease: workout.ease,
                         approach: workout.approach,
+                        weight: workout.weight,
+                        desc: workout.desc,
                         res: workout.res,
                         id: key
                     })
