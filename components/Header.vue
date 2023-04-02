@@ -17,7 +17,7 @@ header.header
   .header__title {{ title }}
   NuxtLink.header__back(
     v-if="backBtn"
-    to="/app"
+    to="/"
     @click="removeActive"
     ) Назад
   //- NuxtLink.detail__back(to="/settings" @click="removeActive") Настройки

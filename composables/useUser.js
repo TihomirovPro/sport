@@ -70,7 +70,7 @@ export const initUser = async () => {
     onAuthStateChanged(auth, (user) => {
         if (user) {
             const uid = user.uid
-            router.replace({ path: "/app" })
+            router.replace({ path: "/" })
             getAllExercises(uid)
             const activeUser = useActiveUser()
             activeUser.value = uid
