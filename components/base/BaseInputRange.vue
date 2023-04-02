@@ -1,0 +1,44 @@
+<script setup>
+const props = defineProps({
+    modelValue: String
+});
+</script>
+
+<template lang="pug">
+.input-range
+  span Интервал: В {{ modelValue }} мин
+
+  input(
+    type="range"
+    min='1'
+    max='7'
+    step="0.5"
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
+  )
+</template>
+
+<style lang="stylus">
+.input-range
+  position relative
+  font-size 18px
+
+  input
+    margin-top 16px
+    width 100%
+    appearance none
+
+    &::-webkit-slider-runnable-track
+      height 10px
+      background #dcdcdc
+      border-radius 10px
+
+    &::-webkit-slider-thumb
+      height 30px
+      width 30px
+      background #5182dc
+      border-radius 50%
+      transform translateY(-10px)
+      -webkit-appearance none
+      box-shadow 0 0 10px rgba(darken(#5182dc, 30%), .2)
+</style>

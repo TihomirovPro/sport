@@ -18,14 +18,14 @@ if (props.weight) {
 }
 
 const fixDate = () => {
-    var options = {
+    const options = {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
     }
+    
     return new Date(props.date).toLocaleString("ru", options).slice(0, -2)
 }
-
 </script>
 
 <template lang="pug">
@@ -58,7 +58,7 @@ const fixDate = () => {
     display grid
     gap 12px
     max-width: 600px
-    padding 16px
+    padding 16px 12px
     border-radius 12px
     background #fafafa
     border 1px solid rgba(#dcdcdc,.5)

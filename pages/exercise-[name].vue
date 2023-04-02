@@ -2,30 +2,41 @@
 const activeExercise = useActiveExercise()
 const allWorkouts = useWorkouts()
 
-const intervals = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5, 7]
 const easeus = ['Свой вес', 'Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Сера-синяя резина', 'Зеленая резина', 'Синяя резина']
+const nowDate = new Date();
 
-const date = ref(new Date()) 
-const interval = ref('placeholder')
-const ease = ref('placeholder')
+const date = ref(`${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`) 
+const interval = ref('2.5')
+const ease = ref(easeus[0])
 const approach = ref('')
 const weight = ref('')
 const desc = ref('')
+const error = ref(false)
+const showAddModal = ref(false)
 
-let showAddModal = ref(false)
-
-const add = async () => {
-    const credentials = await createWorkout(activeExercise.value, date.value, interval.value, ease.value, approach.value, weight.value, desc.value)
-    interval.value = 'placeholder'
-    ease.value = 'placeholder'
-    approach.value = ''
-    weight.value = ''
-    desc.value = ''
-    showAddModal.value = false
+const fixDate = () => {
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }
+    
+    return new Date(date.value).toLocaleString("ru", options).slice(0, -2)
 }
 
-const removeActive = async () => {
-    activeExercise.value = ''
+const add = async () => {
+    if (approach.value) {
+        const credentials = await createWorkout(activeExercise.value, date.value, interval.value, ease.value, approach.value, weight.value, desc.value)
+        interval.value = '2.5'
+        ease.value = easeus[0]
+        approach.value = ''
+        weight.value = ''
+        desc.value = ''
+        showAddModal.value = false
+        error.value = false
+    } else {
+        error.value = true
+    }
 }
 
 const showModal = () => {
@@ -35,10 +46,7 @@ const showModal = () => {
 
 <template lang="pug">
 .detail
-    .detail__title
-        .detail__name {{ $route.params.name }}
-        NuxtLink.detail__back(to="/app" @click="removeActive") Назад
-        //- NuxtLink.detail__back(to="/settings" @click="removeActive") Настройки
+    Header(:title="$route.params.name" :backBtn="true")
 
     .detail__content
         Exercise(
@@ -59,23 +67,22 @@ const showModal = () => {
     )
     .detail__modal(v-if="showAddModal" )
         .detail__modal-wrap
-            BaseInput(
-                v-model="date"
-                type="date"
-            )
-            BaseSelect(
-                v-model="interval"
-                placeholder="Выбрать интервал"
-                :options="intervals"
-            )
+            label.date-label
+                span {{ fixDate() }}
+                BaseInput(
+                    v-model="date"
+                    type="date"
+                )
+            BaseInputRange(v-model="interval")
             BaseSelect(
                 v-model="ease"
                 placeholder="Сложность"
                 :options="easeus"
-            ) 
+            )
             BaseInput(
                 v-model="approach"
                 type="text"
+                :error="error"
                 inputmode="numeric"
                 placeholder="Подходы"
             )
@@ -99,22 +106,6 @@ const showModal = () => {
 <style lang="stylus" scoped>
 .detail
     height 100%
-
-    &__title
-        z-index 10
-        position relative
-        display flex
-        justify-content space-between
-        padding 15px
-        background #5182dc
-        box-shadow 0 0 10px rgba(darken(#5182dc, 30%), .6)
-
-    &__name
-        color rgba(#fff,.8)
-        font-size 20px
-
-    &__back
-        color rgba(#fff,.8)
 
     &__content
         display grid
@@ -170,18 +161,21 @@ const showModal = () => {
 
         &-wrap
             display grid
-            grid-template-columns: 1fr 1fr
-            gap 12px
+            gap 16px
             width 90%
             padding 24px 15px
             background #fafafa
 
-        input
-        textarea
-            grid-column 1/3
-
     &__btn
-        grid-column: 1/3
         width 100%
+
+.date-label
+    padding: 12px
+    text-align center
+    font-size 18px
+    input
+        position absolute
+        visibility hidden
+        z-index -1
 </style>
     
