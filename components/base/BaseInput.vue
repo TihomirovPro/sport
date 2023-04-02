@@ -2,7 +2,8 @@
 const props = defineProps({
     type: String,
     placeholder: String,
-    modelValue: String
+    modelValue: String,
+    error: { type: Boolean, default: false },
 });
 </script>
 
@@ -21,6 +22,7 @@ input.input(
     :placeholder="placeholder"
     autocomplete="off"
     @input="$emit('update:modelValue', $event.target.value)"
+    :class="{ _error: error }"
 )
 </template>
 
@@ -33,4 +35,7 @@ input.input(
     width 100%
     max-width 100%
     min-height 42px
+
+    &._error
+        border 1px solid rgba(red,.6)
 </style>
