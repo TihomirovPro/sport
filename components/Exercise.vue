@@ -58,6 +58,8 @@ const fixDate = () => {
     display grid
     gap 12px
     max-width: 600px
+    width 100%
+    margin 0 auto
     padding 16px 12px
     border-radius 12px
     background #fafafa
@@ -78,6 +80,9 @@ const fixDate = () => {
         padding 12px 0 0
         text-align center
         border-top 1px solid rgba(#dcdcdc,.6)
+        
+        span:not(:first-child)
+            border-left 1px solid rgba(#dcdcdc,.6)
 
     &__desc
         padding 12px

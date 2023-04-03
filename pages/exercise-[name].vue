@@ -2,7 +2,7 @@
 const activeExercise = useActiveExercise()
 const allWorkouts = useWorkouts()
 
-const easeus = ['Свой вес', 'Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Сера-синяя резина', 'Зеленая резина', 'Синяя резина']
+const easeus = ['Свой вес', 'С весом', 'Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина']
 const nowDate = new Date();
 
 const date = ref(`${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`) 
@@ -46,8 +46,6 @@ const showModal = () => {
 
 <template lang="pug">
 .detail
-    Header(:title="$route.params.name" :backBtn="true")
-
     .detail__content
         Exercise(
             v-if="allWorkouts"
@@ -65,45 +63,55 @@ const showModal = () => {
         @click="showModal()"
         :class="{ close: showAddModal }"
     )
-    .detail__modal(v-if="showAddModal" )
-        .detail__modal-wrap
-            label.date-label
-                span {{ fixDate() }}
-                BaseInput(
-                    v-model="date"
-                    type="date"
+    Transition
+        .detail__modal(v-if="showAddModal" )
+            .detail__modal-wrap
+                label.date-label
+                    span {{ fixDate() }}
+                    BaseInput(
+                        v-model="date"
+                        type="date"
+                    )
+                BaseInputRange(v-model="interval")
+                BaseSelect(
+                    v-model="ease"
+                    placeholder="Сложность"
+                    :options="easeus"
                 )
-            BaseInputRange(v-model="interval")
-            BaseSelect(
-                v-model="ease"
-                placeholder="Сложность"
-                :options="easeus"
-            )
-            BaseInput(
-                v-model="approach"
-                type="text"
-                :error="error"
-                inputmode="numeric"
-                placeholder="Подходы"
-            )
-            BaseInput(
-                v-model="weight"
-                type="text"
-                inputmode="numeric"
-                placeholder="Веса"
-            )
-            BaseInput(
-                v-model="desc"
-                type="textarea"
-                placeholder="Заметка"
-            )
-            BaseButton.detail__btn(
-                @click="add"
-                text="Добавить"
-            )
+                BaseInput(
+                    v-model="approach"
+                    type="text"
+                    :error="error"
+                    inputmode="numeric"
+                    placeholder="Подходы"
+                )
+                BaseInput(
+                    v-if="ease === easeus[1]"
+                    v-model="weight"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="Веса"
+                )
+                BaseInput(
+                    v-model="desc"
+                    type="textarea"
+                    placeholder="Заметка"
+                )
+                BaseButton.detail__btn(
+                    @click="add"
+                    text="Добавить"
+                )
 </template>
 
 <style lang="stylus" scoped>
+.v-enter-active
+.v-leave-active
+  transition opacity 0.15s ease
+
+.v-enter-from
+.v-leave-to
+  opacity: 0
+
 .detail
     height 100%
 

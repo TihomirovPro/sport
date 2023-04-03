@@ -24,7 +24,6 @@ const active = async (id) => {
 
 <template lang="pug">
 .exercisesList
-    Header(title="Упражнения")
     .exercisesList__items
         NuxtLink.exercisesList__item(
             v-for="(item, i) in allExercises"

@@ -3,18 +3,38 @@
 export default defineNuxtConfig({
     css: ['@/assets/stylus/main.styl'],
 
+    app: {
+        pageTransition: { name: 'page', mode: 'out-in' }
+    },
+
     modules: [
         '@kevinmarrec/nuxt-pwa'
     ],
 
+    ssr: false,
+    modern: 'client',
+    target: 'static',
+
     pwa: {
         manifest: {
-            name: 'Sport',
+            name: 'Power Progress',
+            short_name: 'Power Progress',
             lang: 'ru',
-            useWebmanifestExtension: false
+            useWebmanifestExtension: false,
+            background_color: '#ffffff',
+            theme_color: '#5182dc',
+        },
+        icon: {
+            fileName: "icon.png",
+            purpose: "maskable"
         },
         meta: {
-            title: 'Sport'
+            lang: 'ru',
+            title: 'Power Progress',
+            theme_color: '#5182dc',
+            ogTitle: 'Power Progress',
+            ogSiteName: 'Power Progress',
+            nativeUI: true
         },
         workbox: {
             enabled: true
