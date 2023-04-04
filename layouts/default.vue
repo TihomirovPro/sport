@@ -17,9 +17,6 @@ const pageName = () => {
 
 const titleHeader = ref('Упражнения')
 const backBtn = ref(false)
-
-
-
 </script>
 
 <template lang="pug">
@@ -32,10 +29,12 @@ const backBtn = ref(false)
 .wrap {
   height: 100%;
 }
+
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.15s;
 }
+
 .page-enter-from,
 .page-leave-to {
   opacity: 0;
