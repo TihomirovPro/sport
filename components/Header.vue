@@ -1,13 +1,13 @@
 <script setup>
 const props = defineProps({
-    title: String,
-    backBtn: Boolean
+  title: String,
+  backBtn: Boolean
 });
 
 const activeExercise = useActiveExercise()
 
 const removeActive = async () => {
-    activeExercise.value = ''
+  activeExercise.value = ''
 }
 
 </script>
