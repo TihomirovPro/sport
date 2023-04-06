@@ -1,30 +1,35 @@
 
 <script setup>
 const activeExercise = useActiveExercise()
+const selectUpdateWorkout = useSelectUpdateWorkout()
 
 const emits = defineEmits(['hiden'])
 const props = defineProps({
-  id: String,
-  date: { type: String, default: '' },
-  interval: { type: String, default: '' },
-  ease: { type: String, default: '' },
-  desc: { type: String, default: '' },
-  approach: { type: String, default: '' },
-  weight: { type: String, default: '' },
-  show: { type: Boolean, default: false }
+  show: { type: Boolean, default: false },
 })
 
 const easeus = ['Свой вес', 'С весом', 'Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина']
 
 const nowDate = new Date()
 
-const dateValue = ref(`${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`)
-const intervalValue = ref('2.5')
+const date = ref(`${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`)
+const interval = ref('2.5')
 const easeValue = ref(easeus[0])
-const approachValue = ref('')
-const weightValue = ref('')
-const descValue = ref('')
+const approach = ref('')
+const weight = ref('')
+const desc = ref('')
 const error = ref(false)
+const update = ref(false)
+
+if (selectUpdateWorkout.value.length != 0) {
+  date.value = selectUpdateWorkout.value.date
+  interval.value = selectUpdateWorkout.value.interval
+  easeValue.value = selectUpdateWorkout.value.ease
+  approach.value = selectUpdateWorkout.value.approach
+  weight.value = selectUpdateWorkout.value.weight
+  desc.value = selectUpdateWorkout.value.desc
+  update.value = true
+}
 
 const fixDate = () => {
   const options = {
@@ -33,22 +38,27 @@ const fixDate = () => {
     day: 'numeric',
   }
 
-  return new Date(dateValue.value).toLocaleString("ru", options).slice(0, -2)
+  return new Date(date.value).toLocaleString("ru", options).slice(0, -2)
 }
 
 const add = async () => {
-  if (approachValue.value) {
-    const credentials = await createWorkout(activeExercise.value, dateValue.value, intervalValue.value, easeValue.value, approachValue.value, weightValue.value, descValue.value)
-    intervalValue.value = '2.5'
+  if (approach.value) {
+    const credentials = await createWorkout(activeExercise.value, date.value, interval.value, easeValue.value, approach.value, weight.value, desc.value)
+    interval.value = '2.5'
     easeValue.value = easeus[0]
-    approachValue.value = ''
-    weightValue.value = ''
-    descValue.value = ''
+    approach.value = ''
+    weight.value = ''
+    desc.value = ''
     error.value = false
     emits('hiden')
   } else {
     error.value = true
   }
+}
+
+const updateSelectWorkout = async () => {
+  const credentials = await updateWorkout(selectUpdateWorkout.value.id, date.value, interval.value, easeValue.value, approach.value, weight.value, desc.value)
+  emits('hiden')
 }
 
 </script>
@@ -59,17 +69,17 @@ Transition
       label.date-label
         span {{ fixDate() }}
         BaseInput(
-          v-model="dateValue"
+          v-model="date"
           type="date"
         )
-      BaseInputRange(v-model="intervalValue")
+      BaseInputRange(v-model="interval")
       BaseSelect(
         v-model="easeValue"
         placeholder="Сложность"
         :options="easeus"
       )
       BaseInput(
-        v-model="approachValue"
+        v-model="approach"
         type="text"
         :error="error"
         inputmode="numeric"
@@ -77,19 +87,25 @@ Transition
       )
       BaseInput(
         v-if="easeValue === easeus[1]"
-        v-model="weightValue"
+        v-model="weight"
         type="text"
         inputmode="numeric"
         placeholder="Веса"
       )
       BaseInput(
-        v-model="descValue"
+        v-model="desc"
         type="textarea"
         placeholder="Заметка"
       )
       BaseButton.detail__btn(
+        v-if="!update"
         @click="add"
         text="Добавить"
+      )
+      BaseButton.detail__btn(
+        v-else
+        @click="updateSelectWorkout"
+        text="Сохранить"
       )
 </template>
 

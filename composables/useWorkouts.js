@@ -1,4 +1,4 @@
-import { getDatabase, ref, onValue, set, child, push, remove } from 'firebase/database'
+import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
 
 export const createWorkout = async (exercisesId, date, interval, ease, approach, weight, desc) => {
@@ -8,8 +8,6 @@ export const createWorkout = async (exercisesId, date, interval, ease, approach,
   const res = approach.split(' ').reduce((sum, current) => {
     return +sum + +current;
   })
-
-  if (ease === "placeholder") ease = false
 
   const newWorkout = {
     exercisesId: exercisesId,
@@ -72,4 +70,25 @@ export const removeWorkout = async (id) => {
   const db = getDatabase()
 
   remove(ref(db, `users/${auth.currentUser.uid}/workout/${id}`))
+}
+
+export const updateWorkout = async (id, date, interval, ease, approach, weight, desc) => {
+  const auth = getAuth()
+  const db = getDatabase()
+
+  const res = approach.split(' ').reduce((sum, current) => {
+    return +sum + +current;
+  })
+
+  const newWorkout = {
+    date: date,
+    interval: interval,
+    ease: ease,
+    approach: approach,
+    weight: weight,
+    desc: desc,
+    res: res
+  }
+
+  update(ref(db,  `users/${auth.currentUser.uid}/workout/${id}`), newWorkout);
 }
