@@ -1,15 +1,23 @@
 <script setup>
 const allWorkouts = useWorkouts()
 const showAddModal = ref(false)
+const key = ref('add')
 
 const showModal = () => {
   showAddModal.value = !showAddModal.value
+  key.value = 'add'
+}
+
+const updateModal = () => {
+  showAddModal.value = !showAddModal.value
+  key.value = 'update'
 }
 </script>
 
 <template lang="pug">
 .detail
   WorkoutModal(
+    :key="key"
     :show="showAddModal"
     @hiden="showModal()"
   )
@@ -26,6 +34,7 @@ const showModal = () => {
       :weight="item.weight"
       :desc="item.desc"
       :res="item.res"
+      @update="updateModal()"
     )
   button.detail__actions(
     @click="showModal()"
@@ -48,7 +57,7 @@ const showModal = () => {
   &__content
     display grid
     gap 24px
-    max-height 100vh
+    max-height 100%
     padding 15px 15px 120px
     overflow auto
 
