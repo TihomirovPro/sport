@@ -5,8 +5,8 @@ const props = defineProps({
   interval: { type: String, default: '' },
   ease: { type: String, default: '' },
   desc: { type: String, default: '' },
-  approach: String,
-  weight: String,
+  approach: null,
+  weight: null,
   res: Number
 });
 
@@ -15,19 +15,19 @@ const emits = defineEmits(['update'])
 const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 
-let resWeight
+// let resWeight
 
-if (props.weight) {
-  resWeight = props.weight.split(' ').reduce((sum, current) => {
-    return +sum + +current;
-  })
-}
+// if (props.weight) {
+//   resWeight = props.weight.split(' ').reduce((sum, current) => {
+//     return +sum + +current;
+//   })
+// }
 
 const removeExercise = async () => {
   const credentials = await removeWorkout(props.id)
 }
 
-const updateExercise = async () => {
+const updateExercise = () => {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
   emits('update')
 }
@@ -52,17 +52,16 @@ const fixDate = () => {
 
   .exercise__approach
     span(
-      v-for="(item, i) in approach.split(' ')"
-      :key="i"
+      v-for="item in approach"
     ) {{ item }}
     span.exercise__all {{ res }}
 
   .exercise__weight(v-if="weight")
     span(
-      v-for="(item, i) in weight.split(' ')"
-      :key="i"
+      v-for="item in weight"
     ) {{ item }}
-    span.exercise__all {{ resWeight }}
+    //- span.exercise__all {{ resWeight }}
+    span.exercise__all 
 
   .exercise__desc(v-if="desc") {{ desc }}
 

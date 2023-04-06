@@ -5,19 +5,23 @@ export const createWorkout = async (exercisesId, date, interval, ease, approach,
   const auth = getAuth()
   const db = getDatabase()
 
-  const res = approach.split(' ').reduce((sum, current) => {
-    return +sum + +current;
-  })
+  const approachVal = approach.split(/\-|\s/)
+  const approachRes = approachVal.reduce((sum, current) => { return +sum + +current })
+  let weightVal = false
+
+  if (weight) {
+    weightVal = weight.split(/\-|\s/)
+  }
 
   const newWorkout = {
     exercisesId: exercisesId,
     date: date,
     interval: interval,
     ease: ease,
-    approach: approach,
-    weight: weight,
+    approach: approachVal,
+    weight: weightVal,
     desc: desc,
-    res: res
+    res: approachRes
   }
 
   const newWorkoutKey = push(child(ref(db), 'workout')).key
@@ -76,18 +80,22 @@ export const updateWorkout = async (id, date, interval, ease, approach, weight, 
   const auth = getAuth()
   const db = getDatabase()
 
-  const res = approach.split(' ').reduce((sum, current) => {
-    return +sum + +current;
-  })
+  const approachVal = approach.split(/\-|\s/)
+  const approachRes = approachVal.reduce((sum, current) => { return +sum + +current })
+  let weightVal = false
+
+  if (weight) {
+    weightVal = weight.split(/\-|\s/)
+  }
 
   const newWorkout = {
     date: date,
     interval: interval,
     ease: ease,
-    approach: approach,
-    weight: weight,
+    approach: approachVal,
+    weight: weightVal,
     desc: desc,
-    res: res
+    res: approachRes
   }
 
   update(ref(db,  `users/${auth.currentUser.uid}/workout/${id}`), newWorkout);

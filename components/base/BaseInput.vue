@@ -29,7 +29,7 @@ input.input(
 <style lang="stylus">
 .input
     padding 10px 8px
-    font-size 14px
+    font-size 18px
     border 1px solid rgba(#dcdcdc,1)
     border-radius 4px
     width 100%
@@ -37,5 +37,5 @@ input.input(
     min-height 42px
 
     &._error
-        border 1px solid rgba(red,.6)
+      border 1px solid rgba(red,.6)
 </style>
