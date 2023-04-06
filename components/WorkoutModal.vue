@@ -21,12 +21,14 @@ const desc = ref('')
 const error = ref(false)
 const update = ref(false)
 
-if (selectUpdateWorkout.value.length != 0) {
+if (selectUpdateWorkout.value) {
   date.value = selectUpdateWorkout.value.date
   interval.value = selectUpdateWorkout.value.interval
   easeValue.value = selectUpdateWorkout.value.ease
-  approach.value = selectUpdateWorkout.value.approach
-  weight.value = selectUpdateWorkout.value.weight
+  approach.value = selectUpdateWorkout.value.approach.join('-')
+  if (selectUpdateWorkout.value.weight) {
+    weight.value = selectUpdateWorkout.value.weight.join('-')
+  }
   desc.value = selectUpdateWorkout.value.desc
   update.value = true
 }
@@ -57,8 +59,19 @@ const add = async () => {
 }
 
 const updateSelectWorkout = async () => {
-  const credentials = await updateWorkout(selectUpdateWorkout.value.id, date.value, interval.value, easeValue.value, approach.value, weight.value, desc.value)
-  emits('hiden')
+  if (approach.value) {
+    const credentials = await updateWorkout(selectUpdateWorkout.value.id, date.value, interval.value, easeValue.value, approach.value, weight.value, desc.value)
+    selectUpdateWorkout.value = ''
+    interval.value = '2.5'
+    easeValue.value = easeus[0]
+    approach.value = ''
+    weight.value = ''
+    desc.value = ''
+    error.value = false
+    emits('hiden')
+  } else {
+    error.value = true
+  }
 }
 
 </script>
@@ -82,6 +95,7 @@ Transition
         v-model="approach"
         type="text"
         :error="error"
+        @input=""
         inputmode="numeric"
         placeholder="Подходы"
       )

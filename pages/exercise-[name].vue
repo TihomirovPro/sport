@@ -1,10 +1,12 @@
 <script setup>
 const allWorkouts = useWorkouts()
+const selectUpdateWorkout = useSelectUpdateWorkout()
 const showAddModal = ref(false)
 const key = ref('add')
 
 const showModal = () => {
   showAddModal.value = !showAddModal.value
+  selectUpdateWorkout.value = ''
   key.value = 'add'
 }
 
@@ -19,13 +21,13 @@ const updateModal = () => {
   WorkoutModal(
     :key="key"
     :show="showAddModal"
-    @hiden="showModal()"
+    @hiden="showAddModal.value = !showAddModal.value"
   )
   .detail__content
     Exercise(
       v-if="allWorkouts"
-      v-for="(item, i) in allWorkouts"
-      :key="i"
+      v-for="item in allWorkouts"
+      :key="item.id"
       :id="item.id"
       :date="item.date"
       :interval="`В ${item.interval} мин`"

@@ -17,6 +17,7 @@ button.button {{text}}
   padding 10px 16px
   background #3b6ec9
   color #fff
+  font-size 18px
   text-align center
   border-radius 4px
   transition .24s
