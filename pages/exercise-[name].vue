@@ -1,46 +1,56 @@
 <script setup>
 const allWorkouts = useWorkouts()
+const isActiveFilters = useActiveFilters()
 const selectUpdateWorkout = useSelectUpdateWorkout()
-const showAddModal = ref(false)
+const isShowModal = useShowModal()
 const key = ref('add')
 
 const showModal = () => {
-  showAddModal.value = !showAddModal.value
+  isShowModal.value = !isShowModal.value
   selectUpdateWorkout.value = ''
   key.value = 'add'
 }
 
-const updateModal = () => {
-  showAddModal.value = !showAddModal.value
-  key.value = 'update'
+const updateModal = (id) => {
+  isShowModal.value = !isShowModal.value
+  key.value = id
 }
 </script>
 
 <template lang="pug">
 .detail
-  WorkoutModal(
-    :key="key"
-    :show="showAddModal"
-    @hiden="showAddModal.value = !showAddModal.value"
-  )
-  .detail__content
-    Exercise(
-      v-if="allWorkouts"
-      v-for="item in allWorkouts"
-      :key="item.id"
-      :id="item.id"
-      :date="item.date"
-      :interval="`В ${item.interval} мин`"
-      :ease="item.ease"
-      :approach="item.approach"
-      :weight="item.weight"
-      :desc="item.desc"
-      :res="item.res"
-      @update="updateModal()"
-    )
+  WorkoutModal(:key="key")
+  .detail__content(v-if="allWorkouts")
+    template(v-for="item in allWorkouts")
+      Exercise(
+        v-if="!isActiveFilters"
+        :key="item.id"
+        :id="item.id"
+        :date="item.date"
+        :interval="`В ${item.interval} мин`"
+        :ease="item.ease"
+        :approach="item.approach"
+        :weight="item.weight"
+        :desc="item.desc"
+        :res="item.res"
+        @update="updateModal(item.id)"
+      )
+      Exercise(
+        v-else-if="item.filter"
+        :key="item.id"
+        :id="item.id"
+        :date="item.date"
+        :interval="`В ${item.interval} мин`"
+        :ease="item.ease"
+        :approach="item.approach"
+        :weight="item.weight"
+        :desc="item.desc"
+        :res="item.res"
+        @update="updateModal(item.id)"
+      )
   button.detail__actions(
-    @click="showModal()"
-    :class="{ close: showAddModal }"
+    @click="showModal"
+    :class="{ close: isShowModal }"
   )
 </template>
 
