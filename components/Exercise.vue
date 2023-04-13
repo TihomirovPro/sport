@@ -18,7 +18,7 @@ const selectUpdateWorkout = useSelectUpdateWorkout()
 // let resWeight
 
 // if (props.weight) {
-//   resWeight = props.weight.split(' ').reduce((sum, current) => {
+//   resWeight = props.weight.reduce((sum, current) => {
 //     return +sum + +current;
 //   })
 // }
