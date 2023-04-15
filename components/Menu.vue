@@ -4,7 +4,10 @@ const isShowMenu = useShowMenu()
 </script>
 
 <template lang="pug">
-.menu(@click.self="isShowMenu = false")
+.menu(
+  v-if="isShowMenu"
+  @click.self="isShowMenu = false"
+)
   .menu__container
     .menu__item Замеры
     .menu__item Настройки

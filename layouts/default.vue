@@ -21,20 +21,19 @@ const backBtn = ref(false)
 </script>
 
 <template lang="pug">
-.wrap
+.page
   Header(
     v-if="user"
     :title="pageName()"
     :backBtn="backBtn"
   )
-  slot
+  .page__content
+    slot
+  Footer(v-if="user")
+  Menu
 </template>
 
 <style>
-.wrap {
-  height: 100%;
-}
-
 .page-enter-active,
 .page-leave-active {
   transition: opacity 0.15s;
@@ -44,4 +43,15 @@ const backBtn = ref(false)
 .page-leave-to {
   opacity: 0;
 }
+</style>
+
+<style lang="stylus">
+.page
+  display grid
+  grid-template-rows 50px 1fr 50px
+  height 100%
+
+  &__content
+    height 100%
+    overflow auto
 </style>

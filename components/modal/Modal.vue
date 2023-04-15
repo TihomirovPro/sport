@@ -28,7 +28,7 @@ Transition
 .v-leave-to
   opacity: 0
 .modal
-  z-index 100
+  z-index 110
   position fixed
   top 0
   left 0
