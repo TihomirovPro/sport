@@ -1,12 +1,17 @@
 <script setup>
 const emits = defineEmits(['select'])
-const selectUpdateExercise = useSelectUpdateExercise()
+const updateExercise = useSelectUpdateExercise()
 const icons = useIcons()
 const activeIcon = ref('')
 
-if (selectUpdateExercise.value) {
-  activeIcon.value = selectUpdateExercise.value.icon
-}
+
+watchEffect(() => {
+  if (updateExercise.value) {
+    activeIcon.value = updateExercise.value.icon
+  } else {
+    activeIcon.value = ''
+  }
+})
 
 const selectIcon = (icon) => {
   activeIcon.value = icon

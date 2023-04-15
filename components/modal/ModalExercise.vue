@@ -1,32 +1,36 @@
 <script setup>
+
 const isShowModal = useShowModal()
 const selectUpdateExercise = useSelectUpdateExercise()
-
-const emits = defineEmits(['hiden'])
 
 const exercise = ref('')
 const color = ref('#5182dc')
 const icon = ref('')
 const error = ref(false)
-const update = ref(false)
 
-if (selectUpdateExercise.value) {
-  exercise.value = selectUpdateExercise.value.name
-  color.value = selectUpdateExercise.value.color ? selectUpdateExercise.value.color : '#5182dc'
-  icon.value = selectUpdateExercise.value.icon
-  update.value = true
+function reset () {
+  selectUpdateExercise.value = ''
+  exercise.value = ''
+  color.value = '#5182dc'
+  icon.value = ''
+  error.value = false
+  isShowModal.value = false
 }
 
-const selectIcon = (el) => {
-  icon.value = el
-}
+watchEffect(() => {
+  if (selectUpdateExercise.value) {
+    exercise.value = selectUpdateExercise.value.name
+    color.value = selectUpdateExercise.value.color ? selectUpdateExercise.value.color : '#5182dc'
+    icon.value = selectUpdateExercise.value.icon
+  } else {
+    reset()
+  }
+})
 
 const newExercise = async () => {
   if (exercise.value) {
     const credentials = await createExercise(exercise.value, color.value, icon.value)
-    exercise.value = ''
-    icon.value = ''
-    error.value = false
+    reset()
   } else {
     error.value = true
   }
@@ -34,23 +38,17 @@ const newExercise = async () => {
 
 const updateData = async () => {
   const credentials = await updateExercise(selectUpdateExercise.value.id, exercise.value, color.value, icon.value)
-  isShowModal.value = false
+  reset()
 }
 
 const remove = async () => {
   const credentials = await removeExercise(selectUpdateExercise.value.id)
-  isShowModal.value = false
-}
-
-const hideModal = () => {
-  selectUpdateExercise.value = ''
+  reset()
 }
 </script>
 
 <template lang="pug">
-Modal(
-  @hiden="hideModal"
-)
+Modal(@hiden="reset")
   BaseInput(
     v-model="exercise"
     type="text"
@@ -62,9 +60,11 @@ Modal(
     type="color"
     :error="error"
   )
-  IconsSelect(@select="(el) => selectIcon(el)")
+  IconsSelect(
+    @select="(el) => icon = el"
+  )
   BaseButton(
-    v-if="!update"
+    v-if="!selectUpdateExercise"
     text="Добавить"
     @click="newExercise"
   )

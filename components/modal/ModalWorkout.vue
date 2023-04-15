@@ -2,9 +2,8 @@
 <script setup>
 const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
+const isShowModal = useShowModal()
 const easeus = useEaseus()
-
-const emits = defineEmits(['hiden'])
 
 const nowDate = new Date()
 
@@ -15,19 +14,33 @@ const approach = ref('')
 const weight = ref('')
 const desc = ref('')
 const error = ref(false)
-const update = ref(false)
 
-if (selectUpdateWorkout.value) {
-  date.value = selectUpdateWorkout.value.date
-  interval.value = selectUpdateWorkout.value.interval
-  ease.value = selectUpdateWorkout.value.ease
-  approach.value = selectUpdateWorkout.value.approach.join('-')
-  if (selectUpdateWorkout.value.weight) {
-    weight.value = selectUpdateWorkout.value.weight.join('-')
-  }
-  desc.value = selectUpdateWorkout.value.desc
-  update.value = true
+function reset () {
+  isShowModal.value = false
+  selectUpdateWorkout.value = ''
+  date.value = `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`
+  interval.value = '2.5'
+  ease.value = easeus.value[0]
+  approach.value = ''
+  weight.value = ''
+  desc.value = ''
+  error.value = false
 }
+
+watchEffect(() => {
+  if (selectUpdateWorkout.value) {
+    date.value = selectUpdateWorkout.value.date
+    interval.value = selectUpdateWorkout.value.interval
+    ease.value = selectUpdateWorkout.value.ease
+    approach.value = selectUpdateWorkout.value.approach.join('-')
+    if (selectUpdateWorkout.value.weight) {
+      weight.value = selectUpdateWorkout.value.weight.join('-')
+    }
+    desc.value = selectUpdateWorkout.value.desc
+  } else {
+    reset()
+  }
+})
 
 const options = {
   year: 'numeric',
@@ -38,13 +51,7 @@ const options = {
 const add = async () => {
   if (approach.value) {
     const credentials = await createWorkout(activeExercise.value, date.value, interval.value, ease.value, approach.value, weight.value, desc.value)
-    interval.value = '2.5'
-    ease.value = easeus.value[0]
-    approach.value = ''
-    weight.value = ''
-    desc.value = ''
-    error.value = false
-    emits('hiden')
+    reset()
   } else {
     error.value = true
   }
@@ -53,22 +60,20 @@ const add = async () => {
 const updateSelectWorkout = async () => {
   if (approach.value) {
     const credentials = await updateWorkout(selectUpdateWorkout.value.id, date.value, interval.value, ease.value, approach.value, weight.value, desc.value)
-    selectUpdateWorkout.value = ''
-    interval.value = '2.5'
-    ease.value = easeus.value[0]
-    approach.value = ''
-    weight.value = ''
-    desc.value = ''
-    error.value = false
-    emits('hiden')
+    reset()
   } else {
     error.value = true
   }
 }
 
+const removeSelectWorkout = async () => {
+  const credentials = await removeWorkout(selectUpdateWorkout.value.id)
+  reset()
+}
+
 </script>
 <template lang="pug">
-Modal(@hiden="selectUpdateWorkout = ''")
+Modal(@hiden="reset")
   label.date-label
     span {{ new Date(date).toLocaleString("ru", options).slice(0, -2) }}
     BaseInput(
@@ -102,15 +107,21 @@ Modal(@hiden="selectUpdateWorkout = ''")
     placeholder="Заметка"
   )
   BaseButton(
-    v-if="!update"
+    v-if="!selectUpdateWorkout"
     @click="add"
     text="Добавить"
   )
-  BaseButton(
-    v-else
-    @click="updateSelectWorkout"
-    text="Сохранить"
-  )
+  template(v-else)
+    BaseButton(
+      @click="updateSelectWorkout"
+      text="Сохранить"
+    )
+    BaseButton(
+      red
+      @click="removeSelectWorkout"
+      text="Удалить"
+    )
+
 </template>
 
 <style lang="stylus" scoped>

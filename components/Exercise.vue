@@ -1,9 +1,4 @@
 <script setup>
-const selectUpdateExercise = useSelectUpdateExercise()
-const allExercises = useAllExercises()
-
-const emits = defineEmits(['update'])
-
 const props = defineProps({
   name: String,
   color: { type: String, default: '#5182dc' },
@@ -11,14 +6,18 @@ const props = defineProps({
   id: String,
 })
 
+const allExercises = useAllExercises()
+const isShowModal = useShowModal()
+const updateExercise = useSelectUpdateExercise()
+const activeExercise = useActiveExercise()
+const activeUser = useActiveUser()
+
 const updateModal = () => {
-  selectUpdateExercise.value = allExercises.value.find(item => item.id === props.id)
-  emits('update')
+  updateExercise.value = allExercises.value.find(item => item.id === props.id)
+  isShowModal.value = true
 }
 
 const active = async () => {
-  const activeExercise = useActiveExercise()
-  const activeUser = useActiveUser()
   activeExercise.value = props.id
   getWorkouts(activeUser.value, props.id)
 }
