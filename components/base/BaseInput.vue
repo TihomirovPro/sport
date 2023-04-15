@@ -22,7 +22,7 @@ input.input(
   :placeholder="placeholder"
   autocomplete="off"
   @input="$emit('update:modelValue', $event.target.value)"
-  :class="{ _error: error }"
+  :class="{ _error: error, _color: type === 'color' }"
 )
 </template>
 
@@ -35,6 +35,10 @@ input.input(
   width 100%
   max-width 100%
   min-height 42px
+
+  &._color
+    padding 1px
+    border none
 
   &._error
     border 1px solid rgba(red,.6)

@@ -6,7 +6,6 @@ const easeus = useEaseus()
 
 const emits = defineEmits(['hiden'])
 
-
 const nowDate = new Date()
 
 const date = ref(`${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`)
@@ -102,12 +101,12 @@ Modal(@hiden="selectUpdateWorkout = ''")
     type="textarea"
     placeholder="Заметка"
   )
-  BaseButton.addWorkout__btn(
+  BaseButton(
     v-if="!update"
     @click="add"
     text="Добавить"
   )
-  BaseButton.addWorkout__btn(
+  BaseButton(
     v-else
     @click="updateSelectWorkout"
     text="Сохранить"

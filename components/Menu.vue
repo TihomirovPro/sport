@@ -6,9 +6,9 @@ const isShowMenu = useShowMenu()
 <template lang="pug">
 .menu(@click.self="isShowMenu = false")
   .menu__container
-    p Замеры
-    p Настройки
-    p Выход
+    .menu__item Замеры
+    .menu__item Настройки
+    .menu__item._exit(@click="signOutUser") Выход
 </template>
 
 <style lang="stylus" scoped>
@@ -22,8 +22,16 @@ const isShowMenu = useShowMenu()
   background rgba(0, 0, 0, .5)
 
   &__container
+    display flex
+    flex-direction column
     padding 12px
     width 50%
     height 100%
     background #fff
+
+  &__item
+    padding 12px
+
+    &._exit
+      margin-top auto
 </style>

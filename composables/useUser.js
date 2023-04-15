@@ -57,11 +57,10 @@ export const signInWithGoogle = () => {
       // console.log(result);
     }).catch((error) => {
       // console.log(error.message);
-    });
+    })
 
   return credentials
 }
-
 
 export const initUser = async () => {
   const router = useRouter()
