@@ -4,6 +4,7 @@ onMounted(async () => {
 })
 
 const route = useRoute()
+const user = useActiveUser()
 
 const pageName = () => {
   if (!route.params.name) {
@@ -21,7 +22,11 @@ const backBtn = ref(false)
 
 <template lang="pug">
 .wrap
-  Header(:title="pageName()" :backBtn="backBtn")
+  Header(
+    v-if="user"
+    :title="pageName()"
+    :backBtn="backBtn"
+  )
   slot
 </template>
 

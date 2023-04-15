@@ -19,10 +19,10 @@ const updateModal = (id) => {
 
 <template lang="pug">
 .detail
-  WorkoutModal(:key="key")
+  ModalWorkout(:key="key")
   .detail__content(v-if="allWorkouts")
     template(v-for="item in allWorkouts")
-      Exercise(
+      Workout(
         v-if="!isActiveFilters"
         :key="item.id"
         :id="item.id"
@@ -35,7 +35,7 @@ const updateModal = (id) => {
         :res="item.res"
         @update="updateModal(item.id)"
       )
-      Exercise(
+      Workout(
         v-else-if="item.filter"
         :key="item.id"
         :id="item.id"
@@ -55,14 +55,6 @@ const updateModal = (id) => {
 </template>
 
 <style lang="stylus" scoped>
-.v-enter-active
-.v-leave-active
-  transition opacity 0.15s ease
-
-.v-enter-from
-.v-leave-to
-  opacity: 0
-
 .detail
   height 100%
 

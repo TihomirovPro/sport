@@ -20,6 +20,13 @@ Transition
 </template>
 
 <style lang="stylus" scoped>
+.v-enter-active
+.v-leave-active
+  transition opacity 0.15s ease
+
+.v-enter-from
+.v-leave-to
+  opacity: 0
 .modal
   z-index 100
   position fixed

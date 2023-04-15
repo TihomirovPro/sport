@@ -61,7 +61,7 @@ const filter = () => {
 <template lang="pug">
 header.header
   .header__wrap
-    //- <svg @click="isShowMenu = true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 464" width="24px" height="24"><path fill="#fff" d="M435 406H29a29 29 0 1 1 0-58h406a29 29 0 0 1 0 58zm0-145H29a29 29 0 1 1 0-58h406a29 29 0 1 1 0 58zm0-145H29a29 29 0 1 1 0-58h406a29 29 0 1 1 0 58z"/></svg>
+    <svg @click="isShowMenu = true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 464 464" width="24px" height="24"><path fill="#fff" d="M435 406H29a29 29 0 1 1 0-58h406a29 29 0 0 1 0 58zm0-145H29a29 29 0 1 1 0-58h406a29 29 0 1 1 0 58zm0-145H29a29 29 0 1 1 0-58h406a29 29 0 1 1 0 58z"/></svg>
     .header__title {{ title }}
   <svg v-if="backBtn" @click="changeFilterStatus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="#fff" fill-rule="evenodd" d="M18 12a4 4 0 1 0-3.87-5H3a1 1 0 0 0 0 2h11.13A4 4 0 0 0 18 12zm-2-4a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM2 16a4 4 0 0 1 7.87-1H21a1 1 0 1 1 0 2H9.87A4 4 0 0 1 2 16zm6 0a2 2 0 1 0-4 0 2 2 0 0 0 4 0z" clip-rule="evenodd"/></svg>
   NuxtLink.header__back(
