@@ -6,18 +6,26 @@ onMounted(async () => {
 const route = useRoute()
 const user = useActiveUser()
 
+const backBtn = ref(false)
+
 const pageName = () => {
-  if (!route.params.name) {
+  if (route.name === 'index') {
     backBtn.value = false
     return 'Упражнения'
+  } else if (route.name === 'settings') {
+    backBtn.value = true
+    return 'Настройки'
+  } else if (route.name === 'measure') {
+    backBtn.value = true
+    return 'Замеры'
+  } else if (route.name === 'profile') {
+    backBtn.value = true
+    return 'Профиль'
   } else {
     backBtn.value = true
     return route.params.name
   }
 }
-
-const titleHeader = ref('Упражнения')
-const backBtn = ref(false)
 </script>
 
 <template lang="pug">

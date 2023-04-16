@@ -2,11 +2,14 @@
 
 const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
+const colors = useColors()
 
 const exercise = ref('')
 const color = ref('#5182dc')
 const icon = ref('')
 const error = ref(false)
+const selectColor = ref(false)
+const selectIcon = ref(false)
 
 function reset () {
   selectUpdateExercise.value = ''
@@ -58,14 +61,26 @@ Modal(
     :error="error"
     placeholder="Название упражения"
   )
-  BaseInput(
-    v-model="color"
-    type="color"
-    :error="error"
-  )
-  IconsSelect(
-    @select="(el) => icon = el"
-  )
+  .wrap
+    p Цвет блока
+    .selectColor(
+      @click="selectColor = true"
+      :style="`background: ${color}`"
+    )
+    Modal(:isShow="selectColor" @hiden="selectColor = false")
+      .colors
+        .colors__item(
+          v-for="item in colors"
+          @click="color = item; selectColor = false"
+          :style="`background: ${item}`"
+        )
+  .wrap
+    p Иконка
+    .selectIcon(:class="`icon-${icon}`" @click="selectIcon = true")
+    Modal(:isShow="selectIcon" @hiden="selectIcon = false")
+      IconsSelect(
+        @select="(el) => { icon = el; selectIcon = false }"
+      )
   BaseButton(
     v-if="!selectUpdateExercise"
     text="Добавить"
@@ -89,4 +104,25 @@ Modal(
   grid-template-columns 1fr 1fr
   place-items center
   gap 20px
+
+.wrap
+  display flex
+  align-items center
+  justify-content space-between
+
+.selectColor
+  width 40px
+  height 40px
+  border-radius 10px
+  background #5182dc
+
+.selectIcon
+  font-size 30px
+
+.colors
+  display grid
+  grid-template-columns repeat(9, 1fr)
+  &__item
+    width 100%
+    height 40px
 </style>
