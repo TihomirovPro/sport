@@ -2,7 +2,7 @@
 <script setup>
 const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
-const isShowModal = useShowModal()
+const isShowModalWorkout = useShowModalWorkout()
 const easeus = useEaseus()
 
 const nowDate = new Date()
@@ -16,7 +16,7 @@ const desc = ref('')
 const error = ref(false)
 
 function reset () {
-  isShowModal.value = false
+  isShowModalWorkout.value = false
   selectUpdateWorkout.value = ''
   date.value = `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`
   interval.value = '2.5'
@@ -73,7 +73,10 @@ const removeSelectWorkout = async () => {
 
 </script>
 <template lang="pug">
-Modal(@hiden="reset")
+Modal(
+  :isShow="isShowModalWorkout"
+  @hiden="reset"
+)
   label.date-label
     span {{ new Date(date).toLocaleString("ru", options).slice(0, -2) }}
     BaseInput(

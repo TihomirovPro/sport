@@ -7,14 +7,14 @@ const props = defineProps({
 })
 
 const allExercises = useAllExercises()
-const isShowModal = useShowModal()
+const isShowModalExercise = useShowModalExercise()
 const updateExercise = useSelectUpdateExercise()
 const activeExercise = useActiveExercise()
 const activeUser = useActiveUser()
 
 const updateModal = () => {
   updateExercise.value = allExercises.value.find(item => item.id === props.id)
-  isShowModal.value = true
+  isShowModalExercise.value = true
 }
 
 const active = async () => {

@@ -12,11 +12,17 @@ const props = defineProps({
 
 const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()
-const isShowModal = useShowModal()
+const isShowModalWorkout = useShowModalWorkout()
+
+const options = {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}
 
 const updateExercise = () => {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
-  isShowModal.value = true
+  isShowModalWorkout.value = true
 }
 </script>
 

@@ -1,6 +1,6 @@
 <script setup>
 
-const isShowModal = useShowModal()
+const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
 
 const exercise = ref('')
@@ -14,7 +14,7 @@ function reset () {
   color.value = '#5182dc'
   icon.value = ''
   error.value = false
-  isShowModal.value = false
+  isShowModalExercise.value = false
 }
 
 watchEffect(() => {
@@ -48,7 +48,10 @@ const remove = async () => {
 </script>
 
 <template lang="pug">
-Modal(@hiden="reset")
+Modal(
+  :isShow="isShowModalExercise"
+  @hiden="reset"
+)
   BaseInput(
     v-model="exercise"
     type="text"
