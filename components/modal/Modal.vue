@@ -44,6 +44,8 @@ Transition
   background rgba(0,0,0,.7)
 
   &__container
+    max-height 100%
+    overflow auto
     display grid
     gap 16px
     width 90%

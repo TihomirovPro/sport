@@ -7,7 +7,8 @@ const allExercises = useAllExercises()
   ModalExercise
   .exercisesList__items
     Exercise(
-      v-for="item in allExercises"
+      v-for="(item, i) in allExercises"
+      :style="`order: ${item.order ? item.order : i}`"
       :key="item.name"
       :name="item.name"
       :color="item.color"
@@ -15,3 +16,8 @@ const allExercises = useAllExercises()
       :id="item.id"
     )
 </template>
+
+<style lang="stylus" scoped>
+.exercisesList__items
+  display grid
+</style>

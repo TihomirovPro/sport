@@ -1,4 +1,8 @@
 <script setup>
+definePageMeta({
+  layout: 'login'
+})
+
 const email = ref('')
 const password = ref('')
 
