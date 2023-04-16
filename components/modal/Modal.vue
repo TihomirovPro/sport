@@ -1,10 +1,14 @@
 
 <script setup>
-const isShowModal = useShowModal()
+// const isShowModal = useShowModal()
 const emits = defineEmits(['hiden'])
 
+const props = defineProps({
+  isShow: false
+})
+
 const closeModal = () => {
-  isShowModal.value = false
+  // isShowModal.value = false
   emits('hiden')
 }
 </script>
@@ -12,8 +16,8 @@ const closeModal = () => {
 <template lang="pug">
 Transition
   .modal(
-    v-if="isShowModal"
-    @click.self="closeModal"
+    v-if="isShow"
+    @click.self="emits('hiden')"
   )
     .modal__container
       slot
