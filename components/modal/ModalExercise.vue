@@ -61,26 +61,25 @@ Modal(
     :error="error"
     placeholder="Название упражения"
   )
-  .wrap
+  .wrap(@click="selectColor = true")
     p Цвет блока
     .selectColor(
-      @click="selectColor = true"
       :style="`background: ${color}`"
     )
-    Modal(:isShow="selectColor" @hiden="selectColor = false")
-      .colors
-        .colors__item(
-          v-for="item in colors"
-          @click="color = item; selectColor = false"
-          :style="`background: ${item}`"
-        )
-  .wrap
-    p Иконка
-    .selectIcon(:class="`icon-${icon}`" @click="selectIcon = true")
-    Modal(:isShow="selectIcon" @hiden="selectIcon = false")
-      IconsSelect(
-        @select="(el) => { icon = el; selectIcon = false }"
+  Modal(:isShow="selectColor" @hiden="selectColor = false")
+    .colors
+      .colors__item(
+        v-for="item in colors"
+        @click="color = item; selectColor = false"
+        :style="`background: ${item}`"
       )
+  .wrap(@click="selectIcon = true")
+    p Иконка
+    .selectIcon(:class="`icon-${icon}`")
+  Modal(:isShow="selectIcon" @hiden="selectIcon = false")
+    IconsSelect(
+      @select="(el) => { icon = el; selectIcon = false }"
+    )
   BaseButton(
     v-if="!selectUpdateExercise"
     text="Добавить"
@@ -121,8 +120,11 @@ Modal(
 
 .colors
   display grid
-  grid-template-columns repeat(9, 1fr)
+  grid-template-columns repeat(6, 1fr)
+  margin -24px -15px
   &__item
     width 100%
-    height 40px
+    height 50px
+    border 2px solid #fff
+    border-radius 10px
 </style>
