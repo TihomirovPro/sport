@@ -51,4 +51,5 @@ Transition
     width 90%
     padding 24px 15px
     background #fafafa
+    border-radius 10px
 </style>
