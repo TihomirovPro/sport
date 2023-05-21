@@ -116,15 +116,14 @@ Modal(
   )
   template(v-else)
     BaseButton(
-      @click="updateSelectWorkout"
-      text="Сохранить"
-    )
-    BaseButton(
       red
       @click="removeSelectWorkout"
       text="Удалить"
     )
-
+    BaseButton(
+      @click="updateSelectWorkout"
+      text="Сохранить"
+    )
 </template>
 
 <style lang="stylus" scoped>

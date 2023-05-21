@@ -56,10 +56,11 @@ const pageName = () => {
 <style lang="stylus">
 .page
   display grid
-  grid-template-rows 50px 1fr 50px
+  grid-template-rows 50px 1fr
   height 100%
 
   &__content
     height 100%
+    padding-bottom 80px
     overflow auto
 </style>

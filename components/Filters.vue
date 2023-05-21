@@ -11,7 +11,7 @@ const ease = ref(easeusFilter[0])
 const filter = () => {
   if (ease.value === easeusFilter[0]) {
     allWorkouts.value.forEach(element => {
-      if (element.interval === interval.value) {
+      if (element.interval === interval.value || interval.value === '0.5') {
         element.filter = true
       } else {
         element.filter = false
@@ -20,7 +20,7 @@ const filter = () => {
   }
   else if (ease.value === easeusFilter[1]) {
     allWorkouts.value.forEach(element => {
-      if (element.interval === interval.value && element.ease !== 'Свой вес' && element.ease !== 'С весом') {
+      if ((element.interval === interval.value || interval.value === '0.5') && element.ease !== 'Свой вес' && element.ease !== 'С весом') {
         element.filter = true
       } else {
         element.filter = false
@@ -29,7 +29,7 @@ const filter = () => {
   }
   else {
     allWorkouts.value.forEach(element => {
-      if (element.interval === interval.value && element.ease === ease.value) {
+      if ((element.interval === interval.value || interval.value === '0.5') && element.ease === ease.value) {
         element.filter = true
       } else {
         element.filter = false
@@ -41,7 +41,7 @@ const filter = () => {
 
 <template lang="pug">
 .filters(v-if="isActiveFilters")
-  BaseInputRange(v-model="interval" @input="filter")
+  BaseInputRange(v-model="interval" @input="filter" min="0.5")
   BaseSelect(
     v-model="ease"
     placeholder="Сложность"

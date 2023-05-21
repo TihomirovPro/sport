@@ -87,13 +87,13 @@ Modal(
   )
   .modal__buttons(v-else)
     BaseButton(
-      text="Сохранить"
-      @click="updateData()"
-    )
-    BaseButton(
       red
       text="Удалить"
       @click="remove()"
+    )
+    BaseButton(
+      text="Сохранить"
+      @click="updateData()"
     )
 </template>
 
@@ -105,9 +105,19 @@ Modal(
   gap 20px
 
 .wrap
+  position relative
   display flex
   align-items center
   justify-content space-between
+  font-size 18px
+  height 40px
+  + .wrap:before
+    position absolute
+    left 0
+    top -8px
+    content ''
+    width 100%
+    border-top 1px solid rgba(#dcdcdc,1)
 
 .selectColor
   width 40px
@@ -116,7 +126,7 @@ Modal(
   background #5182dc
 
 .selectIcon
-  font-size 30px
+  font-size 35px
 
 .colors
   display grid

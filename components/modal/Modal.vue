@@ -1,6 +1,4 @@
-
 <script setup>
-// const isShowModal = useShowModal()
 const emits = defineEmits(['hiden'])
 
 const props = defineProps({
@@ -8,7 +6,6 @@ const props = defineProps({
 })
 
 const closeModal = () => {
-  // isShowModal.value = false
   emits('hiden')
 }
 </script>

@@ -1,16 +1,18 @@
 <script setup>
 const props = defineProps({
-    modelValue: String
+    modelValue: String,
+    min: { type: String, default: '1' }
 });
 </script>
 
 <template lang="pug">
 .input-range
-  span Интервал: В {{ modelValue }} мин
+  span(v-if="modelValue !== '0.5'") Интервал: В {{ modelValue }} мин
+  span(v-else) Интервал: Все
 
   input(
     type="range"
-    min='1'
+   :min='min'
     max='7'
     step="0.5"
     :value="modelValue"
