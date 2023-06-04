@@ -1,5 +1,6 @@
 <script setup>
-
+const activeUser = useActiveUser()
+const allWorkouts = useWorkouts()
 const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
 const colors = useColors()
@@ -10,6 +11,9 @@ const icon = ref('')
 const error = ref(false)
 const selectColor = ref(false)
 const selectIcon = ref(false)
+const workouts = ref('')
+const removeConfirm = ref(false)
+const text = ref('')
 
 function reset () {
   selectUpdateExercise.value = ''
@@ -22,6 +26,7 @@ function reset () {
 
 watchEffect(() => {
   if (selectUpdateExercise.value) {
+    getWorkouts(activeUser.value, selectUpdateExercise.value.id)
     exercise.value = selectUpdateExercise.value.name
     color.value = selectUpdateExercise.value.color ? selectUpdateExercise.value.color : '#5182dc'
     icon.value = selectUpdateExercise.value.icon
@@ -40,32 +45,77 @@ const newExercise = async () => {
 }
 
 const updateData = async () => {
-  const credentials = await updateExercise(selectUpdateExercise.value.id, exercise.value, color.value, icon.value)
+  await updateExercise(selectUpdateExercise.value.id, exercise.value, color.value, icon.value)
   reset()
 }
 
 const remove = async () => {
-  const credentials = await removeExercise(selectUpdateExercise.value.id)
+  if (allWorkouts.value.length) {
+    allWorkouts.value.forEach(async item => {
+      await removeWorkout(item.id)
+    })
+  }
+  await removeExercise(selectUpdateExercise.value.id)
+  removeConfirm.value = false
   reset()
+}
+
+const deleted = () => {
+  if (allWorkouts.value.length) {
+    text.value = 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
+  } else {
+    text.value = 'Ты уверен, что хочешь удалить?)'
+  }
+  removeConfirm.value = true
 }
 </script>
 
 <template lang="pug">
-Modal(
-  :isShow="isShowModalExercise"
-  @hiden="reset"
-)
-  BaseInput(
-    v-model="exercise"
-    type="text"
-    :error="error"
-    placeholder="Название упражения"
+div
+  Modal(
+    :isShow="isShowModalExercise"
+    @hiden="reset"
   )
-  .wrap(@click="selectColor = true")
-    p Цвет блока
-    .selectColor(
-      :style="`background: ${color}`"
+    BaseInput(
+      v-model="exercise"
+      type="text"
+      :error="error"
+      placeholder="Название упражения"
     )
+    .wrap(@click="selectColor = true")
+      p Цвет блока
+      .selectColor(:style="`background: ${color}`")
+    .wrap(@click="selectIcon = true")
+      p Иконка
+      .selectIcon(:class="`icon-${icon}`")
+    BaseButton(
+      v-if="!selectUpdateExercise"
+      text="Добавить"
+      @click="newExercise"
+    )
+    .modal__buttons(v-else)
+      BaseButton(
+        red
+        text="Удалить"
+        @click="deleted()"
+      )
+      BaseButton(
+        text="Сохранить"
+        @click="updateData()"
+      )
+  Modal(:isShow="removeConfirm" @hiden="removeConfirm = false")
+    .modal__text {{ text }}
+    .modal__buttons
+      BaseButton(
+        red
+        text="Удалить"
+        @click="remove()"
+      )
+      BaseButton(
+        text="Отменить"
+        @click="removeConfirm = false"
+      )
+
   Modal(:isShow="selectColor" @hiden="selectColor = false")
     .colors
       .colors__item(
@@ -73,27 +123,10 @@ Modal(
         @click="color = item; selectColor = false"
         :style="`background: ${item}`"
       )
-  .wrap(@click="selectIcon = true")
-    p Иконка
-    .selectIcon(:class="`icon-${icon}`")
+  
   Modal(:isShow="selectIcon" @hiden="selectIcon = false")
     IconsSelect(
       @select="(el) => { icon = el; selectIcon = false }"
-    )
-  BaseButton(
-    v-if="!selectUpdateExercise"
-    text="Добавить"
-    @click="newExercise"
-  )
-  .modal__buttons(v-else)
-    BaseButton(
-      red
-      text="Удалить"
-      @click="remove()"
-    )
-    BaseButton(
-      text="Сохранить"
-      @click="updateData()"
     )
 </template>
 
@@ -103,6 +136,12 @@ Modal(
   grid-template-columns 1fr 1fr
   place-items center
   gap 20px
+
+.modal__text
+  text-align center
+  font-size 18px
+  line-height 140%
+  padding 24px 0
 
 .wrap
   position relative
