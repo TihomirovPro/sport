@@ -114,7 +114,7 @@ Modal(
     @click="add"
     text="Добавить"
   )
-  template(v-else)
+  .modal__buttons(v-else)
     BaseButton(
       red
       @click="removeSelectWorkout"
@@ -140,4 +140,10 @@ Modal(
     position absolute
     visibility hidden
     z-index -1
+
+.modal__buttons
+  display grid
+  grid-template-columns 1fr 1fr
+  place-items center
+  gap 20px
 </style>
