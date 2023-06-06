@@ -5,21 +5,15 @@ export const createWorkout = async (exercisesId, date, interval, ease, approach,
   const auth = getAuth()
   const db = getDatabase()
 
-  const approachVal = approach.split(/\-|\s/)
-  const approachRes = approachVal.reduce((sum, current) => { return +sum + +current })
-  let weightVal = false
-
-  if (weight) {
-    weightVal = weight.split(/\-|\s/)
-  }
+  const approachRes = approach.reduce((sum, current) => { return +sum + +current })
 
   const newWorkout = {
     exercisesId: exercisesId,
     date: date,
     interval: interval,
     ease: ease,
-    approach: approachVal,
-    weight: weightVal,
+    approach: approach,
+    weight: weight,
     desc: desc,
     res: approachRes
   }
@@ -80,20 +74,14 @@ export const updateWorkout = async (id, date, interval, ease, approach, weight, 
   const auth = getAuth()
   const db = getDatabase()
 
-  const approachVal = approach.split(/\-|\s/)
-  const approachRes = approachVal.reduce((sum, current) => { return +sum + +current })
-  let weightVal = false
-
-  if (weight) {
-    weightVal = weight.split(/\-|\s/)
-  }
+  const approachRes = approach.reduce((sum, current) => { return +sum + +current })
 
   const newWorkout = {
     date: date,
     interval: interval,
     ease: ease,
-    approach: approachVal,
-    weight: weightVal,
+    approach: approach,
+    weight: weight,
     desc: desc,
     res: approachRes
   }

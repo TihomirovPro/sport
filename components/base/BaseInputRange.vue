@@ -1,20 +1,24 @@
 <script setup>
 const props = defineProps({
     modelValue: String,
-    min: { type: String, default: '1' }
+    min: { type: String, default: '1' },
+    max: { type: String, default: '7' },
+    step: { type: Number, default: '0.5' },
+    view: { type: String, default: 'interval' },
 });
 </script>
 
 <template lang="pug">
 .input-range
-  span(v-if="modelValue !== '0.5'") Интервал: В {{ modelValue }} мин
-  span(v-else) Интервал: Все
+  span(v-if="view === 'interval' && modelValue !== '0.5'") Интервал: В {{ modelValue }} мин
+  span(v-else-if="view === 'interval'") Интервал: Все
+  span(v-else-if="view === 'approaches'") Подходы: {{ modelValue }}
 
   input(
     type="range"
-   :min='min'
-    max='7'
-    step="0.5"
+    :min='min'
+    :max='max'
+    :step="step"
     :value="modelValue"
     @input="$emit('update:modelValue', $event.target.value)"
   )
