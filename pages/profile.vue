@@ -3,5 +3,5 @@
 
 <template lang="pug">
 .content
-  //- .exit(@click="signOutUser") Выход
+  .exit(@click="signOutUser") Выход
 </template>

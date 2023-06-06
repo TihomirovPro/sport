@@ -13,7 +13,21 @@ export const useShowModal = () => useState('showModal', () => false)
 export const useShowModalExercise = () => useState('showModalExercise', () => false)
 export const useShowModalWorkout = () => useState('showModalWorkout', () => false)
 
-export const useEaseus = () => useState('easeus', () => ['Свой вес', 'С весом', 'Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
+export const useEaseus = () => useState('easeus', () => ['Свой вес', 'С весом', 'В резине'])
+
+export const useRubbers = () => useState('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
+
+export const useRubbersColor = () => useState('rubbersColor', () => [
+  {name: 'Розовая резина', color: 'rgb(236, 72, 153)'},
+  {name: 'Желтая резина', color: 'rgb(250, 204, 21)'},
+  {name: 'Оранжевая резина', color: 'rgb(249, 115, 22)'},
+  {name: 'Черная резина', color: 'rgb(64, 64, 64)'},
+  {name: 'Филетовая резина', color: 'rgb(126, 34, 206)'},
+  {name: 'Серо-синяя резина', color: 'rgb(163, 163, 163)'},
+  {name: 'Зеленая резина', color: 'rgb(22, 163, 74)'},
+  {name: 'Синяя резина', color: 'rgb(29, 78, 216)'}
+])
+
 export const useIcons = () => useState('icons', () => ['push-up', 'pull-up', 'bars', 'bars-2', 'rings'])
 
 export const useColors = () => useState('colors', () => [
