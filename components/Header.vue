@@ -1,8 +1,18 @@
 <script setup>
-const props = defineProps({
-  title: String,
-  backBtn: Boolean
-})
+const route = useRoute()
+
+const pagesWithoutBackBtn = ['index']
+
+const pagesTitles = {
+  index: 'Упражнения',
+  settings: 'Настройки',
+  measure: 'Замеры',
+  profile: 'Профиль',
+  default: route.params.name
+}
+
+const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
+const title = computed(() => pagesTitles[route.name] || pagesTitles.default)
 
 const activeExercise = useActiveExercise()
 const isActiveFilters = useActiveFilters()
@@ -14,10 +24,10 @@ const removeActive = async () => {
 </script>
 
 <template lang="pug">
-header.header   
+header.header
   .header__title {{ title }}
   NuxtLink.header__back(
-    v-if="backBtn"
+    v-if="isShowBackBtn"
     to="/"
     @click="removeActive"
     ) Назад
