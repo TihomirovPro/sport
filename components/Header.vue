@@ -15,12 +15,6 @@ const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
 const title = computed(() => pagesTitles[route.name] || pagesTitles.default)
 
 const activeExercise = useActiveExercise()
-const isActiveFilters = useActiveFilters()
-
-const removeActive = async () => {
-  activeExercise.value = ''
-  isActiveFilters.value = false
-}
 </script>
 
 <template lang="pug">
@@ -29,7 +23,7 @@ header.header
   NuxtLink.header__back(
     v-if="isShowBackBtn"
     to="/"
-    @click="removeActive"
+    @click="activeExercise = ''"
     ) Назад
 </template>
 

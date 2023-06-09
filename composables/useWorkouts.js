@@ -47,7 +47,8 @@ export const getWorkouts = async (userId, exercisesId) => {
             weight: workout.weight,
             desc: workout.desc,
             res: workout.res,
-            id: key
+            id: key,
+            filter: true
           })
         }
       })

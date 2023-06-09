@@ -1,5 +1,4 @@
 <script setup>
-const isShowMenu = useShowMenu()
 const isActiveFilters = useActiveFilters()
 const activeExercise = computed(() => { return useActiveExercise() })
 const isShowModalExercise = useShowModalExercise()

@@ -1,9 +1,9 @@
-<script setup>
-const props = defineProps({
-  options: null,
-  placeholder: String,
-  modelValue: String
-})
+<script setup lang="ts">
+defineProps<{
+  options: []
+  placeholder: string
+  modelValue: string
+}>()
 </script>
 
 <template lang="pug">
@@ -14,11 +14,12 @@ select.input(
   option(
     selected
     disabled
-    value="placeholder"
+    :value="placeholder"
   ) {{ placeholder }}
+
   option(
-    v-for="(option,i) in options"
-    :key="i"
+    v-for="option in options"
+    :key="option"
     :value="option"
   ) {{ option }}
 </template>

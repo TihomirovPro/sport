@@ -15,7 +15,7 @@ const workouts = ref('')
 const removeConfirm = ref(false)
 const text = ref('')
 
-function reset () {
+function reset() {
   selectUpdateExercise.value = ''
   exercise.value = ''
   color.value = '#5182dc'
@@ -35,21 +35,21 @@ watchEffect(() => {
   }
 })
 
-const newExercise = async () => {
+async function newExercise() {
   if (exercise.value) {
-    const credentials = await createExercise(exercise.value, color.value, icon.value)
+    await createExercise(exercise.value, color.value, icon.value)
     reset()
   } else {
     error.value = true
   }
 }
 
-const updateData = async () => {
+async function updateData() {
   await updateExercise(selectUpdateExercise.value.id, exercise.value, color.value, icon.value)
   reset()
 }
 
-const remove = async () => {
+async function remove() {
   if (allWorkouts.value.length) {
     allWorkouts.value.forEach(async item => {
       await removeWorkout(item.id)
@@ -60,7 +60,7 @@ const remove = async () => {
   reset()
 }
 
-const deleted = () => {
+function deleted() {
   if (allWorkouts.value.length) {
     text.value = 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
   } else {

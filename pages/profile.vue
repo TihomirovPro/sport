@@ -1,4 +1,7 @@
 <script setup>
+useHead({
+  title: 'Профиль',
+})
 </script>
 
 <template lang="pug">

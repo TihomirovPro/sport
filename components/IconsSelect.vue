@@ -13,7 +13,7 @@ watchEffect(() => {
   }
 })
 
-const selectIcon = (icon) => {
+function selectIcon(icon) {
   activeIcon.value = icon
   emits('select', icon)
 }

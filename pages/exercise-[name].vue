@@ -1,6 +1,7 @@
 <script setup>
 const allWorkouts = useWorkouts()
 const isActiveFilters = useActiveFilters()
+const route = useRoute()
 </script>
 
 <template lang="pug">

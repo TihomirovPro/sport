@@ -12,12 +12,12 @@ const updateExercise = useSelectUpdateExercise()
 const activeExercise = useActiveExercise()
 const activeUser = useActiveUser()
 
-const updateModal = () => {
+function updateModal() {
   updateExercise.value = allExercises.value.find(item => item.id === props.id)
   isShowModalExercise.value = true
 }
 
-const active = async () => {
+async function active() {
   activeExercise.value = props.id
   getWorkouts(activeUser.value, props.id)
 }

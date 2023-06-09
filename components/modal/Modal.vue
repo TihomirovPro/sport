@@ -1,13 +1,9 @@
-<script setup>
+<script setup lang="ts">
+defineProps<{
+  isShow: boolean
+}>()
+
 const emits = defineEmits(['hiden'])
-
-const props = defineProps({
-  isShow: false
-})
-
-const closeModal = () => {
-  emits('hiden')
-}
 </script>
 
 <template lang="pug">

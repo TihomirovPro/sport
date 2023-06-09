@@ -70,7 +70,7 @@ function easeRubber() {
 
 async function add() {
   if (approach.value) {
-    const credentials = await createWorkout(activeExercise.value, date.value, interval.value, easeRubber(), approach.value, weight.value, desc.value)
+    await createWorkout(activeExercise.value, date.value, interval.value, easeRubber(), approach.value, weight.value, desc.value)
     reset()
   } else {
     error.value = true
@@ -79,7 +79,7 @@ async function add() {
 
 async function updateSelectWorkout() {
   if (approach.value) {
-    const credentials = await updateWorkout(selectUpdateWorkout.value.id, date.value, interval.value, easeRubber(), approach.value, weight.value, desc.value)
+    await updateWorkout(selectUpdateWorkout.value.id, date.value, interval.value, easeRubber(), approach.value, weight.value, desc.value)
     reset()
   } else {
     error.value = true
@@ -87,7 +87,7 @@ async function updateSelectWorkout() {
 }
 
 async function removeSelectWorkout() {
-  const credentials = await removeWorkout(selectUpdateWorkout.value.id)
+  await removeWorkout(selectUpdateWorkout.value.id)
   reset()
 }
 

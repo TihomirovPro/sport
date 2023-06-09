@@ -1,10 +1,10 @@
-<script setup>
-const props = defineProps({
-    type: String,
-    placeholder: String,
-    modelValue: String,
-    error: { type: Boolean, default: false },
-});
+<script setup lang="ts">
+defineProps<{
+    type: string
+    placeholder: string
+    modelValue: string
+    error: boolean
+}>()
 </script>
 
 <template lang="pug">

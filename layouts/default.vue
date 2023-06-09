@@ -12,8 +12,8 @@ const user = useActiveUser()
 
   .page__content
     slot
+
   Footer(v-if="user")
-  Menu
 </template>
 
 <style>

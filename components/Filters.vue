@@ -3,13 +3,13 @@ const isActiveFilters = useActiveFilters()
 
 const allWorkouts = useWorkouts()
 const easeus = useEaseus()
-const interval = ref('1') 
+const interval = ref('0.5') 
 
-const easeusFilter = ['Все', 'Только в резине', ...easeus.value]
-const ease = ref(easeusFilter[0])
+const easeusFilter = ['Все', 'В резине', ...easeus.value]
+const ease = ref('Все')
 
-const filter = () => {
-  if (ease.value === easeusFilter[0]) {
+function filter() {
+  if (ease.value === 'Все') {
     allWorkouts.value.forEach(element => {
       if (element.interval === interval.value || interval.value === '0.5') {
         element.filter = true
@@ -18,7 +18,8 @@ const filter = () => {
       }
     })
   }
-  else if (ease.value === easeusFilter[1]) {
+
+  else if (ease.value === 'В резине') {
     allWorkouts.value.forEach(element => {
       if ((element.interval === interval.value || interval.value === '0.5') && element.ease !== 'Свой вес' && element.ease !== 'С весом') {
         element.filter = true
@@ -27,6 +28,7 @@ const filter = () => {
       }
     })
   }
+
   else {
     allWorkouts.value.forEach(element => {
       if ((element.interval === interval.value || interval.value === '0.5') && element.ease === ease.value) {

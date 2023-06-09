@@ -1,5 +1,9 @@
 <script setup>
 const allExercises = useAllExercises()
+
+useHead({
+  title: 'Упражнения',
+})
 </script>
 
 <template lang="pug">

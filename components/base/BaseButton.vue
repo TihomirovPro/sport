@@ -1,8 +1,8 @@
-<script setup>
-defineProps({
-  text: String,
-  red: { type: Boolean, default: false }
-})
+<script setup lang="ts">
+defineProps<{
+  text: string
+  red: boolean
+}>()
 </script>
 
 <template lang="pug">

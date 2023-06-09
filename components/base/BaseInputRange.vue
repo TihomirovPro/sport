@@ -1,11 +1,11 @@
 <script setup>
-const props = defineProps({
+defineProps({
     modelValue: String,
     min: { type: String, default: '1' },
     max: { type: String, default: '7' },
     step: { type: Number, default: '0.5' },
     view: { type: String, default: 'interval' },
-});
+})
 </script>
 
 <template lang="pug">

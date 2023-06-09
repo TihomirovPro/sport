@@ -5,8 +5,8 @@ const props = defineProps({
   interval: { type: String, default: '' },
   ease: { type: String, default: '' },
   desc: { type: String, default: '' },
-  approach: null,
-  weight: null,
+  approach: [],
+  weight: [],
   res: Number
 })
 
@@ -20,7 +20,7 @@ const options = {
   day: 'numeric',
 }
 
-const updateExercise = () => {
+function updateExercise() {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
   isShowModalWorkout.value = true
 }
