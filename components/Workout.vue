@@ -4,6 +4,7 @@ const props = defineProps<{
   date: string
   interval: string
   ease: string
+  rubber: string
   desc: string
   approach: []
   weight: []
@@ -33,7 +34,7 @@ function selectUpdate() {
   .exercise__top
     p {{ convertDate }}
     p {{ interval }}
-    p {{ ease }}
+    p {{ ease === 'В резине' ? rubber : ease }}
 
   .exercise__approach
     span(

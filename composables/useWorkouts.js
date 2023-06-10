@@ -1,28 +1,6 @@
 import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
 
-export const createWorkout = async (exercisesId, date, interval, ease, approach, weight, desc) => {
-  const auth = getAuth()
-  const db = getDatabase()
-
-  const approachRes = approach.reduce((sum, current) => { return +sum + +current })
-
-  const newWorkout = {
-    exercisesId: exercisesId,
-    date: date,
-    interval: interval,
-    ease: ease,
-    approach: approach,
-    weight: weight,
-    desc: desc,
-    res: approachRes
-  }
-
-  const newWorkoutKey = push(child(ref(db), 'workout')).key
-
-  await set(ref(db, `users/${auth.currentUser.uid}/workout/${newWorkoutKey}`), newWorkout)
-}
-
 export const getWorkouts = async (userId, exercisesId) => {
   const db = getDatabase()
   const allworkouts = useWorkouts()
@@ -43,6 +21,7 @@ export const getWorkouts = async (userId, exercisesId) => {
             date: workout.date,
             interval: workout.interval,
             ease: workout.ease,
+            rubber: workout.rubber,
             approach: workout.approach,
             weight: workout.weight,
             desc: workout.desc,
@@ -64,6 +43,23 @@ export const getWorkouts = async (userId, exercisesId) => {
   })
 }
 
+// Create
+export const createWorkout = async (exercisesId, workout) => {
+  const auth = getAuth()
+  const db = getDatabase()
+
+  const approachRes = workout.approach.reduce((sum, current) => { return +sum + +current })
+  const newWorkout = {
+    ...workout,
+    exercisesId: exercisesId,
+    res: approachRes
+  }
+
+  const newWorkoutKey = push(child(ref(db), 'workout')).key
+  await set(ref(db, `users/${auth.currentUser.uid}/workout/${newWorkoutKey}`), newWorkout)
+}
+
+// Remove
 export const removeWorkout = async (id) => {
   const auth = getAuth()
   const db = getDatabase()
@@ -71,19 +67,15 @@ export const removeWorkout = async (id) => {
   remove(ref(db, `users/${auth.currentUser.uid}/workout/${id}`))
 }
 
-export const updateWorkout = async (id, date, interval, ease, approach, weight, desc) => {
+// Update
+export const updateWorkout = async (id, workout) => {
   const auth = getAuth()
   const db = getDatabase()
 
-  const approachRes = approach.reduce((sum, current) => { return +sum + +current })
+  const approachRes = workout.approach.reduce((sum, current) => { return +sum + +current })
 
   const newWorkout = {
-    date: date,
-    interval: interval,
-    ease: ease,
-    approach: approach,
-    weight: weight,
-    desc: desc,
+    ...workout,
     res: approachRes
   }
 

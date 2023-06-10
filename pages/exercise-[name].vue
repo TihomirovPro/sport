@@ -20,6 +20,7 @@ useHead({
         :date="item.date"
         :interval="`В ${item.interval} мин`"
         :ease="item.ease"
+        :rubber="item.rubber"
         :approach="item.approach"
         :weight="item.weight"
         :desc="item.desc"

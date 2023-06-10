@@ -25,21 +25,18 @@ export const getAllExercises = async (userId) => {
   })
 }
 
-export const createExercise = async (name, color, icon) => {
+// Create
+export const createExercise = async (exercise) => {
   const auth = getAuth()
   const db = getDatabase()
-
-  const newExercise = {
-    name: name,
-    color: color,
-    icon: icon
-  }
-
+  
+  const newExercise = exercise
   const newExerciseKey = push(child(ref(db), 'exercises')).key
 
   await set(ref(db, `users/${auth.currentUser.uid}/exercises/${newExerciseKey}`), newExercise)
 }
 
+// Remove
 export const removeExercise = async (id) => {
   const auth = getAuth()
   const db = getDatabase()
@@ -47,15 +44,12 @@ export const removeExercise = async (id) => {
   remove(ref(db, `users/${auth.currentUser.uid}/exercises/${id}`))
 }
 
-export const updateExercise = async (id, name, color, icon) => {
+// Update
+export const updateExercise = async (id, exercise) => {
   const auth = getAuth()
   const db = getDatabase()
 
-  const newExercise = {
-    name: name,
-    color: color,
-    icon: icon
-  }
+  const newExercise = exercise
 
   update(ref(db,  `users/${auth.currentUser.uid}/exercises/${id}`), newExercise);
 }

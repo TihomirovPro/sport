@@ -4,18 +4,17 @@ const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
 const easeus = useEaseus()
-const rubbers = useRubbers()
 const rubbersColor = useRubbersColor()
 
 const nowDate = new Date()
 const error = ref(false)
+const approaches = ref(5)
 
 const workout = ref({
   date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
   interval: '2.5',
-  approaches: '5',
   ease: easeus.value[0],
-  rubber: rubbers.value[0],
+  rubber: '',
   approach: [],
   weight: [],
   desc: ''
@@ -32,50 +31,39 @@ const convertDate = computed(()=> {
 function reset () {
   isShowModalWorkout.value = false
   selectUpdateWorkout.value = ''
-  workout.value.date = `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`
-  workout.value.interval = '2.5'
-  workout.value.ease = easeus.value[0]
-  workout.value.approaches = '5'
-  workout.value.approach = []
-  workout.value.weight = []
-  workout.value.desc = ''
   error.value = false
+  workout.value = {
+    date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
+    interval: '2.5',
+    ease: easeus.value[0],
+    rubber: '',
+    approach: [],
+    weight: [],
+    desc: ''
+  }
 }
 
 watchEffect(() => {
   if (selectUpdateWorkout.value) {
-    workout.value.date = selectUpdateWorkout.value.date
-    workout.value.interval = selectUpdateWorkout.value.interval
-    workout.value.approach = selectUpdateWorkout.value.approach
-    workout.value.approaches = selectUpdateWorkout.value.approach.length
-
-    if (selectUpdateWorkout.value.ease !== 'Свой вес' && selectUpdateWorkout.value.ease !== 'С весом' ) {
-      workout.value.ease = 'В резине'
-      workout.value.rubber = selectUpdateWorkout.value.ease
-    } else {
-      workout.value.ease = selectUpdateWorkout.value.ease
+    approaches.value = selectUpdateWorkout.value.approach.length
+    workout.value = {
+      date: selectUpdateWorkout.value.date,
+      interval: selectUpdateWorkout.value.interval,
+      approach: selectUpdateWorkout.value.approach,
+      ease: selectUpdateWorkout.value.ease,
+      rubber: selectUpdateWorkout.value.rubber ? selectUpdateWorkout.value.rubber : '',
+      weight: selectUpdateWorkout.value.weight ? selectUpdateWorkout.value.weight : [],
+      desc: selectUpdateWorkout.value.desc ? selectUpdateWorkout.value.desc : '',
     }
 
-    if (selectUpdateWorkout.value.weight) {
-      workout.value.weight = selectUpdateWorkout.value.weight
-    }
-
-    workout.value.des = selectUpdateWorkout.value.desc
   } else {
     reset()
   }
 })
 
-function easeRubber() {
-  if (workout.value.ease === 'В резине')
-    return workout.value.rubber
-  else
-    return workout.value.ease
-}
-
 async function add() {
   if (workout.value.approach) {
-    await createWorkout(activeExercise.value, workout.value.date, workout.value.interval, easeRubber(), workout.value.approach, workout.value.weight, workout.value.desc)
+    await createWorkout(activeExercise.value, workout.value)
     reset()
   } else {
     error.value = true
@@ -84,7 +72,7 @@ async function add() {
 
 async function updateSelectWorkout() {
   if (workout.value.approach) {
-    await updateWorkout(selectUpdateWorkout.value.id, workout.value.date, workout.value.interval, easeRubber(), workout.value.approach, weight.value, workout.value.desc)
+    await updateWorkout(selectUpdateWorkout.value.id, workout.value)
     reset()
   } else {
     error.value = true
@@ -109,38 +97,27 @@ Modal(
       type="date"
     )
   BaseInputRange(v-model="workout.interval")
-  BaseInputRange(v-model="workout.approaches" max="20" step="1" view="approaches")
+  BaseInputRange(v-model="approaches" max="20" step="1" view="approaches")
 
-  .ease-buttons
-    button.ease(
-      :class="{ _active : workout.ease === 'Свой вес' }"
-      @click="workout.ease = 'Свой вес'"
-    ) Свой вес
-    button.ease(
-      :class="{ _active : workout.ease === 'С весом' }"
-      @click="workout.ease = 'С весом'"
-    ) С Весом
-    button.ease(
-      @click="workout.ease = 'В резине'"
-      :class="{ _active : workout.ease !== 'Свой вес' && workout.ease !== 'С весом' }"
-    ) В резине
-
-  .rubbers(v-if="workout.ease === 'В резине'")
-    div(
-      v-for="item in rubbersColor"
-      :style="`background: ${item.color}`"
-      :class="{_active : rubber === item.name}"
-      @click="workout.rubber = item.name"
+  TabsWrap
+    TabsItem(
+      v-for="ease in easeus"
+      :key="ease"
+      :active="workout.ease === ease"
+      @click="workout.ease = ease"
+      :title="ease"
     )
 
-  BaseSelect(
-    v-if="workout.ease === 'В резине'"
-    v-model="workout.rubber"
-    placeholder="Выбрать резину"
-    :options="rubbers"
-  )
+  .rubbers(v-if="workout.ease === 'В резине'")
+    .text-white.text-xs.text-center.flex-center(
+      v-for="item in rubbersColor"
+      :style="`background: ${item.color}`"
+      :class="{_active : workout.rubber === item.name}"
+      @click="workout.rubber = item.name"
+    ) {{ item.name.replace(' резина', '') }}
+
   .approaches
-    .approach(v-for="index in +workout.approaches")
+    .approach(v-for="index in +approaches")
       BaseInput(
         v-model="workout.approach[index-1]"
         type="text"

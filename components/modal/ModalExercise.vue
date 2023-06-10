@@ -5,39 +5,45 @@ const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
 const colors = useColors()
 
-const exercise = ref('')
-const color = ref('#5182dc')
-const icon = ref('')
 const error = ref(false)
 const selectColor = ref(false)
 const selectIcon = ref(false)
-const workouts = ref('')
 const removeConfirm = ref(false)
 const text = ref('')
 
+const exercise = ref({
+  name: '',
+  color: '#5182dc',
+  icon: '',
+})
+
 function reset() {
   selectUpdateExercise.value = ''
-  exercise.value = ''
-  color.value = '#5182dc'
-  icon.value = ''
-  error.value = false
   isShowModalExercise.value = false
+  error.value = false
+  exercise.value = {
+    name: '',
+    color: '#5182dc',
+    icon: '',
+  }
 }
 
 watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(activeUser.value, selectUpdateExercise.value.id)
-    exercise.value = selectUpdateExercise.value.name
-    color.value = selectUpdateExercise.value.color ? selectUpdateExercise.value.color : '#5182dc'
-    icon.value = selectUpdateExercise.value.icon
+    exercise.value = {
+      name: selectUpdateExercise.value.name,
+      color: selectUpdateExercise.value.color ? selectUpdateExercise.value.color : '#5182dc',
+      icon: selectUpdateExercise.value.icon,
+    }
   } else {
     reset()
   }
 })
 
 async function newExercise() {
-  if (exercise.value) {
-    await createExercise(exercise.value, color.value, icon.value)
+  if (exercise.value.name) {
+    await createExercise(exercise.value)
     reset()
   } else {
     error.value = true
@@ -45,7 +51,7 @@ async function newExercise() {
 }
 
 async function updateData() {
-  await updateExercise(selectUpdateExercise.value.id, exercise.value, color.value, icon.value)
+  await updateExercise(selectUpdateExercise.value.id, exercise.value)
   reset()
 }
 
@@ -77,17 +83,17 @@ div
     @hiden="reset"
   )
     BaseInput(
-      v-model="exercise"
+      v-model="exercise.name"
       type="text"
       :error="error"
       placeholder="Название упражения"
     )
     .wrap(@click="selectColor = true")
       p Цвет блока
-      .selectColor(:style="`background: ${color}`")
+      .selectColor(:style="`background: ${exercise.color}`")
     .wrap(@click="selectIcon = true")
       p Иконка
-      .selectIcon(:class="`icon-${icon}`")
+      .selectIcon(:class="`icon-${exercise.icon}`")
     BaseButton(
       v-if="!selectUpdateExercise"
       text="Добавить"
@@ -107,26 +113,26 @@ div
     .modal__text {{ text }}
     .modal__buttons
       BaseButton(
+        text="Отменить"
+        @click="removeConfirm = false"
+      )
+      BaseButton(
         red
         text="Удалить"
         @click="remove()"
-      )
-      BaseButton(
-        text="Отменить"
-        @click="removeConfirm = false"
       )
 
   Modal(:isShow="selectColor" @hiden="selectColor = false")
     .colors
       .colors__item(
         v-for="item in colors"
-        @click="color = item; selectColor = false"
+        @click="exercise.color = item; selectColor = false"
         :style="`background: ${item}`"
       )
   
   Modal(:isShow="selectIcon" @hiden="selectIcon = false")
     IconsSelect(
-      @select="(el) => { icon = el; selectIcon = false }"
+      @select="(el) => { exercise.icon = el; selectIcon = false }"
     )
 </template>
 

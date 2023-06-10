@@ -20,7 +20,7 @@ function loginWithGoogle() {
 </script>
 
 <template lang="pug">
-.login
+.login.flex-center.size-full
   
   .login__google(@click="loginWithGoogle")
     svg(
@@ -34,38 +34,30 @@ function loginWithGoogle() {
       path(d="M416.253,455.624l0.014,0.014C372.396,490.901,316.666,512,256,512c-97.491,0-182.252-54.491-225.491-134.681l82.961-67.91c21.619,57.698,77.278,98.771,142.53,98.771c28.047,0,54.323-7.582,76.87-20.818L416.253,455.624z" fill="#28b446")
       path(d="M419.404,58.936l-82.933,67.896c-23.335-14.586-50.919-23.012-80.471-23.012c-66.729,0-123.429,42.957-143.965,102.724l-83.397-68.276h-0.014C71.23,56.123,157.06,0,256,0C318.115,0,375.068,22.126,419.404,58.936z" fill="#f14336")
       span Войти через google
-  .login__form
-    BaseInput(
-      v-model="email"
-      type="text"
-      placeholder="email"
-    )
-    BaseInput(
-      v-model="password"
-      type="password"
-      placeholder="password"
-    )
-    .login__btns
-      BaseButton(
-        @click="signIn"
-        text="Войти"
-      )
-      BaseButton(
-        @click="signUp"
-        text="Регистрация"
-      )
+  //- .login__form
+  //-   BaseInput(
+  //-     v-model="email"
+  //-     type="text"
+  //-     placeholder="email"
+  //-   )
+  //-   BaseInput(
+  //-     v-model="password"
+  //-     type="password"
+  //-     placeholder="password"
+  //-   )
+  //-   .login__btns
+  //-     BaseButton(
+  //-       @click="signIn"
+  //-       text="Войти"
+  //-     )
+  //-     BaseButton(
+  //-       @click="signUp"
+  //-       text="Регистрация"
+  //-     )
 </template>
 
 <style lang="stylus" scoped>
 .login
-  display flex
-  align-items center
-  justify-content center
-  flex-direction column
-  gap 20px
-  width 100%
-  height 100%
-
   &__form
     display grid
     gap 20px
