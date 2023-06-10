@@ -8,7 +8,7 @@ const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
 
 <template lang="pug">
 header.header
-  .header__title {{ route.meta.title || route.params.name  }}
+  .header__title {{ route.meta.title || route.params.name }}
   NuxtLink.header__back(
     v-if="isShowBackBtn"
     to="/"
