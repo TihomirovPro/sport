@@ -12,7 +12,7 @@ Transition
     v-if="isShow"
     @click.self="emits('hiden')"
   )
-    .modal__container
+    .modal__container.max-w-2xl
       slot
 </template>
 

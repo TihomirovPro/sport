@@ -33,7 +33,7 @@ watchEffect(() => {
     getWorkouts(activeUser.value, selectUpdateExercise.value.id)
     exercise.value = {
       name: selectUpdateExercise.value.name,
-      color: selectUpdateExercise.value.color ? selectUpdateExercise.value.color : '#5182dc',
+      color: selectUpdateExercise.value.color,
       icon: selectUpdateExercise.value.icon,
     }
   } else {

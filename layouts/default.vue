@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 onMounted(async () => {
   initUser()
 })
@@ -7,10 +7,10 @@ const user = useActiveUser()
 </script>
 
 <template lang="pug">
-.page
+.h-full
   Header(v-if="user")
 
-  .page__content
+  .h-full.pb-24.overflow-auto.max-w-2xl.mx-auto
     slot
 
   Footer(v-if="user")
@@ -26,16 +26,4 @@ const user = useActiveUser()
 .page-leave-to {
   opacity: 0;
 }
-</style>
-
-<style lang="stylus">
-.page
-  display grid
-  grid-template-rows 50px 1fr
-  height 100%
-
-  &__content
-    height 100%
-    padding-bottom 80px
-    overflow auto
 </style>

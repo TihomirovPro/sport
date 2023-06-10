@@ -109,7 +109,7 @@ Modal(
     )
 
   .rubbers(v-if="workout.ease === 'В резине'")
-    .text-white.text-xs.text-center.flex-center(
+    .text-white.text-xs.text-center.flex-center.cursor-pointer(
       v-for="item in rubbersColor"
       :style="`background: ${item.color}`"
       :class="{_active : workout.rubber === item.name}"
@@ -180,18 +180,6 @@ Modal(
   display flex
   gap: 12px
   justify-content space-between
-
-.ease
-  width 100%
-  padding 12px 0
-  text-align center
-  background rgba(#5182dc, .2)
-  border-radius 10px
-
-  &._active
-    color: #fff
-    background #5182dc
-    transition: .25s
 
 .approach
   display flex

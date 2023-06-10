@@ -30,7 +30,7 @@ function selectUpdate() {
 </script>
 
 <template lang="pug">
-.exercise
+.exercise.grid.w-full.gap-3.py-4.px-3
   .exercise__top
     p {{ convertDate }}
     p {{ interval }}
@@ -57,12 +57,6 @@ function selectUpdate() {
 
 <style lang="stylus" scoped>
 .exercise
-  display grid
-  gap 12px
-  max-width: 600px
-  width 100%
-  margin 0 auto
-  padding 16px 12px
   border-radius 12px
   background #fafafa
   border 1px solid rgba(#dcdcdc,.5)
