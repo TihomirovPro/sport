@@ -1,5 +1,5 @@
-<script setup>
-useHead({
+<script setup ts="ts">
+definePageMeta({
   title: 'Настройки',
 })
 </script>

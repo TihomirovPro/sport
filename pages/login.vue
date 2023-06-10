@@ -1,4 +1,4 @@
-<script setup>
+<script setup type="ts">
 definePageMeta({
   layout: 'login'
 })
@@ -6,16 +6,16 @@ definePageMeta({
 const email = ref('')
 const password = ref('')
 
-const signUp = async () => {
-  const credentials = await createUser(email.value, password.value)
+async function signUp() {
+  await createUser(email.value, password.value)
 }
 
-const signIn = async () => {
-  const credentials = await signInUser(email.value, password.value)
+async function signIn() {
+  await signInUser(email.value, password.value)
 }
 
-const loginWithGoogle = () => {
-  const credentials = signInWithGoogle()
+function loginWithGoogle() {
+  signInWithGoogle()
 }
 </script>
 

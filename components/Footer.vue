@@ -1,17 +1,9 @@
 <script setup>
-const isActiveFilters = useActiveFilters()
-const activeExercise = computed(() => { return useActiveExercise() })
 const isShowModalExercise = useShowModalExercise()
 const isShowModalWorkout = useShowModalWorkout()
 const route = useRoute()
 
-watchEffect(() => route)
-
-const changeFilterStatus = () => {
-  isActiveFilters.value = !isActiveFilters.value
-}
-
-const showModal = () => {
+function showModal() {
   if (!route.params.name) {
     isShowModalExercise.value = true
   } else {
@@ -33,10 +25,7 @@ const showModal = () => {
 
   .addBtn(@click="showModal")
 
-  svg(v-if="activeExercise.value" @click="changeFilterStatus" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30")
-    path(fill="#262626" fill-rule="evenodd" d="M18 12a4 4 0 1 0-3.87-5H3a1 1 0 0 0 0 2h11.13A4 4 0 0 0 18 12zm-2-4a2 2 0 1 0 4 0 2 2 0 0 0-4 0zM2 16a4 4 0 0 1 7.87-1H21a1 1 0 1 1 0 2H9.87A4 4 0 0 1 2 16zm6 0a2 2 0 1 0-4 0 2 2 0 0 0 4 0z" clip-rule="evenodd")
-
-  svg(v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="30")
+  svg(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="30")
     path(fill="#262626" d="M420 92 335 6a21 21 0 0 0-1-1l-1-1h-1l-1-1h-1l-1-1h-1l-1-1h-2l-1-1h-2a21 21 0 0 0-4 0h-2l-1 1h-2l-1 1h-1l-1 1h-1l-1 1h-1l-1 1-1 1-85 86a21 21 0 0 0 30 30l49-49v247a21 21 0 1 0 42 0V73l49 49a21 21 0 0 0 30-30zM262 390l-49 49V192a21 21 0 1 0-42 0v247l-49-49a21 21 0 0 0-30 30l85 86 1 1 1 1h1l1 1h1l1 1h1l1 1h2l1 1h8l1-1h2l1-1h1l1-1h1l1-1h1l1-1 1-1 85-86a21 21 0 0 0-30-30z")
 
   NuxtLink(to="/settings")

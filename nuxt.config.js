@@ -21,8 +21,13 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    '@kevinmarrec/nuxt-pwa'
+    '@kevinmarrec/nuxt-pwa',
+    '@nuxtjs/tailwindcss',
   ],
+
+  tailwindcss: {
+    viewer: false,
+  },
 
   ssr: false,
   modern: 'client',

@@ -1,8 +1,8 @@
-<script setup>
+<script setup type="ts">
 const allExercises = useAllExercises()
 
-useHead({
-  title: 'Упражнения',
+definePageMeta({
+  title: 'Упражнения'
 })
 </script>
 

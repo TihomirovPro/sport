@@ -1,25 +1,14 @@
-<script setup>
+<script setup lang="ts">
+const activeExercise = useActiveExercise()
 const route = useRoute()
 
 const pagesWithoutBackBtn = ['index']
-
-const pagesTitles = {
-  index: 'Упражнения',
-  settings: 'Настройки',
-  measure: 'Замеры',
-  profile: 'Профиль',
-  default: route.params.name
-}
-
 const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
-const title = computed(() => pagesTitles[route.name] || pagesTitles.default)
-
-const activeExercise = useActiveExercise()
 </script>
 
 <template lang="pug">
 header.header
-  .header__title {{ title }}
+  .header__title {{ route.meta.title || route.params.name  }}
   NuxtLink.header__back(
     v-if="isShowBackBtn"
     to="/"

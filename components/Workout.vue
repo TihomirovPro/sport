@@ -1,26 +1,28 @@
-<script setup>
-const props = defineProps({
-  id: String,
-  date: String,
-  interval: { type: String, default: '' },
-  ease: { type: String, default: '' },
-  desc: { type: String, default: '' },
-  approach: [],
-  weight: [],
-  res: Number
-})
+<script setup lang="ts">
+const props = defineProps<{
+  id: string
+  date: string
+  interval: string
+  ease: string
+  desc: string
+  approach: []
+  weight: []
+  res: number
+}>()
 
 const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
 
-const options = {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-}
+const convertDate = computed(()=> {
+  return new Date(props.date).toLocaleString('ru', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).slice(0, -2)
+})
 
-function updateExercise() {
+function selectUpdate() {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
   isShowModalWorkout.value = true
 }
@@ -29,9 +31,9 @@ function updateExercise() {
 <template lang="pug">
 .exercise
   .exercise__top
-    p {{ new Date(date).toLocaleString("ru", options).slice(0, -2) }}
+    p {{ convertDate }}
     p {{ interval }}
-    p(v-if="ease") {{ ease }}
+    p {{ ease }}
 
   .exercise__approach
     span(
@@ -48,7 +50,7 @@ function updateExercise() {
   .exercise__desc(v-if="desc") {{ desc }}
 
   .exercise__bottom
-    div(@click="updateExercise")
+    div(@click="selectUpdate")
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 511" width="20" height="20"><path fill="#5182dc" d="M405 256c-11 0-21 10-21 22v170c0 12-10 22-21 22H64c-12 0-21-10-21-22V150c0-12 9-22 21-22h171a21 21 0 1 0 0-42H64c-35 0-64 29-64 64v298c0 36 29 64 64 64h299c35 0 64-28 64-64V278c0-12-10-22-22-22zm0 0"/><path fill="#5182dc" d="M200 237a11 11 0 0 0-3 5l-15 76c-1 3 0 7 3 10a11 11 0 0 0 7 3l3-1 75-15c2 0 4-1 5-3l169-168-75-76zM496 16a53 53 0 0 0-75 0l-30 30 76 75 29-29a53 53 0 0 0 0-76zm0 0"/></svg>
 </template>
 

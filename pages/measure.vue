@@ -1,6 +1,6 @@
-<script setup>
-useHead({
-  title: 'Замеры',
+<script setup lang="ts">
+definePageMeta({
+  title: 'Замеры'
 })
 </script>
 

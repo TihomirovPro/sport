@@ -1,9 +1,11 @@
-<script setup>
-const props = defineProps({
-  name: String,
-  color: { type: String, default: '#5182dc' },
-  icon: { type: String, default: '' },
-  id: String,
+<script setup lang="ts">
+const props = withDefaults(defineProps<{
+  name: string
+  color: string
+  icon: string
+  id: string
+}>(), {
+  color: '#5182dc'
 })
 
 const allExercises = useAllExercises()

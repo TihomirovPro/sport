@@ -1,5 +1,5 @@
-<script setup>
-useHead({
+<script setup type="ts">
+definePageMeta({
   title: 'Профиль',
 })
 </script>
