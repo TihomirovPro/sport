@@ -1,15 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
-  id: string
-  date: string
-  interval: string
-  ease: string
-  rubber: string
-  desc: string
-  approach: []
-  weight: []
-  res: number
-}>()
+const props = defineProps<TypeWorkoutPage>()
 
 const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()

@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
 
-export const getAllExercises = async (userId) => {
+export const getAllExercises = async (userId:string) => {
   const db = getDatabase()
   let allExercises = useAllExercises()
 
@@ -26,18 +26,16 @@ export const getAllExercises = async (userId) => {
 }
 
 // Create
-export const createExercise = async (exercise) => {
+export const createExercise = async (exercise:TypeExerciseCreate) => {
   const auth = getAuth()
   const db = getDatabase()
   
-  const newExercise = exercise
   const newExerciseKey = push(child(ref(db), 'exercises')).key
-
-  await set(ref(db, `users/${auth.currentUser.uid}/exercises/${newExerciseKey}`), newExercise)
+  await set(ref(db, `users/${auth.currentUser.uid}/exercises/${newExerciseKey}`), exercise)
 }
 
 // Remove
-export const removeExercise = async (id) => {
+export const removeExercise = async (id:string) => {
   const auth = getAuth()
   const db = getDatabase()
 
@@ -45,11 +43,9 @@ export const removeExercise = async (id) => {
 }
 
 // Update
-export const updateExercise = async (id, exercise) => {
+export const updateExercise = async (exercise:TypeExercise) => {
   const auth = getAuth()
   const db = getDatabase()
 
-  const newExercise = exercise
-
-  update(ref(db,  `users/${auth.currentUser.uid}/exercises/${id}`), newExercise);
+  update(ref(db,  `users/${auth.currentUser.uid}/exercises/${exercise.id}`), exercise);
 }

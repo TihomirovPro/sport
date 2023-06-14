@@ -1,18 +1,23 @@
+// User
 export const useActiveUser = () => useState('activeUser', () => '')
 
-export const useAllExercises = () => useState('allExercises', () => [])
-export const useActiveExercise = () => useState('activeExercise', () => '')
-export const useSelectUpdateExercise = () => useState('updateExercise', () => '')
+// Exercise
+export const useAllExercises = () => useState<TypeExercise[]>('allExercises', () => [])
+export const useActiveExercise = () => useState<TypeExerciseActive>('activeExercise', () => '')
+export const useSelectUpdateExercise = () => useState<TypeExercise>('updateExercise', () => '')
 
-export const useWorkouts = () => useState('workouts', () => [])
-export const useSelectUpdateWorkout = () => useState('updateWorkout', () => '')
+// Workout
+export const useWorkouts = () => useState<TypeWorkout[]>('workouts', () => [])
+export const useSelectUpdateWorkout = () => useState<TypeWorkout>('updateWorkout', () => '')
 
-export const useShowModal = () => useState('showModal', () => false)
-export const useShowModalExercise = () => useState('showModalExercise', () => false)
-export const useShowModalWorkout = () => useState('showModalWorkout', () => false)
+// Modal
+export const useShowModal = () => useState<boolean>('showModal', () => false)
+export const useShowModalExercise = () => useState<boolean>('showModalExercise', () => false)
+export const useShowModalWorkout = () => useState<boolean>('showModalWorkout', () => false)
 
-export const useEaseus = () => useState('easeus', () => ['Свой вес', 'С весом', 'В резине'])
-export const useRubbers = () => useState('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
+// All
+export const useEaseus = () => useState<TypeEase>('easeus', () => ['Свой вес', 'С весом', 'В резине'])
+export const useRubbers = () => useState<string[]>('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
 
 export const useRubbersColor = () => useState('rubbersColor', () => [
   {name: 'Розовая резина', color: 'rgb(236, 72, 153)'},

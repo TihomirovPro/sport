@@ -1,10 +1,11 @@
 import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
 
-export const getWorkouts = async (userId, exercisesId) => {
+export const getWorkouts = async (userId:string, exercisesId:string) => {
   const db = getDatabase()
   const allworkouts = useWorkouts()
-  let sortingWorkouts = []
+
+  let sortingWorkouts:TypeWorkout[] = []
   const workouts = ref(db, `users/${userId}/workout`)
 
   onValue(workouts, (snapshot) => {
@@ -44,40 +45,23 @@ export const getWorkouts = async (userId, exercisesId) => {
 }
 
 // Create
-export const createWorkout = async (exercisesId, workout) => {
-  const auth = getAuth()
+export const createWorkout = async (workout:TypeWorkoutCreate) => {
   const db = getDatabase()
-
-  const approachRes = workout.approach.reduce((sum, current) => { return +sum + +current })
-  const newWorkout = {
-    ...workout,
-    exercisesId: exercisesId,
-    res: approachRes
-  }
-
+  const auth = getAuth()
   const newWorkoutKey = push(child(ref(db), 'workout')).key
-  await set(ref(db, `users/${auth.currentUser.uid}/workout/${newWorkoutKey}`), newWorkout)
+  await set(ref(db, `users/${auth.currentUser.uid}/workout/${newWorkoutKey}`), workout)
 }
 
 // Remove
-export const removeWorkout = async (id) => {
-  const auth = getAuth()
+export const removeWorkout = async (id:string) => {
   const db = getDatabase()
-
+  const auth = getAuth()
   remove(ref(db, `users/${auth.currentUser.uid}/workout/${id}`))
 }
 
 // Update
-export const updateWorkout = async (id, workout) => {
-  const auth = getAuth()
+export const updateWorkout = async (workout:TypeWorkout) => {
   const db = getDatabase()
-
-  const approachRes = workout.approach.reduce((sum, current) => { return +sum + +current })
-
-  const newWorkout = {
-    ...workout,
-    res: approachRes
-  }
-
-  update(ref(db,  `users/${auth.currentUser.uid}/workout/${id}`), newWorkout);
+  const auth = getAuth()
+  update(ref(db,  `users/${auth.currentUser.uid}/workout/${workout.id}`), workout);
 }

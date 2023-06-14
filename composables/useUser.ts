@@ -8,21 +8,21 @@ import {
   signOut
 } from 'firebase/auth'
 
-export const createUser = async (email, password) => {
+export const createUser = async (email:string, password:string) => {
   const auth = getAuth()
   const credentials = await createUserWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {
-      const user = userCredential.user;
+      const user = userCredential.user
     })
     .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
+      const errorCode = error.code
+      const errorMessage = error.message
     })
 
   return credentials
 }
 
-export const signInUser = async (email, password) => {
+export const signInUser = async (email:string, password:string) => {
   const auth = getAuth()
   const credentials = await signInWithEmailAndPassword(auth, email, password)
     .then((userCredential) => {

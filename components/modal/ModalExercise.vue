@@ -12,6 +12,7 @@ const removeConfirm = ref(false)
 const text = ref('')
 
 const exercise = ref({
+  id: '',
   name: '',
   color: '#5182dc',
   icon: '',
@@ -22,6 +23,7 @@ function reset() {
   isShowModalExercise.value = false
   error.value = false
   exercise.value = {
+    id: '',
     name: '',
     color: '#5182dc',
     icon: '',
@@ -32,6 +34,7 @@ watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(activeUser.value, selectUpdateExercise.value.id)
     exercise.value = {
+      id: selectUpdateExercise.value.id,
       name: selectUpdateExercise.value.name,
       color: selectUpdateExercise.value.color,
       icon: selectUpdateExercise.value.icon,
@@ -51,7 +54,7 @@ async function newExercise() {
 }
 
 async function updateData() {
-  await updateExercise(selectUpdateExercise.value.id, exercise.value)
+  await updateExercise(exercise.value)
   reset()
 }
 

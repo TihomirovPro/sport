@@ -11,13 +11,16 @@ const error = ref(false)
 const approaches = ref(5)
 
 const workout = ref({
+  id: '',
   date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
   interval: '2.5',
   ease: easeus.value[0],
   rubber: '',
   approach: [],
   weight: [],
-  desc: ''
+  desc: '',
+  exercisesId: activeExercise.value,
+  res: null
 })
 
 const convertDate = computed(()=> {
@@ -33,13 +36,16 @@ function reset () {
   selectUpdateWorkout.value = ''
   error.value = false
   workout.value = {
+    id: '',
+    exercisesId: activeExercise.value,
     date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
     interval: '2.5',
     ease: easeus.value[0],
     rubber: '',
     approach: [],
     weight: [],
-    desc: ''
+    desc: '',
+    res: null
   }
 }
 
@@ -47,6 +53,8 @@ watchEffect(() => {
   if (selectUpdateWorkout.value) {
     approaches.value = selectUpdateWorkout.value.approach.length
     workout.value = {
+      id: selectUpdateWorkout.value.id,
+      exercisesId: activeExercise.value,
       date: selectUpdateWorkout.value.date,
       interval: selectUpdateWorkout.value.interval,
       approach: selectUpdateWorkout.value.approach,
@@ -54,8 +62,8 @@ watchEffect(() => {
       rubber: selectUpdateWorkout.value.rubber ? selectUpdateWorkout.value.rubber : '',
       weight: selectUpdateWorkout.value.weight ? selectUpdateWorkout.value.weight : [],
       desc: selectUpdateWorkout.value.desc ? selectUpdateWorkout.value.desc : '',
+      res: selectUpdateWorkout.value.res,
     }
-
   } else {
     reset()
   }
@@ -63,7 +71,8 @@ watchEffect(() => {
 
 async function add() {
   if (workout.value.approach) {
-    await createWorkout(activeExercise.value, workout.value)
+    workout.value.res = workout.value.approach.reduce((sum, current) => { return +sum + +current })
+    await createWorkout(workout.value)
     reset()
   } else {
     error.value = true
@@ -72,7 +81,8 @@ async function add() {
 
 async function updateSelectWorkout() {
   if (workout.value.approach) {
-    await updateWorkout(selectUpdateWorkout.value.id, workout.value)
+    workout.value.res = workout.value.approach.reduce((sum, current) => { return +sum + +current })
+    await updateWorkout(workout.value)
     reset()
   } else {
     error.value = true
@@ -80,7 +90,7 @@ async function updateSelectWorkout() {
 }
 
 async function removeSelectWorkout() {
-  await removeWorkout(selectUpdateWorkout.value.id)
+  await removeWorkout(workout.value.id)
   reset()
 }
 </script>
