@@ -1,23 +1,25 @@
 import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
+import type { TypeWorkout, TypeWorkoutCreate } from "./types"
 
-export const getWorkouts = async (userId:string, exercisesId:string) => {
+export const getWorkouts = async (exercisesId:string) => {
   const db = getDatabase()
+  const auth = getAuth()
   const allworkouts = useWorkouts()
 
-  let sortingWorkouts:TypeWorkout[] = []
-  const workouts = ref(db, `users/${userId}/workout`)
+  const workouts = ref(db, `users/${auth.currentUser.uid}/workout`)
 
   onValue(workouts, (snapshot) => {
     const data = snapshot.val()
 
     if (data) {
       allworkouts.value = []
-      sortingWorkouts = []
       Object.keys(data).forEach((key) => {
-        const workout = data[key]
+        const workout:TypeWorkout = data[key]
+        
         if (exercisesId === workout.exercisesId) {
-          sortingWorkouts.push({
+          allworkouts.value.push({
+            id: key,
             exercisesId: workout.exercisesId,
             date: workout.date,
             interval: workout.interval,
@@ -27,19 +29,16 @@ export const getWorkouts = async (userId:string, exercisesId:string) => {
             weight: workout.weight,
             desc: workout.desc,
             res: workout.res,
-            id: key,
             filter: true
           })
         }
-      })
+      })      
 
-      sortingWorkouts.sort((a, b) => {
+      allworkouts.value.sort((a, b) => {
         if (new Date(a.date) < new Date(b.date)) return 1
         if (new Date(a.date) > new Date(b.date)) return -1
         return 0
       })
-
-      allworkouts.value = sortingWorkouts
     }
   })
 }

@@ -1,20 +1,20 @@
+<script setup lang="ts">
+import type { TypeWorkout } from "../../composables/types"
 
-<script setup>
 const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
-const easeus = useEaseus()
 const rubbersColor = useRubbersColor()
 
 const nowDate = new Date()
 const error = ref(false)
 const approaches = ref(5)
 
-const workout = ref({
+const workout = ref<TypeWorkout>({
   id: '',
   date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
   interval: '2.5',
-  ease: easeus.value[0],
+  ease: EnumEase.noWeight,
   rubber: '',
   approach: [],
   weight: [],
@@ -40,7 +40,7 @@ function reset () {
     exercisesId: activeExercise.value,
     date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
     interval: '2.5',
-    ease: easeus.value[0],
+    ease: EnumEase.noWeight,
     rubber: '',
     approach: [],
     weight: [],
@@ -71,7 +71,7 @@ watchEffect(() => {
 
 async function add() {
   if (workout.value.approach) {
-    workout.value.res = workout.value.approach.reduce((sum, current) => { return +sum + +current })
+    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => { return +sum + +current })
     await createWorkout(workout.value)
     reset()
   } else {
@@ -81,7 +81,7 @@ async function add() {
 
 async function updateSelectWorkout() {
   if (workout.value.approach) {
-    workout.value.res = workout.value.approach.reduce((sum, current) => { return +sum + +current })
+    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => { return +sum + +current })
     await updateWorkout(workout.value)
     reset()
   } else {
@@ -111,7 +111,7 @@ Modal(
 
   TabsWrap
     TabsItem(
-      v-for="ease in easeus"
+      v-for="ease in EnumEase"
       :key="ease"
       :active="workout.ease === ease"
       @click="workout.ease = ease"
@@ -127,7 +127,10 @@ Modal(
     ) {{ item.name.replace(' резина', '') }}
 
   .approaches
-    .approach(v-for="index in +approaches")
+    .approach(
+      v-for="index in +approaches"
+      :key="index"
+    )
       BaseInput(
         v-model="workout.approach[index-1]"
         type="text"

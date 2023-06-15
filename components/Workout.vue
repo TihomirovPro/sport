@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { TypeWorkoutPage } from "../composables/types"
+
 const props = defineProps<TypeWorkoutPage>()
 
 const allWorkouts = useWorkouts()

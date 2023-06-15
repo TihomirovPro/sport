@@ -1,5 +1,6 @@
 import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
 import { getAuth } from 'firebase/auth'
+import type { TypeExercise, TypeExerciseCreate } from "./types"
 
 export const getAllExercises = async (userId:string) => {
   const db = getDatabase()
@@ -13,7 +14,7 @@ export const getAllExercises = async (userId:string) => {
     if (data) {
       allExercises.value = []
       Object.keys(data).forEach((key) => {
-        const exercise = data[key]
+        const exercise:TypeExercise = data[key]
         allExercises.value.push({
           name: exercise.name,
           color: exercise.color,

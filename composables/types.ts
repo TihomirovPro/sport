@@ -1,22 +1,21 @@
 // Exercise
-type TypeExercise = {
+export type TypeExercise = {
   id: string
   name: string
   color: string
   icon: string
 }
 
-type TypeExerciseCreate = Omit<TypeExercise, 'id'>
-type TypeExerciseActive = Pick<TypeExercise, 'id'>
-
+export type TypeExerciseCreate = Omit<TypeExercise, 'id'>
+export type TypeExerciseActive = Pick<TypeExercise, 'id'>
 
 // Workout
-type TypeWorkout = {
+export type TypeWorkout = {
   id: string
   exercisesId: string
   date: string
   interval: string
-  ease: string
+  ease: TypeEase
   rubber: string
   desc: string
   approach: []
@@ -25,8 +24,14 @@ type TypeWorkout = {
   filter?: boolean
 }
 
-type TypeWorkoutCreate = Omit<TypeWorkout, 'id'>
-type TypeWorkoutPage = Omit<TypeWorkout, 'exercisesId' | 'filter'>
+export type TypeWorkoutCreate = Omit<TypeWorkout, 'id'>
+export type TypeWorkoutPage = Omit<TypeWorkout, 'exercisesId'>
 
 // Ease
-type TypeEase = ['Свой вес', 'С весом', 'В резине']
+export const enum EnumEase {
+  noWeight = 'Свой вес',
+  weight = 'С весом',
+  rubber = 'В резине'
+}
+
+export type TypeEase = EnumEase.noWeight | EnumEase.weight | EnumEase.rubber

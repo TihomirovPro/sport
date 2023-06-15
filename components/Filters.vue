@@ -1,17 +1,18 @@
-<script setup>
+<script setup lang="ts">
+import type { TypeEase } from '../composables/types'
+
 const allWorkouts = useWorkouts()
-const easeus = useEaseus()
 
 const filter = ref({
   ease: 'Все',
   intervals: [],
   interval: 0,
-  changeEase(name) {
+  changeEase(name:string) {
     filter.value.ease = name
     useFilter()
   },
-  changeInterval(name) {
-    filter.value.interval = name
+  changeInterval(interval:number) {
+    filter.value.interval = interval
     useFilter()
   },
 })
@@ -29,14 +30,14 @@ watchEffect(() => {
   }
 })
 
-function filterEase(itemEase) {  
+function filterEase(itemEase:TypeEase) {  
   if (filter.value.ease === 'Все') return true
   else if (itemEase === filter.value.ease) return true
-  else if (filter.value.ease === 'В резине' && itemEase !== 'Свой вес' && itemEase !== 'С весом') return true
+  else if (filter.value.ease === EnumEase.rubber && itemEase !== EnumEase.noWeight && itemEase !== EnumEase.weight) return true
   else return false
 }
 
-function filterEaseInterval(itemEase, itemInterval) {
+function filterEaseInterval(itemEase:TypeEase, itemInterval:number) {
   if (itemInterval === filter.value.interval) return filterEase(itemEase)
   else if (filter.value.interval === 0) return filterEase(itemEase)
   else return false
@@ -44,7 +45,7 @@ function filterEaseInterval(itemEase, itemInterval) {
 
 function useFilter() {
   allWorkouts.value.forEach(element => {
-    element.filter = filterEaseInterval(element.ease, element.interval)
+    element.filter = filterEaseInterval(element.ease, +element.interval)
   })
 }
 </script>
@@ -74,7 +75,7 @@ function useFilter() {
       title="Все"
     )
     TabsItem(
-      v-for="ease in easeus"
+      v-for="ease in EnumEase"
       :key="ease"
       :active="filter.ease === ease"
       @click="filter.changeEase(ease)"

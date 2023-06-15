@@ -1,3 +1,5 @@
+import type { TypeExercise, TypeExerciseActive, TypeWorkout } from "./types"
+
 // User
 export const useActiveUser = () => useState('activeUser', () => '')
 
@@ -16,7 +18,6 @@ export const useShowModalExercise = () => useState<boolean>('showModalExercise',
 export const useShowModalWorkout = () => useState<boolean>('showModalWorkout', () => false)
 
 // All
-export const useEaseus = () => useState<TypeEase>('easeus', () => ['Свой вес', 'С весом', 'В резине'])
 export const useRubbers = () => useState<string[]>('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
 
 export const useRubbersColor = () => useState('rubbersColor', () => [

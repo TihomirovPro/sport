@@ -1,17 +1,18 @@
-<script setup>
-const activeUser = useActiveUser()
+<script setup lang="ts">
+import type { TypeExercise } from "../../composables/types"
+
 const allWorkouts = useWorkouts()
 const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
 const colors = useColors()
 
-const error = ref(false)
-const selectColor = ref(false)
-const selectIcon = ref(false)
-const removeConfirm = ref(false)
-const text = ref('')
+const error = ref<boolean>(false)
+const selectColor = ref<boolean>(false)
+const selectIcon = ref<boolean>(false)
+const removeConfirm = ref<boolean>(false)
+const text = ref<string>('')
 
-const exercise = ref({
+const exercise = ref<TypeExercise>({
   id: '',
   name: '',
   color: '#5182dc',
@@ -32,7 +33,7 @@ function reset() {
 
 watchEffect(() => {
   if (selectUpdateExercise.value) {
-    getWorkouts(activeUser.value, selectUpdateExercise.value.id)
+    getWorkouts(selectUpdateExercise.value.id)
     exercise.value = {
       id: selectUpdateExercise.value.id,
       name: selectUpdateExercise.value.name,

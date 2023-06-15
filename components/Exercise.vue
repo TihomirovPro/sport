@@ -1,10 +1,7 @@
 <script setup lang="ts">
-const props = withDefaults(defineProps<{
-  name: string
-  color: string
-  icon: string
-  id: string
-}>(), {
+import type { TypeExercise } from "../composables/types"
+
+const props = withDefaults(defineProps<TypeExercise>(), {
   color: '#5182dc'
 })
 
@@ -21,7 +18,7 @@ function updateModal() {
 
 async function active() {
   activeExercise.value = props.id
-  getWorkouts(activeUser.value, props.id)
+  getWorkouts(props.id)
 }
 </script>
 
