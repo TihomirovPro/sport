@@ -1,21 +1,27 @@
 // Exercise
-export type TypeExercise = {
+export interface TypeExercise {
   id: string
   name: string
-  color: string
-  icon: string
+  color?: string
+  icon?: string
 }
 
 export type TypeExerciseCreate = Omit<TypeExercise, 'id'>
-export type TypeExerciseActive = Pick<TypeExercise, 'id'>
+
+// Ease
+export const enum EnumEase {
+  noWeight = 'Свой вес',
+  weight = 'С весом',
+  rubber = 'В резине'
+}
 
 // Workout
-export type TypeWorkout = {
+export interface TypeWorkout {
   id: string
   exercisesId: string
   date: string
   interval: string
-  ease: TypeEase
+  ease: EnumEase
   rubber: string
   desc: string
   approach: []
@@ -26,12 +32,3 @@ export type TypeWorkout = {
 
 export type TypeWorkoutCreate = Omit<TypeWorkout, 'id'>
 export type TypeWorkoutPage = Omit<TypeWorkout, 'exercisesId'>
-
-// Ease
-export const enum EnumEase {
-  noWeight = 'Свой вес',
-  weight = 'С весом',
-  rubber = 'В резине'
-}
-
-export type TypeEase = EnumEase.noWeight | EnumEase.weight | EnumEase.rubber

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 defineProps<{
   text: string
-  red: boolean
+  red?: boolean
 }>()
 </script>
 
 <template lang="pug">
 button.button(
   :class="{ _red: red }"
-) {{text}}
+) {{ text }}
 </template>
 
 <style lang="stylus" scoped>

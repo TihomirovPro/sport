@@ -28,9 +28,4 @@ const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
 
   &__back
     color rgba(#fff,.8)
-
-  &__wrap
-    display flex
-    align-items center
-    gap 10px
 </style>

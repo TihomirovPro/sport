@@ -1,17 +1,28 @@
 <script setup lang="ts">
-import type { TypeEase } from '../composables/types'
+import type { TypeWorkout } from '../composables/types'
+import { EnumEase } from '../composables/types'
 
 const allWorkouts = useWorkouts()
 
-const filter = ref({
+interface IFilter {
+  ease: 'Все' | EnumEase,
+  intervals: number[],
+  interval: number,
+  changeEase: (name:'Все' | EnumEase) => void,
+  changeInterval: (interval:number) => void
+}
+
+const filter = ref<IFilter>({
   ease: 'Все',
   intervals: [],
   interval: 0,
-  changeEase(name:string) {
+
+  changeEase: (name:'Все' | EnumEase) => {
     filter.value.ease = name
     useFilter()
   },
-  changeInterval(interval:number) {
+
+  changeInterval: (interval:number) => {
     filter.value.interval = interval
     useFilter()
   },
@@ -20,27 +31,25 @@ const filter = ref({
 watchEffect(() => {
   if (allWorkouts.value) {
     filter.value.intervals = allWorkouts.value
-      .reduce((acc, item) => {
-        if (acc.includes(item.interval)) return acc
-        return [...acc, item.interval]
+      .reduce((acc:number[], item:TypeWorkout):number[] => {
+        if (acc.includes(+item.interval)) return acc
+        return [...acc, +item.interval]
       }, [])
-      .sort((a, b) => {
-        return a - b
-      })
+      .sort((a, b) => a - b)
   }
 })
 
-function filterEase(itemEase:TypeEase) {  
+function filterEase(itemEase:EnumEase):boolean {  
   if (filter.value.ease === 'Все') return true
   else if (itemEase === filter.value.ease) return true
   else if (filter.value.ease === EnumEase.rubber && itemEase !== EnumEase.noWeight && itemEase !== EnumEase.weight) return true
-  else return false
+  return false
 }
 
-function filterEaseInterval(itemEase:TypeEase, itemInterval:number) {
+function filterEaseInterval(itemEase:EnumEase, itemInterval:number):boolean {
   if (itemInterval === filter.value.interval) return filterEase(itemEase)
   else if (filter.value.interval === 0) return filterEase(itemEase)
-  else return false
+  return false
 }
 
 function useFilter() {

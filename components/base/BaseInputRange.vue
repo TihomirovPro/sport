@@ -1,10 +1,15 @@
-<script setup>
-defineProps({
-    modelValue: String,
-    min: { type: String, default: '1' },
-    max: { type: String, default: '7' },
-    step: { type: Number, default: '0.5' },
-    view: { type: String, default: 'interval' },
+<script setup lang="ts">
+withDefaults(defineProps<{
+    modelValue: string | number
+    min: string
+    max: string
+    step: string
+    view: string
+}>(), {
+  min: '1',
+  max: '7',
+  step: '0.5',
+  view: 'interval'
 })
 </script>
 

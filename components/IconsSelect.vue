@@ -1,30 +1,34 @@
-<script setup>
+<script setup lang="ts">
 const emits = defineEmits(['select'])
 const updateExercise = useSelectUpdateExercise()
 const icons = useIcons()
-const activeIcon = ref('')
+
+const icon = ref({
+  active: '',
+  select: (name:string) => icon.value.active = name
+})
 
 
 watchEffect(() => {
   if (updateExercise.value) {
-    activeIcon.value = updateExercise.value.icon
+    icon.value.active = updateExercise.value.icon
   } else {
-    activeIcon.value = ''
+    icon.value.active = ''
   }
 })
 
-function selectIcon(icon) {
-  activeIcon.value = icon
-  emits('select', icon)
+function selectIcon(iconName:string) {
+  icon.value.active = iconName
+  emits('select', iconName)
 }
 </script>
 
 <template lang="pug">
 .icons
   .icons__item(
-    v-for="icon in icons"
-    :class="[`icon-${icon}`, { active: activeIcon === icon }]"
-    @click="selectIcon(icon)"
+    v-for="iconName in icons"
+    :class="[`icon-${iconName}`, { active: icon.active === iconName }]"
+    @click="selectIcon(iconName)"
   )
 </template>
 

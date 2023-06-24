@@ -1,16 +1,16 @@
-import type { TypeExercise, TypeExerciseActive, TypeWorkout } from "./types"
+import type { TypeExercise, TypeWorkout } from "./types"
 
 // User
 export const useActiveUser = () => useState('activeUser', () => '')
 
 // Exercise
 export const useAllExercises = () => useState<TypeExercise[]>('allExercises', () => [])
-export const useActiveExercise = () => useState<TypeExerciseActive>('activeExercise', () => '')
-export const useSelectUpdateExercise = () => useState<TypeExercise>('updateExercise', () => '')
+export const useActiveExercise = () => useState<string>('activeExercise', () => '')
+export const useSelectUpdateExercise = () => useState<TypeExercise | null>('updateExercise', () => null)
 
 // Workout
 export const useWorkouts = () => useState<TypeWorkout[]>('workouts', () => [])
-export const useSelectUpdateWorkout = () => useState<TypeWorkout>('updateWorkout', () => '')
+export const useSelectUpdateWorkout = () => useState<TypeWorkout | null>('updateWorkout', () => null)
 
 // Modal
 export const useShowModal = () => useState<boolean>('showModal', () => false)

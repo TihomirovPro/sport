@@ -20,7 +20,7 @@ const exercise = ref<TypeExercise>({
 })
 
 function reset() {
-  selectUpdateExercise.value = ''
+  selectUpdateExercise.value = null
   isShowModalExercise.value = false
   error.value = false
   exercise.value = {
@@ -86,36 +86,41 @@ div
     :isShow="isShowModalExercise"
     @hiden="reset"
   )
-    BaseInput(
-      v-model="exercise.name"
-      type="text"
-      :error="error"
-      placeholder="Название упражения"
-    )
-    .wrap(@click="selectColor = true")
-      p Цвет блока
-      .selectColor(:style="`background: ${exercise.color}`")
-    .wrap(@click="selectIcon = true")
-      p Иконка
-      .selectIcon(:class="`icon-${exercise.icon}`")
-    BaseButton(
-      v-if="!selectUpdateExercise"
-      text="Добавить"
-      @click="newExercise"
-    )
-    .modal__buttons(v-else)
-      BaseButton(
-        red
-        text="Удалить"
-        @click="deleted()"
+    template(#content)
+      BaseInput(
+        v-model="exercise.name"
+        type="text"
+        :error="error"
+        placeholder="Название упражения"
       )
+      .wrap(@click="selectColor = true")
+        p Цвет блока
+        .selectColor(:style="`background: ${exercise.color}`")
+      .wrap(@click="selectIcon = true")
+        p Иконка
+        .selectIcon(:class="`icon-${exercise.icon}`")
+
+    template(#bottom)
       BaseButton(
-        text="Сохранить"
-        @click="updateData()"
+        v-if="!selectUpdateExercise"
+        text="Добавить"
+        @click="newExercise"
       )
+      template(v-else)
+        BaseButton(
+          red
+          text="Удалить"
+          @click="deleted()"
+        )
+        BaseButton(
+          text="Сохранить"
+          @click="updateData()"
+        )
+  
   Modal(:isShow="removeConfirm" @hiden="removeConfirm = false")
-    .modal__text {{ text }}
-    .modal__buttons
+    template(#content)
+      .modal__text {{ text }}
+    template(#buttom)
       BaseButton(
         text="Отменить"
         @click="removeConfirm = false"
@@ -127,26 +132,22 @@ div
       )
 
   Modal(:isShow="selectColor" @hiden="selectColor = false")
-    .colors
-      .colors__item(
-        v-for="item in colors"
-        @click="exercise.color = item; selectColor = false"
-        :style="`background: ${item}`"
-      )
+    template(#content)
+      .colors
+        .colors__item(
+          v-for="item in colors"
+          @click="exercise.color = item; selectColor = false"
+          :style="`background: ${item}`"
+        )
   
   Modal(:isShow="selectIcon" @hiden="selectIcon = false")
-    IconsSelect(
-      @select="(el) => { exercise.icon = el; selectIcon = false }"
-    )
+    template(#content)
+      IconsSelect(
+        @select="(el:string) => { exercise.icon = el; selectIcon = false }"
+      )
 </template>
 
 <style lang="stylus" scoped>
-.modal__buttons
-  display grid
-  grid-template-columns 1fr 1fr
-  place-items center
-  gap 20px
-
 .modal__text
   text-align center
   font-size 18px

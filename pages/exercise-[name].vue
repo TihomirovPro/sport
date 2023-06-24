@@ -11,7 +11,7 @@ useHead({
 .p-4
   ModalWorkout
   Filters
-  .detail__content(v-if="allWorkouts")
+  .grid.gap-6.pt-4.pb-7.overflow-auto(v-if="allWorkouts")
     template(v-for="item in allWorkouts")
       Workout(
         v-if="item.filter"
@@ -27,13 +27,3 @@ useHead({
         :res="item.res"
       )
 </template>
-
-<style lang="stylus" scoped>
-.detail
-  &__content
-    display grid
-    gap 24px
-    padding 16px 0 24px
-    overflow auto
-</style>
-    

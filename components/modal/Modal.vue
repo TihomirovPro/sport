@@ -1,19 +1,25 @@
 <script setup lang="ts">
-defineProps<{
-  isShow: boolean
-}>()
+const slots = useSlots()
 
-const emits = defineEmits(['hiden'])
+defineProps<{ isShow: boolean }>()
+
+const emits = defineEmits<{ hiden: [] }>()
 </script>
 
 <template lang="pug">
 Transition
-  .modal.size-full.flex-center(
+  .size-full.flex-center.top-0.left-0.fixed.z-50(
     v-if="isShow"
+    class="bg-[rgba(0,0,0,.7)]"
     @click.self="emits('hiden')"
   )
-    .modal__container.max-w-2xl
-      slot
+    .grid.gap-4.max-w-2xl.py-6.px-4.max-h-full.overflow-auto.rounded-lg(
+      class="w-11/12 bg-[#fafafa]"
+    )
+      slot(name="content")
+
+      .grid.grid-flow-col.place-items-center.gap-5.mt-4(v-if="slots.bottom")
+        slot(name="bottom")
 </template>
 
 <style lang="stylus" scoped>
@@ -24,20 +30,4 @@ Transition
 .v-enter-from
 .v-leave-to
   opacity: 0
-.modal
-  z-index 110
-  position fixed
-  top 0
-  left 0
-  background rgba(0,0,0,.7)
-
-  &__container
-    max-height 100%
-    overflow auto
-    display grid
-    gap 16px
-    width 90%
-    padding 24px 15px
-    background #fafafa
-    border-radius 10px
 </style>

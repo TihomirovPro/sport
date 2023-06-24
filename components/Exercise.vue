@@ -9,7 +9,6 @@ const allExercises = useAllExercises()
 const isShowModalExercise = useShowModalExercise()
 const updateExercise = useSelectUpdateExercise()
 const activeExercise = useActiveExercise()
-const activeUser = useActiveUser()
 
 function updateModal() {
   updateExercise.value = allExercises.value.find(item => item.id === props.id)
@@ -23,49 +22,20 @@ async function active() {
 </script>
 
 <template lang="pug">
-.exercise
-  .exercise__block(
+.grid.gap-5.items-center.px-3(
+  class="grid-cols-[56px_1fr]"
+)
+  .flex-center.size-14.text-4xl.p-1.rounded-xl.uppercase(
+    class="text-[#fff] bg-[#5182dc]"
     :style="`background: ${color}`"
     @click="updateModal"
   )
-    .exercise__text(v-if="!icon") {{ name[0] }}
-    .exercise__icon(v-else :class="`icon-${icon}`")
+    .text-2xl(v-if="!icon") {{ name[0] }}
+    div(v-else :class="`icon-${icon}`")
 
-  NuxtLink(
-    class="exercise__link"
+  NuxtLink.cursor-pointer.py-6.text-xl.border-b(
+    class="text-[#5182dc] border-[rgba(#dcdcdc,.5)]"
     @click="active"
     :to="`/exercise-${name}`"
   ) {{ name }}
 </template>
-    
-<style lang="stylus" scoped>
-.exercise
-  display grid
-  grid-template-columns 50px 1fr
-  gap 20px
-  align-items center
-  padding 0 12px
-
-  &__block
-    display flex
-    align-items center
-    justify-content center
-    color: #fff
-    font-size 40px
-    padding 4px
-    width 50px
-    height 50px
-    background #5182dc
-    border-radius 10px
-    text-transform uppercase
-
-  &__text
-    font-size 24px
-
-  &__link
-    padding 24px 0
-    color #5182dc
-    font-size 20px
-    cursor pointer
-    border-bottom: 1px solid rgba(#dcdcdc,.5)
-</style>

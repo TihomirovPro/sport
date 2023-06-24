@@ -20,7 +20,7 @@ const workout = ref<TypeWorkout>({
   weight: [],
   desc: '',
   exercisesId: activeExercise.value,
-  res: null
+  res: NaN
 })
 
 const convertDate = computed(()=> {
@@ -33,7 +33,7 @@ const convertDate = computed(()=> {
 
 function reset () {
   isShowModalWorkout.value = false
-  selectUpdateWorkout.value = ''
+  selectUpdateWorkout.value = null
   error.value = false
   workout.value = {
     id: '',
@@ -100,72 +100,74 @@ Modal(
   :isShow="isShowModalWorkout"
   @hiden="reset"
 )
-  label.date-label
-    span {{ convertDate }}
+  template(#content)
+    label.date-label
+      span {{ convertDate }}
+      BaseInput(
+        v-model="date"
+        type="date"
+      )
+    BaseInputRange(v-model="workout.interval")
+    BaseInputRange(v-model="approaches" max="10" step="1" view="approaches")
+
+    TabsWrap
+      TabsItem(
+        v-for="ease in EnumEase"
+        :key="ease"
+        :active="workout.ease === ease"
+        @click="workout.ease = ease"
+        :title="ease"
+      )
+
+    .rubbers(v-if="workout.ease === EnumEase.rubber")
+      .text-white.text-xs.text-center.flex-center.cursor-pointer(
+        v-for="item in rubbersColor"
+        :style="`background: ${item.color}`"
+        :class="{_active : workout.rubber === item.name}"
+        @click="workout.rubber = item.name"
+      ) {{ item.name.replace(' резина', '') }}
+
+    .approaches
+      .approach(
+        v-for="index in +approaches"
+        :key="index"
+      )
+        BaseInput(
+          v-model="workout.approach[index-1]"
+          type="text"
+          :error="error"
+          inputmode="numeric"
+          :placeholder="`Подход ${index}`"
+        )
+        BaseInput(
+          v-if="workout.ease === EnumEase.weight"
+          v-model="workout.weight[index-1]"
+          type="text"
+          inputmode="numeric"
+          :placeholder="`Вес ${index}`"
+        )
+
     BaseInput(
-      v-model="date"
-      type="date"
+      v-model="workout.desc"
+      type="textarea"
+      placeholder="Заметка"
     )
-  BaseInputRange(v-model="workout.interval")
-  BaseInputRange(v-model="approaches" max="20" step="1" view="approaches")
-
-  TabsWrap
-    TabsItem(
-      v-for="ease in EnumEase"
-      :key="ease"
-      :active="workout.ease === ease"
-      @click="workout.ease = ease"
-      :title="ease"
-    )
-
-  .rubbers(v-if="workout.ease === 'В резине'")
-    .text-white.text-xs.text-center.flex-center.cursor-pointer(
-      v-for="item in rubbersColor"
-      :style="`background: ${item.color}`"
-      :class="{_active : workout.rubber === item.name}"
-      @click="workout.rubber = item.name"
-    ) {{ item.name.replace(' резина', '') }}
-
-  .approaches
-    .approach(
-      v-for="index in +approaches"
-      :key="index"
-    )
-      BaseInput(
-        v-model="workout.approach[index-1]"
-        type="text"
-        :error="error"
-        inputmode="numeric"
-        :placeholder="`Подход ${index}`"
-      )
-      BaseInput(
-        v-if="workout.ease === 'С весом'"
-        v-model="workout.weight[index-1]"
-        type="text"
-        inputmode="numeric"
-        :placeholder="`Вес ${index}`"
-      )
-
-  BaseInput(
-    v-model="workout.desc"
-    type="textarea"
-    placeholder="Заметка"
-  )
-  BaseButton(
-    v-if="!selectUpdateWorkout"
-    @click="add"
-    text="Добавить"
-  )
-  .modal__buttons(v-else)
+  template(#bottom)
     BaseButton(
-      red
-      @click="removeSelectWorkout"
-      text="Удалить"
+      v-if="!selectUpdateWorkout"
+      @click="add"
+      text="Добавить"
     )
-    BaseButton(
-      @click="updateSelectWorkout"
-      text="Сохранить"
-    )
+    template(v-else)
+      BaseButton(
+        red
+        @click="removeSelectWorkout"
+        text="Удалить"
+      )
+      BaseButton(
+        @click="updateSelectWorkout"
+        text="Сохранить"
+      )
 </template>
 
 <style lang="stylus" scoped>
@@ -182,12 +184,6 @@ Modal(
     position absolute
     visibility hidden
     z-index -1
-
-.modal__buttons
-  display grid
-  grid-template-columns 1fr 1fr
-  place-items center
-  gap 20px
 
 .ease-buttons
   display flex
