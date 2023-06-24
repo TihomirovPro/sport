@@ -45,7 +45,7 @@ function reset () {
     approach: [],
     weight: [],
     desc: '',
-    res: null
+    res: NaN
   }
 }
 
@@ -101,7 +101,7 @@ Modal(
   @hiden="reset"
 )
   template(#content)
-    label.date-label
+    label.date-label.-mx-4.-mt-6
       span {{ convertDate }}
       BaseInput(
         v-model="date"
@@ -173,22 +173,16 @@ Modal(
 <style lang="stylus" scoped>
 .date-label
   padding: 16px 0
-  width calc(100% + 30px)
-  margin: -24px -15px 0
   text-align center
   font-size 18px
   background #5182dc
   color: #fafafa
   border-bottom 1px solid rgba(0,0,0,.4)
+
   input
     position absolute
     visibility hidden
     z-index -1
-
-.ease-buttons
-  display flex
-  gap: 12px
-  justify-content space-between
 
 .approach
   display flex

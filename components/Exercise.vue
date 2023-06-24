@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import type { TypeExercise } from "../composables/types"
 
-const props = withDefaults(defineProps<TypeExercise>(), {
-  color: '#5182dc'
-})
+const props = defineProps<TypeExercise>()
 
-const allExercises = useAllExercises()
 const isShowModalExercise = useShowModalExercise()
 const updateExercise = useSelectUpdateExercise()
 const activeExercise = useActiveExercise()
 
-function updateModal() {
-  updateExercise.value = allExercises.value.find(item => item.id === props.id)
+function update() {
+  updateExercise.value = props
   isShowModalExercise.value = true
 }
 
@@ -25,10 +22,10 @@ async function active() {
 .grid.gap-5.items-center.px-3(
   class="grid-cols-[56px_1fr]"
 )
-  .flex-center.size-14.text-4xl.p-1.rounded-xl.uppercase(
-    class="text-[#fff] bg-[#5182dc]"
+  .flex-center.size-14.text-4xl.p-1.rounded-xl.uppercase.text-white(
+    class="bg-[#5182dc]"
     :style="`background: ${color}`"
-    @click="updateModal"
+    @click="update"
   )
     .text-2xl(v-if="!icon") {{ name[0] }}
     div(v-else :class="`icon-${icon}`")

@@ -4,18 +4,18 @@ import type { TypeExercise } from "../../composables/types"
 const allWorkouts = useWorkouts()
 const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
-const colors = useColors()
+
+const showModalColor = ref<boolean>(false)
+const showModalIcon = ref<boolean>(false)
 
 const error = ref<boolean>(false)
-const selectColor = ref<boolean>(false)
-const selectIcon = ref<boolean>(false)
 const removeConfirm = ref<boolean>(false)
 const text = ref<string>('')
 
 const exercise = ref<TypeExercise>({
   id: '',
   name: '',
-  color: '#5182dc',
+  color: '',
   icon: '',
 })
 
@@ -26,7 +26,7 @@ function reset() {
   exercise.value = {
     id: '',
     name: '',
-    color: '#5182dc',
+    color: '',
     icon: '',
   }
 }
@@ -34,12 +34,7 @@ function reset() {
 watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(selectUpdateExercise.value.id)
-    exercise.value = {
-      id: selectUpdateExercise.value.id,
-      name: selectUpdateExercise.value.name,
-      color: selectUpdateExercise.value.color,
-      icon: selectUpdateExercise.value.icon,
-    }
+    exercise.value = { ...selectUpdateExercise.value }
   } else {
     reset()
   }
@@ -78,6 +73,16 @@ function deleted() {
   }
   removeConfirm.value = true
 }
+
+function selectColor(color:string) {
+  exercise.value.color = color
+  showModalColor.value = false
+}
+
+function selectIcon(icon:string) {
+  exercise.value.icon = icon
+  showModalIcon.value = false
+}
 </script>
 
 <template lang="pug">
@@ -93,12 +98,15 @@ div
         :error="error"
         placeholder="Название упражения"
       )
-      .wrap(@click="selectColor = true")
+      .wrap(@click="showModalColor = true")
         p Цвет блока
-        .selectColor(:style="`background: ${exercise.color}`")
-      .wrap(@click="selectIcon = true")
+        .size-10.rounded-lg(
+          class="bg-[#5182dc]"
+          :style="`background: ${exercise.color}`"
+        )
+      .wrap(@click="showModalIcon = true")
         p Иконка
-        .selectIcon(:class="`icon-${exercise.icon}`")
+        .text-4xl(:class="`icon-${exercise.icon}`")
 
     template(#bottom)
       BaseButton(
@@ -130,21 +138,19 @@ div
         text="Удалить"
         @click="remove()"
       )
-
-  Modal(:isShow="selectColor" @hiden="selectColor = false")
-    template(#content)
-      .colors
-        .colors__item(
-          v-for="item in colors"
-          @click="exercise.color = item; selectColor = false"
-          :style="`background: ${item}`"
-        )
   
-  Modal(:isShow="selectIcon" @hiden="selectIcon = false")
-    template(#content)
-      IconsSelect(
-        @select="(el:string) => { exercise.icon = el; selectIcon = false }"
-      )
+  ModalColor(
+    :isShow="showModalColor"
+    @hiden="showModalColor = false"
+    @selectColor="(color) => selectColor(color)"
+  )
+
+  ModalIcon(
+    :isShow="showModalIcon"
+    :activeIcon='exercise.icon'
+    @hiden="showModalIcon = false"
+    @selectIcon="(icon) => selectIcon(icon)"
+  )
 </template>
 
 <style lang="stylus" scoped>
@@ -161,6 +167,7 @@ div
   justify-content space-between
   font-size 18px
   height 40px
+
   + .wrap:before
     position absolute
     left 0
@@ -168,23 +175,4 @@ div
     content ''
     width 100%
     border-top 1px solid rgba(#dcdcdc,1)
-
-.selectColor
-  width 40px
-  height 40px
-  border-radius 10px
-  background #5182dc
-
-.selectIcon
-  font-size 35px
-
-.colors
-  display grid
-  grid-template-columns repeat(6, 1fr)
-  margin -24px -15px
-  &__item
-    width 100%
-    height 50px
-    border 2px solid #fff
-    border-radius 10px
 </style>

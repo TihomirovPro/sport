@@ -40,15 +40,12 @@ watchEffect(() => {
 })
 
 function filterEase(itemEase:EnumEase):boolean {  
-  if (filter.value.ease === 'Все') return true
-  else if (itemEase === filter.value.ease) return true
-  else if (filter.value.ease === EnumEase.rubber && itemEase !== EnumEase.noWeight && itemEase !== EnumEase.weight) return true
+  if (filter.value.ease === 'Все' || itemEase === filter.value.ease) return true
   return false
 }
 
 function filterEaseInterval(itemEase:EnumEase, itemInterval:number):boolean {
-  if (itemInterval === filter.value.interval) return filterEase(itemEase)
-  else if (filter.value.interval === 0) return filterEase(itemEase)
+  if (filter.value.interval === 0 || itemInterval === filter.value.interval) return filterEase(itemEase)
   return false
 }
 

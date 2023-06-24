@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   active: boolean
-  title: string
+  title: string | number
 }>()
 </script>
 

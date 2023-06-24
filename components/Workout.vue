@@ -26,7 +26,7 @@ function selectUpdate() {
   .exercise__top
     p {{ convertDate }}
     p {{ interval }}
-    p {{ ease === 'В резине' ? rubber : ease }}
+    p {{ ease === EnumEase.rubber ? rubber : ease }}
 
   .exercise__approach
     span(

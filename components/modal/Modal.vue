@@ -1,9 +1,9 @@
 <script setup lang="ts">
-const slots = useSlots()
-
 defineProps<{ isShow: boolean }>()
 
 const emits = defineEmits<{ hiden: [] }>()
+
+const slots = useSlots()
 </script>
 
 <template lang="pug">
