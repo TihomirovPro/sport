@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TypeWorkout } from "../../composables/types"
+import type { TypeWorkoutCreate } from "../../composables/types"
 
 const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
@@ -10,16 +10,17 @@ const nowDate = new Date()
 const error = ref(false)
 const approaches = ref(5)
 
-const workout = ref<TypeWorkout>({
-  id: '',
+let eases = computed(() => activeExercise.value.ease ? activeExercise.value.ease : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
+
+const workout = ref<TypeWorkoutCreate>({
   date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
   interval: '2.5',
-  ease: EnumEase.noWeight,
+  ease: activeExercise.value.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
   rubber: '',
   approach: [],
   weight: [],
   desc: '',
-  exercisesId: activeExercise.value,
+  exercisesId: activeExercise.value.id,
   res: NaN
 })
 
@@ -36,11 +37,10 @@ function reset () {
   selectUpdateWorkout.value = null
   error.value = false
   workout.value = {
-    id: '',
-    exercisesId: activeExercise.value,
+    exercisesId: activeExercise.value.id,
     date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
     interval: '2.5',
-    ease: EnumEase.noWeight,
+    ease: activeExercise.value.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
     rubber: '',
     approach: [],
     weight: [],
@@ -53,8 +53,7 @@ watchEffect(() => {
   if (selectUpdateWorkout.value) {
     approaches.value = selectUpdateWorkout.value.approach.length
     workout.value = {
-      id: selectUpdateWorkout.value.id,
-      exercisesId: activeExercise.value,
+      exercisesId: selectUpdateWorkout.value.exercisesId,
       date: selectUpdateWorkout.value.date,
       interval: selectUpdateWorkout.value.interval,
       approach: selectUpdateWorkout.value.approach,
@@ -82,7 +81,7 @@ async function add() {
 async function updateSelectWorkout() {
   if (workout.value.approach) {
     workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => { return +sum + +current })
-    await updateWorkout(workout.value)
+    await updateWorkout(selectUpdateWorkout.value.id, workout.value)
     reset()
   } else {
     error.value = true
@@ -90,7 +89,7 @@ async function updateSelectWorkout() {
 }
 
 async function removeSelectWorkout() {
-  await removeWorkout(workout.value.id)
+  await removeWorkout(selectUpdateWorkout.value.id)
   reset()
 }
 </script>
@@ -112,7 +111,7 @@ Modal(
 
     TabsWrap
       TabsItem(
-        v-for="ease in EnumEase"
+        v-for="ease in eases"
         :key="ease"
         :active="workout.ease === ease"
         @click="workout.ease = ease"

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-const activeExercise = useActiveExercise()
 const route = useRoute()
 
 const pagesWithoutBackBtn = ['index']
@@ -13,7 +12,6 @@ const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
     NuxtLink.header__back(
       v-if="isShowBackBtn"
       to="/"
-      @click="activeExercise = ''"
       ) Назад
 </template>
 

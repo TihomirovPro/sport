@@ -22,7 +22,7 @@ function selectUpdate() {
 </script>
 
 <template lang="pug">
-.exercise.grid.w-full.gap-3.py-4.px-3
+.exercise.grid.w-full.gap-3.py-4.px-3.text-sm
   .exercise__top
     p {{ convertDate }}
     p {{ interval }}

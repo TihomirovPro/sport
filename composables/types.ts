@@ -2,6 +2,7 @@
 export interface TypeExercise {
   id: string
   name: string
+  ease: EnumEase[]
   color?: string
   icon?: string
 }

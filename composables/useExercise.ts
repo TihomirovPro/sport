@@ -19,6 +19,7 @@ export const getAllExercises = async (userId:string) => {
           name: exercise.name,
           color: exercise.color,
           icon: exercise.icon,
+          ease: exercise.ease,
           id: key
         })
       })
@@ -44,9 +45,9 @@ export const removeExercise = async (id:string) => {
 }
 
 // Update
-export const updateExercise = async (exercise:TypeExercise) => {
+export const updateExercise = async (id:string, exercise:TypeExerciseCreate) => {
   const auth = getAuth()
   const db = getDatabase()
 
-  update(ref(db,  `users/${auth.currentUser.uid}/exercises/${exercise.id}`), exercise);
+  update(ref(db,  `users/${auth.currentUser.uid}/exercises/${id}`), exercise);
 }

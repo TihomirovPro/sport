@@ -5,7 +5,7 @@ export const useActiveUser = () => useState('activeUser', () => '')
 
 // Exercise
 export const useAllExercises = () => useState<TypeExercise[]>('allExercises', () => [])
-export const useActiveExercise = () => useState<string>('activeExercise', () => '')
+export const useActiveExercise = () => useState<TypeExercise | null>('activeExercise', () => null)
 export const useSelectUpdateExercise = () => useState<TypeExercise | null>('updateExercise', () => null)
 
 // Workout

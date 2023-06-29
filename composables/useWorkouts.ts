@@ -59,8 +59,8 @@ export const removeWorkout = async (id:string) => {
 }
 
 // Update
-export const updateWorkout = async (workout:TypeWorkout) => {
+export const updateWorkout = async (id:string, workout:TypeWorkoutCreate) => {
   const db = getDatabase()
   const auth = getAuth()
-  update(ref(db,  `users/${auth.currentUser.uid}/workout/${workout.id}`), workout);
+  update(ref(db,  `users/${auth.currentUser.uid}/workout/${id}`), workout);
 }

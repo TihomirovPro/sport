@@ -13,7 +13,7 @@ function update() {
 }
 
 async function active() {
-  activeExercise.value = props.id
+  activeExercise.value = props
   getWorkouts(props.id)
 }
 </script>

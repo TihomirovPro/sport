@@ -3,6 +3,9 @@ import type { TypeWorkout } from '../composables/types'
 import { EnumEase } from '../composables/types'
 
 const allWorkouts = useWorkouts()
+const activeExercise = useActiveExercise()
+
+const eases = computed(() => activeExercise.value.ease ? activeExercise.value.ease : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
 
 interface IFilter {
   ease: 'Все' | EnumEase,
@@ -58,33 +61,34 @@ function useFilter() {
 
 <template lang="pug">
 .filters
-  .pb-2(v-if="allWorkouts && filter.intervals.length > 1") Интервал
-  TabsWrap.pb-2(v-if="allWorkouts && filter.intervals.length > 1")
-    TabsItem(
-      :active="filter.interval === 0"
-      @click="filter.changeInterval(0)"
-      title="Все"
-    )
-    TabsItem(
-      v-for="interval in filter.intervals"
-      :key="interval"
-      :active="filter.interval === interval"
-      @click="filter.changeInterval(interval)"
-      :title="interval"
-    )
-  
-  .pb-2(v-if="allWorkouts && filter.intervals.length > 1") Сложность
-  TabsWrap(v-if="allWorkouts")
-    TabsItem(
-      :active="filter.ease === 'Все'"
-      @click="filter.changeEase('Все')"
-      title="Все"
-    )
-    TabsItem(
-      v-for="ease in EnumEase"
-      :key="ease"
-      :active="filter.ease === ease"
-      @click="filter.changeEase(ease)"
-      :title="ease"
-    )
+  template(v-if="allWorkouts && filter.intervals.length > 1")
+    .pb-2.text-sm Интервал
+    TabsWrap.pb-2
+      TabsItem(
+        :active="filter.interval === 0"
+        @click="filter.changeInterval(0)"
+        title="Все"
+      )
+      TabsItem(
+        v-for="interval in filter.intervals"
+        :key="interval"
+        :active="filter.interval === interval"
+        @click="filter.changeInterval(interval)"
+        :title="interval"
+      )
+    .pb-2.text-sm Сложность
+  template(v-if="eases.length > 1")
+    TabsWrap(v-if="allWorkouts")
+      TabsItem(
+        :active="filter.ease === 'Все'"
+        @click="filter.changeEase('Все')"
+        title="Все"
+      )
+      TabsItem(
+        v-for="ease in eases"
+        :key="ease"
+        :active="filter.ease === ease"
+        @click="filter.changeEase(ease)"
+        :title="ease"
+      )
 </template>

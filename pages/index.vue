@@ -17,5 +17,6 @@ definePageMeta({
     :color="item.color"
     :icon="item.icon"
     :id="item.id"
+    :ease="item.ease"
   )
 </template>

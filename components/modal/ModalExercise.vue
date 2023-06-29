@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { TypeExercise } from "../../composables/types"
+import type { TypeExerciseCreate } from "../../composables/types"
+import { EnumEase } from "../../composables/types";
 
 const allWorkouts = useWorkouts()
 const isShowModalExercise = useShowModalExercise()
@@ -12,11 +13,11 @@ const error = ref<boolean>(false)
 const removeConfirm = ref<boolean>(false)
 const text = ref<string>('')
 
-const exercise = ref<TypeExercise>({
-  id: '',
+const exercise = ref<TypeExerciseCreate>({
   name: '',
   color: '',
   icon: '',
+  ease: [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
 })
 
 function reset() {
@@ -24,17 +25,23 @@ function reset() {
   isShowModalExercise.value = false
   error.value = false
   exercise.value = {
-    id: '',
     name: '',
     color: '',
     icon: '',
+    ease: [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
   }
 }
 
 watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(selectUpdateExercise.value.id)
-    exercise.value = { ...selectUpdateExercise.value }
+
+    const { id, ...exerciseUpdate } = selectUpdateExercise.value
+    exercise.value = { ...exerciseUpdate }
+    
+    if (!exercise.value.ease) {
+      exercise.value.ease = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
+    }
   } else {
     reset()
   }
@@ -50,7 +57,7 @@ async function newExercise() {
 }
 
 async function updateData() {
-  await updateExercise(exercise.value)
+  await updateExercise(selectUpdateExercise.value.id, exercise.value)
   reset()
 }
 
@@ -83,6 +90,15 @@ function selectIcon(icon:string) {
   exercise.value.icon = icon
   showModalIcon.value = false
 }
+
+function selectEase(ease:EnumEase) {
+  if (exercise.value.ease.includes(ease)) {
+    const newEase = exercise.value.ease.filter(el => el !== ease)
+    exercise.value.ease = newEase
+  }  else {
+    exercise.value.ease.push(ease)
+  }
+}
 </script>
 
 <template lang="pug">
@@ -107,6 +123,16 @@ div
       .wrap(@click="showModalIcon = true")
         p Иконка
         .text-4xl(:class="`icon-${exercise.icon}`")
+  
+      p Сложность
+      TabsWrap
+        TabsItem(
+          v-for="ease in EnumEase"
+          :key="ease"
+          :active="exercise.ease.includes(ease)"
+          :title="ease"
+          @click="selectEase(ease)"
+        )
 
     template(#bottom)
       BaseButton(
@@ -168,10 +194,10 @@ div
   font-size 18px
   height 40px
 
-  + .wrap:before
+  &:before
     position absolute
     left 0
-    top -8px
+    bottom -8px
     content ''
     width 100%
     border-top 1px solid rgba(#dcdcdc,1)
