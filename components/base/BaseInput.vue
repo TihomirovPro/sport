@@ -1,10 +1,18 @@
 <script setup lang="ts">
 defineProps<{
-    type: string
-    placeholder: string
-    modelValue: string
-    error: boolean
+  modelValue: string
+  placeholder: string
+  type: string
+  error?: boolean
 }>()
+
+const emits = defineEmits<{
+  'update:modelValue': [value:string]
+}>()
+
+function updateValue(e:Event) {
+  emits('update:modelValue', (e.target as HTMLInputElement).value)
+}
 </script>
 
 <template lang="pug">
@@ -13,7 +21,7 @@ textarea.input(
   :value="modelValue"
   :placeholder="placeholder"
   autocomplete="off"
-  @input="$emit('update:modelValue', $event.target.value)"
+  @input="updateValue"
 )
 input.input(
   v-else
@@ -21,8 +29,8 @@ input.input(
   :value="modelValue"
   :placeholder="placeholder"
   autocomplete="off"
-  @input="$emit('update:modelValue', $event.target.value)"
-  :class="{ _error: error, _color: type === 'color' }"
+  @input="updateValue"
+  :class="{ '_error': error }"
 )
 </template>
 
@@ -35,10 +43,6 @@ input.input(
   width 100%
   max-width 100%
   min-height 42px
-
-  &._color
-    padding 1px
-    border none
 
   &._error
     border 1px solid rgba(red,.6)

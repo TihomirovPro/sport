@@ -4,12 +4,20 @@ defineProps<{
   placeholder: string
   modelValue: string
 }>()
+
+const emits = defineEmits<{
+  'update:modelValue': [value:string]
+}>()
+
+function updateValue(e:Event) {
+  emits('update:modelValue', (e.target as HTMLInputElement).value)
+}
 </script>
 
 <template lang="pug">
 select.input(
   :value="modelValue"
-  @change="$emit('update:modelValue', $event.target.value)"
+  @change="updateValue"
 )
   option(
     selected

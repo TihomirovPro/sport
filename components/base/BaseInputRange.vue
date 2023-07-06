@@ -11,13 +11,20 @@ withDefaults(defineProps<{
   step: '0.5',
   view: 'interval'
 })
+
+const emits = defineEmits<{
+  'update:modelValue': [value:string]
+}>()
+
+function updateValue(e:Event) {
+  emits('update:modelValue', (e.target as HTMLInputElement).value)
+}
 </script>
 
 <template lang="pug">
-.input-range
-  span(v-if="view === 'interval' && modelValue !== '0.5'") Интервал: В {{ modelValue }} мин
-  span(v-else-if="view === 'interval'") Интервал: Все
-  span(v-else-if="view === 'approaches'") Подходы: {{ modelValue }}
+.input-range.relative.text-lg
+  span(v-if="view === 'interval'") Интервал: В {{ modelValue }} мин
+  span(v-else) Подходы: {{ modelValue }}
 
   input(
     type="range"
@@ -25,15 +32,12 @@ withDefaults(defineProps<{
     :max='max'
     :step="step"
     :value="modelValue"
-    @input="$emit('update:modelValue', $event.target.value)"
+    @input="updateValue"
   )
 </template>
 
 <style lang="stylus">
 .input-range
-  position relative
-  font-size 18px
-
   input
     margin-top 16px
     width 100%

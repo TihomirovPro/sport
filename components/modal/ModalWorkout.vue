@@ -10,7 +10,7 @@ const nowDate = new Date()
 const error = ref(false)
 const approaches = ref(5)
 
-let eases = computed(() => activeExercise.value.ease ? activeExercise.value.ease : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
+const eases = computed(() => activeExercise.value.ease ? activeExercise.value.ease : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
 
 const workout = ref<TypeWorkoutCreate>({
   date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
@@ -70,7 +70,7 @@ watchEffect(() => {
 
 async function add() {
   if (workout.value.approach) {
-    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => { return +sum + +current })
+    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
     await createWorkout(workout.value)
     reset()
   } else {
@@ -79,8 +79,10 @@ async function add() {
 }
 
 async function updateSelectWorkout() {
-  if (workout.value.approach) {
-    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => { return +sum + +current })
+  if (workout.value.approach.length > 0) {
+    console.log(workout.value.approach);
+    
+    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
     await updateWorkout(selectUpdateWorkout.value.id, workout.value)
     reset()
   } else {
@@ -138,6 +140,7 @@ Modal(
           inputmode="numeric"
           :placeholder="`Подход ${index}`"
         )
+
         BaseInput(
           v-if="workout.ease === EnumEase.weight"
           v-model="workout.weight[index-1]"

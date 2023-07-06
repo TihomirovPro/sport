@@ -7,31 +7,21 @@ defineProps<{
 
 <template lang="pug">
 button.button(
+  class=`
+    cursor-pointer transition
+    block w-full py-2.5 px-4
+    text-white text-centetext-lg
+    bg-[#3b6ec9] hover_bg-[#5682d0] rounded
+  `
   :class="{ _red: red }"
 ) {{ text }}
 </template>
 
 <style lang="stylus" scoped>
 .button
-  cursor pointer
-  display block
-  width 100%
-  padding 10px 16px
-  background #3b6ec9
-  color #fff
-  font-size 18px
-  text-align center
-  border-radius 4px
-  transition .24s
-
-
   &._red
     background darken(red, 10%)
 
     &:hover
       background darken(red, 20%)
-
-  &:hover
-    background #5682d0
-
 </style>

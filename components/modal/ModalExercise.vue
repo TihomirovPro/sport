@@ -37,11 +37,11 @@ watchEffect(() => {
     getWorkouts(selectUpdateExercise.value.id)
 
     const { id, ...exerciseUpdate } = selectUpdateExercise.value
-    exercise.value = { ...exerciseUpdate }
+    exercise.value = {...exerciseUpdate }
     
-    if (!exercise.value.ease) {
-      exercise.value.ease = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
-    }
+    if (!selectUpdateExercise.value.ease) exercise.value.ease = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
+    else exercise.value.ease = selectUpdateExercise.value.ease
+
   } else {
     reset()
   }
@@ -92,12 +92,8 @@ function selectIcon(icon:string) {
 }
 
 function selectEase(ease:EnumEase) {
-  if (exercise.value.ease.includes(ease)) {
-    const newEase = exercise.value.ease.filter(el => el !== ease)
-    exercise.value.ease = newEase
-  }  else {
-    exercise.value.ease.push(ease)
-  }
+  if (exercise.value.ease.includes(ease)) exercise.value.ease = [...exercise.value.ease.filter(el => el !== ease)]
+  else exercise.value.ease.push(ease)
 }
 </script>
 

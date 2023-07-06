@@ -23,10 +23,10 @@ export interface TypeWorkout {
   date: string
   interval: string
   ease: EnumEase
-  rubber: string
+  rubber?: string
   desc: string
-  approach: []
-  weight: []
+  approach: number[]
+  weight: number[]
   res: number,
   filter?: boolean
 }
