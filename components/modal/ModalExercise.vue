@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { TypeExerciseCreate } from "../../composables/types"
-import { EnumEase } from "../../composables/types";
+import type { TypeExerciseCreate } from '~/composables/types'
+import { EnumEase } from '~/composables/types';
 
 const allWorkouts = useWorkouts()
 const isShowModalExercise = useShowModalExercise()
@@ -87,6 +87,7 @@ function selectColor(color:string) {
 }
 
 function selectIcon(icon:string) {
+  console.log(icon)
   exercise.value.icon = icon
   showModalIcon.value = false
 }
@@ -104,22 +105,31 @@ div
     @hiden="reset"
   )
     template(#content)
-      BaseInput(
-        v-model="exercise.name"
-        type="text"
-        :error="error"
-        placeholder="Название упражения"
-      )
-      .wrap(@click="showModalColor = true")
-        p Цвет блока
-        .size-10.rounded-lg(
+      .wrap.gap-3
+        .size-14.rounded-lg.flex-center.p-1(
           class="bg-[#5182dc]"
           :style="`background: ${exercise.color}`"
         )
-      .wrap(@click="showModalIcon = true")
-        p Иконка
-        .text-4xl(:class="`icon-${exercise.icon}`")
-  
+          Icon(
+            :icon="exercise.icon"
+            color="#fff"
+          )
+        BaseInput(
+          v-model="exercise.name"
+          type="text"
+          :error="error"
+          placeholder="Название упражения"
+        )
+
+      TabsWrap
+        TabsItem(
+          title="Цвет"
+          @click="showModalColor = true"
+        )
+        TabsItem(
+          title="Иконка"
+          @click="showModalIcon = true"
+        )      
       p Сложность
       TabsWrap
         TabsItem(
@@ -188,13 +198,12 @@ div
   align-items center
   justify-content space-between
   font-size 18px
-  height 40px
 
-  &:before
-    position absolute
-    left 0
-    bottom -8px
-    content ''
-    width 100%
-    border-top 1px solid rgba(#dcdcdc,1)
+  // &:before
+  //   position absolute
+  //   left 0
+  //   bottom -8px
+  //   content ''
+  //   width 100%
+  //   border-top 1px solid rgba(#dcdcdc,1)
 </style>

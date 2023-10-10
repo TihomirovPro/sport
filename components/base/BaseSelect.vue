@@ -5,12 +5,12 @@ defineProps<{
   modelValue: string
 }>()
 
-const emits = defineEmits<{
+const emit = defineEmits<{
   'update:modelValue': [value:string]
 }>()
 
 function updateValue(e:Event) {
-  emits('update:modelValue', (e.target as HTMLInputElement).value)
+  emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
 </script>
 

@@ -10,6 +10,7 @@ export const useSelectUpdateExercise = () => useState<TypeExercise | null>('upda
 
 // Workout
 export const useWorkouts = () => useState<TypeWorkout[]>('workouts', () => [])
+export const useFilteredWorkouts = () => useState<TypeWorkout[]>('filteredWorkouts', () => [])
 export const useSelectUpdateWorkout = () => useState<TypeWorkout | null>('updateWorkout', () => null)
 
 // Modal
@@ -31,7 +32,12 @@ export const useRubbersColor = () => useState('rubbersColor', () => [
   {name: 'Синяя резина', color: 'rgb(29, 78, 216)'}
 ])
 
-export const useIcons = () => useState('icons', () => ['push-up', 'pull-up', 'bars', 'bars-2', 'rings'])
+export const useIcons = () => useState('icons', () => [
+  'push-up', 'push-up-1',
+  'bars',
+  'rings',
+  'pull-up', 'pull-up-1', 'pull-up-2', 'pull-up-3',
+])
 
 export const useColors = () => useState('colors', () => [
   '#f87171', '#fb7185', '#f43f5e', '#ef4444', '#dc2626', '#b91c1c',

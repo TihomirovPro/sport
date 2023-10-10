@@ -33,7 +33,7 @@ export const createExercise = async (exercise:TypeExerciseCreate) => {
   const db = getDatabase()
   
   const newExerciseKey = push(child(ref(db), 'exercises')).key
-  await set(ref(db, `users/${auth.currentUser.uid}/exercises/${newExerciseKey}`), exercise)
+  await set(ref(db, `users/${auth.currentUser?.uid}/exercises/${newExerciseKey}`), exercise)
 }
 
 // Remove
@@ -41,7 +41,7 @@ export const removeExercise = async (id:string) => {
   const auth = getAuth()
   const db = getDatabase()
 
-  remove(ref(db, `users/${auth.currentUser.uid}/exercises/${id}`))
+  remove(ref(db, `users/${auth.currentUser?.uid}/exercises/${id}`))
 }
 
 // Update
@@ -49,5 +49,5 @@ export const updateExercise = async (id:string, exercise:TypeExerciseCreate) => 
   const auth = getAuth()
   const db = getDatabase()
 
-  update(ref(db,  `users/${auth.currentUser.uid}/exercises/${id}`), exercise);
+  update(ref(db,  `users/${auth.currentUser?.uid}/exercises/${id}`), exercise);
 }

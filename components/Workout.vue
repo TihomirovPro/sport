@@ -1,19 +1,11 @@
 <script setup lang="ts">
-import type { TypeWorkoutPage } from "../composables/types"
+import type { TypeWorkoutPage } from '~/composables/types'
 
 const props = defineProps<TypeWorkoutPage>()
 
 const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
-
-const convertDate = computed(()=> {
-  return new Date(props.date).toLocaleString('ru', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).slice(0, -2)
-})
 
 function selectUpdate() {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
@@ -24,7 +16,7 @@ function selectUpdate() {
 <template lang="pug">
 .exercise.grid.w-full.gap-3.py-4.px-3.text-sm
   .exercise__top
-    p {{ convertDate }}
+    p {{ date }}
     p {{ interval }}
     p {{ ease === EnumEase.rubber ? rubber : ease }}
 

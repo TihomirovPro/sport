@@ -28,8 +28,15 @@ export interface TypeWorkout {
   approach: number[]
   weight: number[]
   res: number,
-  filter?: boolean
 }
 
 export type TypeWorkoutCreate = Omit<TypeWorkout, 'id'>
 export type TypeWorkoutPage = Omit<TypeWorkout, 'exercisesId'>
+
+// Filter
+export interface Filter {
+  ease: 'Все' | EnumEase,
+  interval: number,
+  changeEase: (name:'Все' | EnumEase) => void,
+  changeInterval: (interval:number) => void
+}

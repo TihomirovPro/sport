@@ -1,35 +1,31 @@
 <script setup lang="ts">
-import type { TypeWorkoutCreate } from "../../composables/types"
+import type { TypeWorkoutCreate } from '~/composables/types'
 
 const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
 const rubbersColor = useRubbersColor()
 
-const nowDate = new Date()
+const nowDate = new Intl.DateTimeFormat('ru-RU', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric'
+}).format(new Date()).slice(0, -3)
 const error = ref(false)
 const approaches = ref(5)
 
-const eases = computed(() => activeExercise.value.ease ? activeExercise.value.ease : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
+const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
 
 const workout = ref<TypeWorkoutCreate>({
-  date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
+  date: nowDate,
   interval: '2.5',
-  ease: activeExercise.value.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
+  ease: activeExercise.value?.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
   rubber: '',
   approach: [],
   weight: [],
   desc: '',
-  exercisesId: activeExercise.value.id,
-  res: NaN
-})
-
-const convertDate = computed(()=> {
-  return new Date(workout.value.date).toLocaleString('ru', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).slice(0, -2)
+  exercisesId: activeExercise.value?.id,
+  res: 0
 })
 
 function reset () {
@@ -37,15 +33,15 @@ function reset () {
   selectUpdateWorkout.value = null
   error.value = false
   workout.value = {
-    exercisesId: activeExercise.value.id,
-    date: `${nowDate.getFullYear()}-${nowDate.getMonth() + 1}-${nowDate.getDate()}`,
+    exercisesId: activeExercise.value?.id,
+    date: nowDate,
     interval: '2.5',
-    ease: activeExercise.value.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
+    ease: activeExercise.value?.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
     rubber: '',
     approach: [],
     weight: [],
     desc: '',
-    res: NaN
+    res: 0
   }
 }
 
@@ -58,9 +54,9 @@ watchEffect(() => {
       interval: selectUpdateWorkout.value.interval,
       approach: selectUpdateWorkout.value.approach,
       ease: selectUpdateWorkout.value.ease,
-      rubber: selectUpdateWorkout.value.rubber ? selectUpdateWorkout.value.rubber : '',
-      weight: selectUpdateWorkout.value.weight ? selectUpdateWorkout.value.weight : [],
-      desc: selectUpdateWorkout.value.desc ? selectUpdateWorkout.value.desc : '',
+      rubber: selectUpdateWorkout.value.rubber || '',
+      weight: selectUpdateWorkout.value.weight || [],
+      desc: selectUpdateWorkout.value.desc || '',
       res: selectUpdateWorkout.value.res,
     }
   } else {
@@ -83,7 +79,7 @@ async function updateSelectWorkout() {
     console.log(workout.value.approach);
     
     workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-    await updateWorkout(selectUpdateWorkout.value.id, workout.value)
+    await updateWorkout(selectUpdateWorkout.value!.id, workout.value)
     reset()
   } else {
     error.value = true
@@ -91,7 +87,7 @@ async function updateSelectWorkout() {
 }
 
 async function removeSelectWorkout() {
-  await removeWorkout(selectUpdateWorkout.value.id)
+  await removeWorkout(selectUpdateWorkout.value!.id)
   reset()
 }
 </script>
@@ -103,9 +99,9 @@ Modal(
 )
   template(#content)
     label.date-label.-mx-4.-mt-6
-      span {{ convertDate }}
+      span {{ workout.date }}
       BaseInput(
-        v-model="date"
+        v-model="workout.date"
         type="date"
       )
     BaseInputRange(v-model="workout.interval")

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 defineProps<{ isShow: boolean }>()
 
-const emits = defineEmits<{ hiden: [] }>()
+const emit = defineEmits<{ hiden: [] }>()
 
 const slots = useSlots()
 </script>
@@ -11,7 +11,7 @@ Transition
   .size-full.flex-center.top-0.left-0.fixed.z-50(
     v-if="isShow"
     class="bg-[rgba(0,0,0,.7)]"
-    @click.self="emits('hiden')"
+    @click.self="emit('hiden')"
   )
     .grid.gap-4.max-w-2xl.py-6.px-4.max-h-full.overflow-auto.rounded-lg(
       class="w-11/12 bg-[#fafafa]"

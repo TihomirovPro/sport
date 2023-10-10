@@ -10,7 +10,7 @@ const user = useActiveUser()
 .h-full
   Header(v-if="user")
 
-  .h-full.pb-24.overflow-auto.max-w-2xl.mx-auto
+  .h-full.pb-40.overflow-auto.max-w-2xl.mx-auto
     slot
 
   Footer(v-if="user")

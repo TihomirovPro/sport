@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const allWorkouts = useWorkouts()
+const filteredWorkouts = useFilteredWorkouts()
 const route = useRoute()
 
 useHead({
@@ -11,11 +11,9 @@ useHead({
 .p-4
   ModalWorkout
   Filters
-  .grid.gap-6.pt-4.pb-7.overflow-auto(v-if="allWorkouts")
-    template(v-for="item in allWorkouts")
+  .grid.gap-6.pt-4.pb-7.overflow-auto
+    template(v-for="item in filteredWorkouts" :key="item.id")
       Workout(
-        v-if="item.filter"
-        :key="item.id"
         :id="item.id"
         :date="item.date"
         :interval="`В ${item.interval} мин`"

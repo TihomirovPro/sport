@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TypeExercise } from "../composables/types"
+import type { TypeExercise } from '~/composables/types'
 
 const props = defineProps<TypeExercise>()
 
@@ -14,7 +14,7 @@ function update() {
 
 async function active() {
   activeExercise.value = props
-  getWorkouts(props.id)
+  await getWorkouts(props.id)
 }
 </script>
 
@@ -28,7 +28,7 @@ async function active() {
     @click="update"
   )
     .text-2xl(v-if="!icon") {{ name[0] }}
-    div(v-else :class="`icon-${icon}`")
+    Icon(v-else :icon="icon" color="#fff")
 
   NuxtLink.cursor-pointer.py-6.text-xl.border-b(
     class="text-[#5182dc] border-[rgba(#dcdcdc,.5)]"
