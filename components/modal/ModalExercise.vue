@@ -111,9 +111,11 @@ div
           :style="`background: ${exercise.color}`"
         )
           Icon(
+            v-if="exercise.icon"
             :icon="exercise.icon"
             color="#fff"
           )
+          .text-2xl.text-white(v-else) {{ exercise.name[0] }}
         BaseInput(
           v-model="exercise.name"
           type="text"

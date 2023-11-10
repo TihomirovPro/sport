@@ -35,7 +35,7 @@ async function active() {
     :style="`background: ${color}`"
     @click="update"
   )
-    .text-2xl(v-if="!icon") {{ slug[0] }}
+    .text-2xl(v-if="!icon") {{ name[0] }}
     Icon(v-else :icon="icon" color="#fff")
 
   NuxtLink.cursor-pointer.py-6.text-xl.border-b(
