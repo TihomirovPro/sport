@@ -1,17 +1,23 @@
 <script setup lang="ts">
 const route = useRoute()
-
 const pagesWithoutBackBtn = ['index']
 const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
+const headerTitle = useHeaderTitle()
+
+// function back() {
+//   headerTitle.value = 'Упражнения'
+//   return '/'
+// }
 </script>
 
 <template lang="pug">
-.header.px-3
+header.header.px-3.sticky.top-0
   .max-w-2xl.mx-auto.flex.flex-wrap.items-center.justify-between.h-14
-    .header__title {{ route.meta.title || route.params.name }}
-    NuxtLink.header__back(
-      v-if="isShowBackBtn"
-      to="/"
+    .header__title {{ headerTitle }}
+    div(@click="headerTitle = 'Упражнения'")
+      NuxtLink.header__back(
+        v-if="isShowBackBtn"
+        to="/"
       ) Назад
 </template>
 

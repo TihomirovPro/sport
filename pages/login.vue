@@ -69,6 +69,7 @@ function loginWithGoogle() {
     box-shadow 0 0 5px rgba(#5182dc, .2)
 
   &__google
+    cursor: pointer
     display grid
     align-items center
     grid-template-columns 25px 1fr
@@ -76,6 +77,10 @@ function loginWithGoogle() {
     padding 12px 24px
     border 1px solid #5182dc
     border-radius 24px
+    transition: .3s
+
+    &:hover
+      background-color: rgba(#5182dc, .1)
 
   &__btns
     display flex

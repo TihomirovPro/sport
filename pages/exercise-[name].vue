@@ -1,17 +1,20 @@
 <script setup lang="ts">
 const filteredWorkouts = useFilteredWorkouts()
-const route = useRoute()
+const activeExercise = useActiveExercise()
+const headerTitle = useHeaderTitle()
+
+headerTitle.value = String(activeExercise.value?.name)
 
 useHead({
-  title: route.params.name,
+  title: activeExercise.value?.name
 })
 </script>
 
 <template lang="pug">
-.p-4
+.py-4
   ModalWorkout
   Filters
-  .grid.gap-6.pt-4.pb-7.overflow-auto
+  .grid.gap-6.pt-4
     template(v-for="item in filteredWorkouts" :key="item.id")
       Workout(
         :id="item.id"

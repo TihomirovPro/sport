@@ -7,7 +7,7 @@ definePageMeta({
 </script>
 
 <template lang="pug">
-.exercisesList
+div
   ModalExercise
   Exercise(
     v-for="(item, i) in allExercises"

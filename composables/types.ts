@@ -2,7 +2,7 @@
 export interface TypeExercise {
   id: string
   name: string
-  ease: EnumEase[]
+  ease?: EnumEase[]
   color?: string
   icon?: string
 }
@@ -23,10 +23,10 @@ export interface TypeWorkout {
   date: string
   interval: string
   ease: EnumEase
-  rubber?: string
-  desc: string
+  rubber?: string | false
+  desc?: string | false
   approach: number[]
-  weight: number[]
+  weight?: number[] | false
   res: number,
 }
 

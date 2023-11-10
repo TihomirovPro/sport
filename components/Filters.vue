@@ -51,32 +51,32 @@ function useFilter() {
   template(v-if="allWorkouts && intervals.length > 1")
     .pb-2.text-sm Интервал
     TabsWrap.pb-2
-      TabsItem(
-        :active="filter.interval === 0"
-        @click="filter.changeInterval(0)"
-        title="Все"
-      )
+      //- TabsItem(
+      //-   :active="filter.interval === 0"
+      //-   @click="filter.changeInterval(0)"
+      //-   title="Все"
+      //- ).text-xs
       TabsItem(
         v-for="interval in intervals"
         :key="interval"
         :active="filter.interval === interval"
         @click="filter.changeInterval(interval)"
         :title="interval"
-      )
+      ).text-xs
   
   template(v-if="eases.length > 1")
     .pb-2.text-sm Сложность
     TabsWrap(v-if="allWorkouts")
-      TabsItem(
-        :active="filter.ease === 'Все'"
-        @click="filter.changeEase('Все')"
-        title="Все"
-      )
+      //- TabsItem(
+      //-   :active="filter.ease === 'Все'"
+      //-   @click="filter.changeEase('Все')"
+      //-   title="Все"
+      //- )
       TabsItem(
         v-for="ease in eases"
         :key="ease"
         :active="filter.ease === ease"
         @click="filter.changeEase(ease)"
         :title="ease"
-      )
+      ).text-xs
 </template>

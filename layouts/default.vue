@@ -7,10 +7,10 @@ const user = useActiveUser()
 </script>
 
 <template lang="pug">
-.h-full
+.flex.flex-col.min-h-full
   Header(v-if="user")
 
-  .h-full.pb-40.overflow-auto.max-w-2xl.mx-auto
+  main.px-2.max-w-2xl.w-full.mx-auto
     slot
 
   Footer(v-if="user")

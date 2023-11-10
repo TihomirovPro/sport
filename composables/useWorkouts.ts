@@ -22,11 +22,12 @@ export const getWorkouts = async (exercisesId:string) => {
           allworkouts.value.push({
             id: key,
             exercisesId: workout.exercisesId,
-            date: workout.date.includes('-') ? new Intl.DateTimeFormat('ru-RU', {
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric'
-            }).format(new Date(workout.date)).slice(0, -3) : workout.date,
+            date: workout.date,
+            // date: workout.date.includes('-') ? new Intl.DateTimeFormat('ru-RU', {
+            //   year: 'numeric',
+            //   month: 'long',
+            //   day: 'numeric'
+            // }).format(new Date(workout.date)).slice(0, -3) : workout.date,
             interval: workout.interval,
             ease: workout.ease,
             rubber: workout.rubber,

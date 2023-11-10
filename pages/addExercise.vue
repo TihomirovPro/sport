@@ -100,62 +100,56 @@ function selectEase(ease:EnumEase) {
 
 <template lang="pug">
 div
-  Modal(
-    :isShow="isShowModalExercise"
-    @hiden="reset"
-  )
-    template(#content)
-      .wrap.gap-3
-        .size-14.rounded-lg.flex-center.p-1(
-          class="bg-[#5182dc]"
-          :style="`background: ${exercise.color}`"
-        )
-          Icon(
-            :icon="exercise.icon"
-            color="#fff"
-          )
-        BaseInput(
-          v-model="exercise.name"
-          type="text"
-          :error="error"
-          placeholder="Название упражения"
-        )
-
-      TabsWrap
-        TabsItem(
-          title="Цвет"
-          @click="showModalColor = true"
-        )
-        TabsItem(
-          title="Иконка"
-          @click="showModalIcon = true"
-        )      
-      p Сложность
-      TabsWrap
-        TabsItem(
-          v-for="ease in EnumEase"
-          :key="ease"
-          :active="exercise.ease.includes(ease)"
-          :title="ease"
-          @click="selectEase(ease)"
-        )
-
-    template(#bottom)
-      BaseButton(
-        v-if="!selectUpdateExercise"
-        text="Добавить"
-        @click="newExercise"
+  .wrap.gap-3
+    .size-14.rounded-lg.flex-center.p-1(
+      class="bg-[#5182dc]"
+      :style="`background: ${exercise.color}`"
+    )
+      Icon(
+        :icon="exercise.icon"
+        color="#fff"
       )
-      template(v-else)
-        BaseButton(
-          red
-          text="Удалить"
-          @click="deleted()"
-        )
-        BaseButton(
-          text="Сохранить"
-          @click="updateData()"
-        )
+    BaseInput(
+      v-model="exercise.name"
+      type="text"
+      :error="error"
+      placeholder="Название упражения"
+    )
+
+  TabsWrap
+    TabsItem(
+      title="Цвет"
+      @click="showModalColor = true"
+    )
+    TabsItem(
+      title="Иконка"
+      @click="showModalIcon = true"
+    )      
+  p Сложность
+  TabsWrap
+    TabsItem(
+      v-for="ease in EnumEase"
+      :key="ease"
+      :active="exercise.ease.includes(ease)"
+      :title="ease"
+      @click="selectEase(ease)"
+    )
+
+  BaseButton(
+    v-if="!selectUpdateExercise"
+    text="Добавить"
+    @click="newExercise"
+  )
+  template(v-else)
+    BaseButton(
+      red
+      text="Удалить"
+      @click="deleted()"
+    )
+    BaseButton(
+      text="Сохранить"
+      @click="updateData()"
+    )
 
   ModalRemoveConfirm(
     :text="text"

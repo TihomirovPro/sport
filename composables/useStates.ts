@@ -1,5 +1,7 @@
 import type { TypeExercise, TypeWorkout } from "./types"
 
+export const useHeaderTitle = () => useState('headerTitle', () => 'Упражнения')
+
 // User
 export const useActiveUser = () => useState('activeUser', () => '')
 

@@ -7,6 +7,14 @@ const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
 
+const formatDate = computed(() => {
+  return Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(new Date(props.date)).slice(0, -3)
+})
+
 function selectUpdate() {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
   isShowModalWorkout.value = true
@@ -14,12 +22,15 @@ function selectUpdate() {
 </script>
 
 <template lang="pug">
-.exercise.grid.w-full.gap-3.py-4.px-3.text-sm
+.exercise.grid.w-full.gap-3.py-4.px-3.text-xs
   .exercise__top
-    p {{ date }}
+    p {{ formatDate }}
     p {{ interval }}
     p {{ ease === EnumEase.rubber ? rubber : ease }}
 
+  //- .exercise__approach
+  //-   span(v-for="i in approach.length") {{ i }}
+  //-   span
   .exercise__approach
     span(
       v-for="item in approach"
@@ -76,7 +87,7 @@ function selectUpdate() {
     border-top 1px solid rgba(#dcdcdc,.6)
 
   &__all
-    font-size 16px
+    font-size 14px
     font-weight 700
     color red
     text-align right

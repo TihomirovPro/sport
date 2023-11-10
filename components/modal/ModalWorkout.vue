@@ -6,13 +6,18 @@ const selectUpdateWorkout = useSelectUpdateWorkout()
 const isShowModalWorkout = useShowModalWorkout()
 const rubbersColor = useRubbersColor()
 
-const nowDate = new Intl.DateTimeFormat('ru-RU', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric'
-}).format(new Date()).slice(0, -3)
+function formatDate(date:number | string) {
+  return new Intl.DateTimeFormat('ru-RU', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  }).format(new Date(date)).slice(0, -3)
+}
+
+const nowDate = new Date().getTime()
 const error = ref(false)
 const approaches = ref(5)
+const removeConfirm = ref(false)
 
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
 
@@ -87,85 +92,95 @@ async function updateSelectWorkout() {
 }
 
 async function removeSelectWorkout() {
-  await removeWorkout(selectUpdateWorkout.value!.id)
+  removeWorkout(selectUpdateWorkout.value!.id)
+  removeConfirm.value = false
   reset()
 }
 </script>
 
 <template lang="pug">
-Modal(
-  :isShow="isShowModalWorkout"
-  @hiden="reset"
-)
-  template(#content)
-    label.date-label.-mx-4.-mt-6
-      span {{ workout.date }}
+div
+  Modal(
+    :isShow="isShowModalWorkout"
+    @hiden="reset"
+  )
+    template(#content)
+      label.date-label.-mx-4.-mt-6
+        span {{ formatDate(workout.date) }}
+        BaseInput(
+          v-model="workout.date"
+          type="date"
+        )
+      BaseInputRange(v-model="workout.interval")
+      BaseInputRange(v-model="approaches" max="10" step="1" view="approaches")
+
+      TabsWrap
+        TabsItem(
+          v-for="ease in eases"
+          :key="ease"
+          :active="workout.ease === ease"
+          @click="workout.ease = ease"
+          :title="ease"
+        )
+
+      .rubbers(v-if="workout.ease === EnumEase.rubber")
+        .text-white.text-xs.text-center.flex-center.cursor-pointer(
+          v-for="item in rubbersColor"
+          :style="`background: ${item.color}`"
+          :class="{_active : workout.rubber === item.name}"
+          @click="workout.rubber = item.name"
+        ) {{ item.name.replace(' резина', '') }}
+
+      .approaches
+        .approach(
+          v-for="index in +approaches"
+          :key="index"
+        )
+          BaseInput(
+            v-model="workout.approach[index-1]"
+            type="text"
+            :error="error"
+            inputmode="numeric"
+            :placeholder="`Подход ${index}`"
+          )
+
+          BaseInput(
+            v-if="workout.ease === EnumEase.weight"
+            v-model="workout.weight[index-1]"
+            type="text"
+            inputmode="numeric"
+            :placeholder="`Вес ${index}`"
+          )
+
       BaseInput(
-        v-model="workout.date"
-        type="date"
+        v-model="workout.desc"
+        type="textarea"
+        placeholder="Заметка"
       )
-    BaseInputRange(v-model="workout.interval")
-    BaseInputRange(v-model="approaches" max="10" step="1" view="approaches")
-
-    TabsWrap
-      TabsItem(
-        v-for="ease in eases"
-        :key="ease"
-        :active="workout.ease === ease"
-        @click="workout.ease = ease"
-        :title="ease"
-      )
-
-    .rubbers(v-if="workout.ease === EnumEase.rubber")
-      .text-white.text-xs.text-center.flex-center.cursor-pointer(
-        v-for="item in rubbersColor"
-        :style="`background: ${item.color}`"
-        :class="{_active : workout.rubber === item.name}"
-        @click="workout.rubber = item.name"
-      ) {{ item.name.replace(' резина', '') }}
-
-    .approaches
-      .approach(
-        v-for="index in +approaches"
-        :key="index"
-      )
-        BaseInput(
-          v-model="workout.approach[index-1]"
-          type="text"
-          :error="error"
-          inputmode="numeric"
-          :placeholder="`Подход ${index}`"
-        )
-
-        BaseInput(
-          v-if="workout.ease === EnumEase.weight"
-          v-model="workout.weight[index-1]"
-          type="text"
-          inputmode="numeric"
-          :placeholder="`Вес ${index}`"
-        )
-
-    BaseInput(
-      v-model="workout.desc"
-      type="textarea"
-      placeholder="Заметка"
-    )
-  template(#bottom)
-    BaseButton(
-      v-if="!selectUpdateWorkout"
-      @click="add"
-      text="Добавить"
-    )
-    template(v-else)
+    template(#bottom)
       BaseButton(
-        red
-        @click="removeSelectWorkout"
-        text="Удалить"
+        v-if="!selectUpdateWorkout"
+        @click="add"
+        text="Добавить"
       )
-      BaseButton(
-        @click="updateSelectWorkout"
-        text="Сохранить"
-      )
+      template(v-else)
+        BaseButton(
+          red
+          @click="removeConfirm = true"
+          text="Удалить"
+        )
+        BaseButton(
+          @click="updateSelectWorkout"
+          text="Сохранить"
+        )
+  
+  ModalRemoveConfirm(
+    text="Точно хочешь удалить данную запись?"
+    :isShow="removeConfirm"
+    @hiden="removeConfirm = false"
+    @cancelRemove="removeConfirm = false"
+    @remove="removeSelectWorkout"
+  )
 </template>
 
 <style lang="stylus" scoped>
