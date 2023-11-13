@@ -3,11 +3,8 @@ const route = useRoute()
 const router = useRouter()
 
 function link() {
-  if (!route.params.name) {
-    router.push('/exercise')
-  } else {
-    router.push(`/workout`)
-  }
+  if (route.name === 'index') router.push('/exercise')
+  if (route.name === 'exercise-item') router.push(`/workout`)
 }
 </script>
 

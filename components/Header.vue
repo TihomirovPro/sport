@@ -14,11 +14,12 @@ function back() {
   if (route.name === 'workout') {
     selectUpdateWorkout.value = null
     localStorage.removeItem('newWorkout')
-    router.push(`/exercise-${name.value}`)
+    localStorage.removeItem('approaches')
+    router.push('/exercise-item')
     return
   }
 
-  if (activeExercise.value && route.name === `exercise-${name.value}`) {
+  if (activeExercise.value && route.name === 'exercise-item') {
     activeExercise.value = null
     localStorage.removeItem('activeExercise')
   }

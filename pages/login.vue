@@ -1,7 +1,15 @@
 <script setup type="ts">
+ const activeUser = useActiveUser()
+ const router = useRouter()
+
 definePageMeta({
   layout: 'login'
 })
+
+if (activeUser.value) {
+  console.log(activeUser.value);
+  router.push('/')
+}
 
 const email = ref('')
 const password = ref('')

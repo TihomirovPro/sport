@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { TypeWorkoutCreate } from '~/composables/types'
 
+const router = useRouter()
 const activeExercise = useActiveExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
-const isShowModalWorkout = useShowModalWorkout()
 const rubbersColor = useRubbersColor()
 const headerTitle = useHeaderTitle()
 headerTitle.value = 'Добавить тренировку'
@@ -45,7 +45,6 @@ const workout = ref<TypeWorkoutCreate>({
 })
 
 function reset () {
-  isShowModalWorkout.value = false
   selectUpdateWorkout.value = null
   error.value = false
   workout.value = {
@@ -81,30 +80,14 @@ watchEffect(() => {
   }
 })
 
-if (!selectUpdateWorkout.value && localStorage.getItem('newWorkout')) {
-  const newWorkout = JSON.parse(localStorage.getItem('newWorkout'))
-  console.log(newWorkout);
-  
-  
-  workout.value = {
-    exercisesId: activeExercise.value?.id,
-    date: newWorkout.date,
-    interval: newWorkout.interval,
-    approach: newWorkout.approach,
-    ease: newWorkout.ease,
-    rubber: newWorkout.rubber || '',
-    weight: newWorkout.weight || [],
-    desc: newWorkout.desc || '',
-    res: 0
-  }
-}
-
 async function add() {
   if (workout.value.approach) {
     workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
     await createWorkout(workout.value)
     reset()
+    router.push('/exercise-item')
     localStorage.removeItem('newWorkout')
+    localStorage.removeItem('approaches')
   } else {
     error.value = true
   }
@@ -112,11 +95,10 @@ async function add() {
 
 async function updateSelectWorkout() {
   if (workout.value.approach.length > 0) {
-    console.log(workout.value.approach);
-    
     workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
     await updateWorkout(selectUpdateWorkout.value!.id, workout.value)
     reset()
+    router.push('/exercise-item')
   } else {
     error.value = true
   }
@@ -126,6 +108,7 @@ async function removeSelectWorkout() {
   removeWorkout(selectUpdateWorkout.value!.id)
   removeConfirm.value = false
   reset()
+  router.push('/exercise-item')
 }
 
 function timer(time){
@@ -139,10 +122,40 @@ function timer(time){
   return '00:00'
 }
 
+if (!selectUpdateWorkout.value && localStorage.getItem('newWorkout')) {
+  const newWorkout = JSON.parse(localStorage.getItem('newWorkout'))
+  approaches.value = +JSON.parse(localStorage.getItem('approaches'))
+
+  workout.value = {
+    exercisesId: activeExercise.value?.id,
+    date: newWorkout.date,
+    interval: newWorkout.interval,
+    approach: newWorkout.approach,
+    ease: newWorkout.ease,
+    rubber: newWorkout.rubber || '',
+    weight: newWorkout.weight || [],
+    desc: newWorkout.desc || '',
+    res: 0
+  }
+}
+
 function saveNewWorkout() {
   if (!selectUpdateWorkout.value) {
+    console.log(workout.value.ease);
+    
     localStorage.setItem('newWorkout', JSON.stringify(workout.value))
+    localStorage.setItem('approaches', JSON.stringify(approaches.value))
   }
+}
+
+function selectEase(ease) {
+  workout.value.ease = ease
+  saveNewWorkout()
+}
+
+function selectRubber(name) {
+  workout.value.rubber = name
+  saveNewWorkout()
 }
 </script>
 
@@ -162,7 +175,7 @@ function saveNewWorkout() {
       v-for="ease in eases"
       :key="ease"
       :active="workout.ease === ease"
-      @click="workout.ease = ease, saveNewWorkout"
+      @click="selectEase(ease)"
       :title="ease"
     )
 
@@ -171,7 +184,7 @@ function saveNewWorkout() {
       v-for="item in rubbersColor"
       :style="`background: ${item.color}`"
       :class="{_active : workout.rubber === item.name}"
-      @click="workout.rubber = item.name, saveNewWorkout"
+      @click="selectRubber(item.name)"
     ) {{ item.name.replace(' резина', '') }}
 
   .approaches

@@ -64,18 +64,18 @@ export const signInWithGoogle = () => {
 
 export const initUser = async () => {
   const router = useRouter()
+  const route = useRoute()
   const auth = getAuth()
-  const activeExercise = useActiveExercise()
+  const activeUser = useActiveUser()
 
-  onAuthStateChanged(auth, (user) => {
+  onAuthStateChanged(auth, (user) => {    
     if (user) {
       const uid = user.uid
-      // router.replace({ path: "/" })
       getAllExercises(uid)
-      const activeUser = useActiveUser()
       activeUser.value = uid
+      if (route.name === 'login') router.push('/')
     } else {
-      router.replace({ path: "/login" })
+      router.push('/login')
     }
   })
 }

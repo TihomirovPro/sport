@@ -36,6 +36,6 @@ async function active() {
   NuxtLink.cursor-pointer.py-6.text-xl.border-b(
     class="text-[#5182dc] border-[rgba(#dcdcdc,.5)]"
     @click="active"
-    :to="`/exercise-${slug}`"
+    to="/exercise-item"
   ) {{ name }}
 </template>

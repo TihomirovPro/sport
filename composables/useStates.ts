@@ -15,10 +15,6 @@ export const useWorkouts = () => useState<TypeWorkout[]>('workouts', () => [])
 export const useFilteredWorkouts = () => useState<TypeWorkout[]>('filteredWorkouts', () => [])
 export const useSelectUpdateWorkout = () => useState<TypeWorkout | null>('updateWorkout', () => null)
 
-// Modal
-export const useShowModal = () => useState<boolean>('showModal', () => false)
-export const useShowModalWorkout = () => useState<boolean>('showModalWorkout', () => false)
-
 // All
 export const useRubbers = () => useState<string[]>('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
 
