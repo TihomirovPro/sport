@@ -140,9 +140,7 @@ if (!selectUpdateWorkout.value && localStorage.getItem('newWorkout')) {
 }
 
 function saveNewWorkout() {
-  if (!selectUpdateWorkout.value) {
-    console.log(workout.value.ease);
-    
+  if (!selectUpdateWorkout.value) {    
     localStorage.setItem('newWorkout', JSON.stringify(workout.value))
     localStorage.setItem('approaches', JSON.stringify(approaches.value))
   }

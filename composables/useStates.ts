@@ -31,9 +31,11 @@ export const useRubbersColor = () => useState('rubbersColor', () => [
 
 export const useIcons = () => useState('icons', () => [
   'push-up', 'push-up-1',
-  'bars',
+  'bars', 'bars-1',
   'rings',
   'pull-up', 'pull-up-1', 'pull-up-2', 'pull-up-3',
+  'deadlift',
+  'squats'
 ])
 
 export const useColors = () => useState('colors', () => [

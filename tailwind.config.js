@@ -11,7 +11,6 @@ module.exports = {
     './view/**/*.{js,ts,vue}',
   ],
 
-
   plugins: [
     plugin(({ matchUtilities, theme }) => {
       matchUtilities({

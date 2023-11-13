@@ -15,7 +15,7 @@ const icons = useIcons()
 <template lang="pug">
 Modal(:isShow="isShow" @hiden="emit('hiden')")
   template(#content)
-    .grid.gap-2.grid-cols-5.place-items-center.text-5xl.-mx-3.-my-5
+    .grid.gap-2.grid-cols-4.place-items-center.text-5xl.-mx-3.-my-5
       .w-full.p-2.rounded-lg(
         :key="icon"
         v-for="icon in icons"

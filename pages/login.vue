@@ -1,15 +1,7 @@
 <script setup type="ts">
- const activeUser = useActiveUser()
- const router = useRouter()
-
 definePageMeta({
   layout: 'login'
 })
-
-if (activeUser.value) {
-  console.log(activeUser.value);
-  router.push('/')
-}
 
 const email = ref('')
 const password = ref('')
@@ -29,8 +21,10 @@ function loginWithGoogle() {
 
 <template lang="pug">
 .login.flex-center.size-full
-  
-  .login__google(@click="loginWithGoogle")
+  .cursor-pointer.grid.items-center.transition.py-3.px-6.rounded-3xl(
+    class="gap-2.5 border border-[#5182dc] grid-cols-[25px_1fr] hover_bg-[#5182dc]/10"
+    @click="loginWithGoogle"
+  )
     svg(
       xmlns="http://www.w3.org/2000/svg"
       width="25"
@@ -53,7 +47,7 @@ function loginWithGoogle() {
   //-     type="password"
   //-     placeholder="password"
   //-   )
-  //-   .login__btns
+  //-   .flex(class="gap-2.5")
   //-     BaseButton(
   //-       @click="signIn"
   //-       text="Войти"
@@ -65,32 +59,13 @@ function loginWithGoogle() {
 </template>
 
 <style lang="stylus" scoped>
-.login
-  &__form
-    display grid
-    gap 20px
-    width 300px
-    padding 16px
-    background #fafafa
-    border-radius 10px
-    border 1px solid rgba(#dcdcdc,.5)
-    box-shadow 0 0 5px rgba(#5182dc, .2)
-
-  &__google
-    cursor: pointer
-    display grid
-    align-items center
-    grid-template-columns 25px 1fr
-    gap 10px
-    padding 12px 24px
-    border 1px solid #5182dc
-    border-radius 24px
-    transition: .3s
-
-    &:hover
-      background-color: rgba(#5182dc, .1)
-
-  &__btns
-    display flex
-    gap 10px
+.login__form
+  display grid
+  gap 20px
+  width 300px
+  padding 16px
+  background #fafafa
+  border-radius 10px
+  border 1px solid rgba(#dcdcdc,.5)
+  box-shadow 0 0 5px rgba(#5182dc, .2)
 </style>

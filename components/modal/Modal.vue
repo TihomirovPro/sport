@@ -8,9 +8,9 @@ const slots = useSlots()
 
 <template lang="pug">
 Transition
-  .size-full.flex-center.top-0.left-0.fixed.z-50(
+  .size-full.flex-center.top-0.left-0.fixed(
     v-if="isShow"
-    class="bg-[rgba(0,0,0,.7)]"
+    class="bg-[rgba(0,0,0,.7)] z-[1000]"
     @click.self="emit('hiden')"
   )
     .grid.gap-4.max-w-2xl.py-6.px-4.max-h-full.overflow-auto.rounded-lg(

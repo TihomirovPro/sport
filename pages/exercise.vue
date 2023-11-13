@@ -98,7 +98,6 @@ function selectColor(color:string) {
 }
 
 function selectIcon(icon:string) {
-  console.log(icon)
   exercise.value.icon = icon
   showModalIcon.value = false
 }
@@ -147,22 +146,23 @@ function selectEase(ease:EnumEase) {
       :title="ease"
       @click="selectEase(ease)"
     )
+  .grid.grid-flow-col.place-items-center.gap-5.mt-4
+    BaseButton(
+      v-if="!selectUpdateExercise"
+      text="Добавить"
+      @click="newExercise"
+    ).mt-auto
 
-  BaseButton(
-    v-if="!selectUpdateExercise"
-    text="Добавить"
-    @click="newExercise"
-  ).mt-auto
-  template(v-else)
-    BaseButton(
-      red
-      text="Удалить"
-      @click="deleted()"
-    )
-    BaseButton(
-      text="Сохранить"
-      @click="updateData()"
-    )
+    template(v-else)
+      BaseButton(
+        red
+        text="Удалить"
+        @click="deleted()"
+      )
+      BaseButton(
+        text="Сохранить"
+        @click="updateData()"
+      )
 
   ModalRemoveConfirm(
     :text="text"

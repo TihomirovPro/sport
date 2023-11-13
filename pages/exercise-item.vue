@@ -3,7 +3,6 @@ const filteredWorkouts = useFilteredWorkouts()
 const activeExercise = useActiveExercise()
 const headerTitle = useHeaderTitle()
 
-
 if (!activeExercise.value && localStorage.getItem('activeExercise')) {
   activeExercise.value = JSON.parse(localStorage.getItem('activeExercise'))
   await getWorkouts(activeExercise.value.id)
