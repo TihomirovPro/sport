@@ -2,9 +2,16 @@
 import type { TypeExerciseCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types';
 
+useHead({
+  title: 'Добавить упражнение'
+})
+
+const headerTitle = useHeaderTitle()
+headerTitle.value = 'Добавить упражнение'
+
 const allWorkouts = useWorkouts()
-const isShowModalExercise = useShowModalExercise()
 const selectUpdateExercise = useSelectUpdateExercise()
+const router = useRouter()
 
 const showModalColor = ref<boolean>(false)
 const showModalIcon = ref<boolean>(false)
@@ -22,7 +29,6 @@ const exercise = ref<TypeExerciseCreate>({
 
 function reset() {
   selectUpdateExercise.value = null
-  isShowModalExercise.value = false
   error.value = false
   exercise.value = {
     name: '',
@@ -35,6 +41,7 @@ function reset() {
 watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(selectUpdateExercise.value.id)
+    headerTitle.value = 'Изменить упражнение'
 
     const { id, ...exerciseUpdate } = selectUpdateExercise.value
     exercise.value = {...exerciseUpdate }
@@ -43,6 +50,7 @@ watchEffect(() => {
     else exercise.value.ease = selectUpdateExercise.value.ease
 
   } else {
+    headerTitle.value = 'Добавить упражнение'
     reset()
   }
 })
@@ -51,6 +59,7 @@ async function newExercise() {
   if (exercise.value.name) {
     await createExercise(exercise.value)
     reset()
+    router.push('/')
   } else {
     error.value = true
   }
@@ -59,6 +68,7 @@ async function newExercise() {
 async function updateData() {
   await updateExercise(selectUpdateExercise.value.id, exercise.value)
   reset()
+  router.push('/')
 }
 
 async function remove() {
@@ -69,6 +79,7 @@ async function remove() {
   }
   await removeExercise(selectUpdateExercise.value.id)
   removeConfirm.value = false
+  router.push('/')
   reset()
 }
 
@@ -99,16 +110,18 @@ function selectEase(ease:EnumEase) {
 </script>
 
 <template lang="pug">
-div
-  .wrap.gap-3
+.grid.gap-3
+  .wrap.grid.gap-3.pb-4
     .size-14.rounded-lg.flex-center.p-1(
-      class="bg-[#5182dc]"
+      class="bg-[#5182dc] min-w-[56px]"
       :style="`background: ${exercise.color}`"
     )
       Icon(
+        v-if="exercise.icon"
         :icon="exercise.icon"
         color="#fff"
       )
+      .text-white.text-2xl(v-else) {{ exercise.name[0] }}
     BaseInput(
       v-model="exercise.name"
       type="text"
@@ -139,7 +152,7 @@ div
     v-if="!selectUpdateExercise"
     text="Добавить"
     @click="newExercise"
-  )
+  ).mt-auto
   template(v-else)
     BaseButton(
       red
@@ -186,12 +199,4 @@ div
   align-items center
   justify-content space-between
   font-size 18px
-
-  // &:before
-  //   position absolute
-  //   left 0
-  //   bottom -8px
-  //   content ''
-  //   width 100%
-  //   border-top 1px solid rgba(#dcdcdc,1)
 </style>

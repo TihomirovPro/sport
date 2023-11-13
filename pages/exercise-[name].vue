@@ -3,6 +3,11 @@ const filteredWorkouts = useFilteredWorkouts()
 const activeExercise = useActiveExercise()
 const headerTitle = useHeaderTitle()
 
+if (!activeExercise.value && localStorage.getItem('activeExercise')) {
+  activeExercise.value = JSON.parse(localStorage.getItem('activeExercise'))    
+  await getWorkouts(activeExercise.value.id)
+}
+
 headerTitle.value = String(activeExercise.value?.name)
 
 useHead({
@@ -11,8 +16,7 @@ useHead({
 </script>
 
 <template lang="pug">
-.py-4
-  ModalWorkout
+div
   Filters
   .grid.gap-6.pt-4
     template(v-for="item in filteredWorkouts" :key="item.id")

@@ -65,11 +65,12 @@ export const signInWithGoogle = () => {
 export const initUser = async () => {
   const router = useRouter()
   const auth = getAuth()
+  const activeExercise = useActiveExercise()
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
       const uid = user.uid
-      router.replace({ path: "/" })
+      // router.replace({ path: "/" })
       getAllExercises(uid)
       const activeUser = useActiveUser()
       activeUser.value = uid

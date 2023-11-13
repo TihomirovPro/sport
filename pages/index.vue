@@ -1,14 +1,16 @@
 <script setup type="ts">
 const allExercises = useAllExercises()
+const headerTitle = useHeaderTitle()
 
-definePageMeta({
+useHead({
   title: 'Упражнения',
 })
+
+headerTitle.value = 'Упражнения'
 </script>
 
 <template lang="pug">
 div
-  ModalExercise
   Exercise(
     v-for="(item, i) in allExercises"
     :style="`order: ${item.order ? item.order : i}`"

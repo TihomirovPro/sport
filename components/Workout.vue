@@ -3,9 +3,9 @@ import type { TypeWorkoutPage } from '~/composables/types'
 
 const props = defineProps<TypeWorkoutPage>()
 
+const router = useRouter()
 const allWorkouts = useWorkouts()
 const selectUpdateWorkout = useSelectUpdateWorkout()
-const isShowModalWorkout = useShowModalWorkout()
 
 const formatDate = computed(() => {
   return Intl.DateTimeFormat('ru-RU', {
@@ -17,7 +17,7 @@ const formatDate = computed(() => {
 
 function selectUpdate() {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
-  isShowModalWorkout.value = true
+  router.push('/workout')
 }
 </script>
 
@@ -25,7 +25,7 @@ function selectUpdate() {
 .exercise.grid.w-full.gap-3.py-4.px-3.text-xs
   .exercise__top
     p {{ formatDate }}
-    p {{ interval }}
+    p {{ approach.length }} x {{ interval }}
     p {{ ease === EnumEase.rubber ? rubber : ease }}
 
   //- .exercise__approach

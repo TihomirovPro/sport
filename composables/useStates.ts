@@ -17,7 +17,6 @@ export const useSelectUpdateWorkout = () => useState<TypeWorkout | null>('update
 
 // Modal
 export const useShowModal = () => useState<boolean>('showModal', () => false)
-export const useShowModalExercise = () => useState<boolean>('showModalExercise', () => false)
 export const useShowModalWorkout = () => useState<boolean>('showModalWorkout', () => false)
 
 // All

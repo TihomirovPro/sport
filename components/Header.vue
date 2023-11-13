@@ -1,29 +1,46 @@
 <script setup lang="ts">
 const route = useRoute()
+const router = useRouter()
 const pagesWithoutBackBtn = ['index']
 const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
 const headerTitle = useHeaderTitle()
+const selectUpdateExercise = useSelectUpdateExercise()
+const selectUpdateWorkout = useSelectUpdateWorkout()
+const activeExercise = useActiveExercise()
 
-// function back() {
-//   headerTitle.value = 'Упражнения'
-//   return '/'
-// }
+const name = computed(() => cyrToLat(activeExercise.value?.name))
+
+function back() {
+  if (route.name === 'workout') {
+    selectUpdateWorkout.value = null
+    localStorage.removeItem('newWorkout')
+    router.push(`/exercise-${name.value}`)
+    return
+  }
+
+  if (activeExercise.value && route.name === `exercise-${name.value}`) {
+    activeExercise.value = null
+    localStorage.removeItem('activeExercise')
+  }
+
+  if (selectUpdateExercise.value) selectUpdateExercise.value = null
+  router.push('/')
+}
 </script>
 
 <template lang="pug">
-header.header.px-3.sticky.top-0
+header.header.px-3.sticky.top-0.bg-blue-500
   .max-w-2xl.mx-auto.flex.flex-wrap.items-center.justify-between.h-14
     .header__title {{ headerTitle }}
-    div(@click="headerTitle = 'Упражнения'")
-      NuxtLink.header__back(
-        v-if="isShowBackBtn"
-        to="/"
-      ) Назад
+    .header__back(
+      v-if="isShowBackBtn"
+      @click="back"
+    ) Назад
 </template>
 
 <style lang="stylus">
 .header
-  background #5182dc
+  z-index 100
   box-shadow 0 0 10px rgba(darken(#5182dc, 30%), .6)
 
   &__title

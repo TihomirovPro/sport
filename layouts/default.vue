@@ -1,19 +1,26 @@
 <script setup lang="ts">
+const route = useRoute()
+const user = useActiveUser()
+
 onMounted(async () => {
   initUser()
 })
 
-const user = useActiveUser()
+const isShowFooter = computed(()=> {
+  if (route.name === 'exercise' || route.name === 'workout') return false
+  return true
+})
+
 </script>
 
 <template lang="pug">
-.flex.flex-col.min-h-full
-  Header(v-if="user")
+.flex.flex-col.min-h-full(v-if="user")
+  Header
 
-  main.px-2.max-w-2xl.w-full.mx-auto
+  main.px-2.py-3.max-w-2xl.size-full.mx-auto
     slot
 
-  Footer(v-if="user")
+  Footer(v-if="isShowFooter")
 </template>
 
 <style>
