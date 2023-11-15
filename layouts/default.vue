@@ -6,10 +6,16 @@ onMounted(async () => {
   initUser()
 })
 
-const isShowFooter = computed(()=> {
-  if (route.name === 'exercise' || route.name === 'workout') return false
-  return true
+const isShowMenu = computed(()=> {
+  if (route.name === 'exercise-item' || route.name === 'index') return true
+  return false
 })
+
+if (localStorage.getItem('baseColor')) {
+  const html = document.querySelector('html')
+
+  html.style.setProperty('--colorAccent', localStorage.getItem('baseColor'))
+}
 
 </script>
 
@@ -20,7 +26,7 @@ const isShowFooter = computed(()=> {
   main.px-2.py-3.max-w-2xl.size-full.mx-auto
     slot
 
-  Footer(v-if="isShowFooter")
+  Menu(v-if="isShowMenu")
 </template>
 
 <style>

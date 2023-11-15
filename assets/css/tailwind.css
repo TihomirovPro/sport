@@ -2,6 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
+*,
+*:before,
+*:after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-weight: inherit;
+  line-height: inherit;
+  color: inherit;
+  -webkit-touch-callout: none;
+  -webkit-text-size-adjust: none;
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  -webkit-user-select: none;
+}
+
+*:focus,
+*:before:focus,
+*:after:focus {
+  outline: 0;
+  background: 0;
+}
+
+html {
+  --colorAccent: 59 130 246;
+  --colorFaint: 220 220 220;
+
+  --colorBg: 255 255 255;
+  --colorText: 38 38 38;
+}
+
+html.dark {
+  --colorBg: 40 40 40;
+  --colorText: 255 255 255;
+  --colorFaint: 70 70 70;
+}
+
+html,
+body,
+#__nuxt {
+  width: 100%;
+  height: 100%;
+  color: rgb(var(--colorText));
+  background-color: rgb(var(--colorBg));
+}
+
 @layer components {
   .flex-center {
     @apply flex items-center justify-center;

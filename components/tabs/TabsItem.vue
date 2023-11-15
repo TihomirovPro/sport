@@ -7,7 +7,7 @@ defineProps<{
 
 <template lang="pug">
 .w-full.py-3.text-center.text-sm.rounded-lg.transition.cursor-pointer(
-  class="bg-[#5182dc]/20"
-  :class="{ 'text-white !bg-[#5182dc]' : active }"
+  class="bg-accent/20"
+  :class="{ 'text-white !bg-accent' : active }"
 ) {{ title }}
 </template>

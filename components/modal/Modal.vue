@@ -8,15 +8,16 @@ const slots = useSlots()
 
 <template lang="pug">
 Transition
-  .size-full.flex-center.top-0.left-0.fixed(
+  .size-full.top-0.left-0.fixed.flex(
     v-if="isShow"
-    class="bg-[rgba(0,0,0,.7)] z-[1000]"
+    class="bg-[rgba(0,0,0,.7)] z-[100]"
     @click.self="emit('hiden')"
   )
-    .grid.gap-4.max-w-2xl.py-6.px-4.max-h-full.overflow-auto.rounded-lg(
-      class="w-11/12 bg-[#fafafa]"
+    .grid.gap-4.py-5.px-2.rounded-t-lg(
+      class="w-full h-[50%] bg-[rgb(var(--colorBg))] mt-auto"
     )
-      slot(name="content")
+      .overflow-auto.rounded-lg.py-5.px-3
+        slot(name="content")
 
       .grid.grid-flow-col.place-items-center.gap-5.mt-4(v-if="slots.bottom")
         slot(name="bottom")

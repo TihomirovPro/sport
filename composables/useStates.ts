@@ -15,6 +15,9 @@ export const useWorkouts = () => useState<TypeWorkout[]>('workouts', () => [])
 export const useFilteredWorkouts = () => useState<TypeWorkout[]>('filteredWorkouts', () => [])
 export const useSelectUpdateWorkout = () => useState<TypeWorkout | null>('updateWorkout', () => null)
 
+// settings
+export const useSettings = () => useState<[]>('settings', () => [])
+
 // All
 export const useRubbers = () => useState<string[]>('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
 

@@ -4,7 +4,7 @@ import type { TypeExercise, TypeExerciseCreate } from "./types"
 
 export const getAllExercises = async (userId:string) => {
   const db = getDatabase()
-  let allExercises = useAllExercises()
+  const allExercises = useAllExercises()
 
   const exercises = ref(db, `users/${userId}/exercises`)
 

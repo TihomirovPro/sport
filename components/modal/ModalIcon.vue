@@ -19,7 +19,7 @@ Modal(:isShow="isShow" @hiden="emit('hiden')")
       .w-full.p-2.rounded-lg(
         :key="icon"
         v-for="icon in icons"
-        :class="{ 'border bg-[#5182dc]/20 border-[#5182dc]' : activeIcon === icon }"
+        :class="{ 'border bg-accent/20 border-accent' : activeIcon === icon }"
         @click="emit('selectIcon', icon)"
       )
         Icon(

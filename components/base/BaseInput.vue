@@ -16,14 +16,14 @@ function updateValue(e:Event) {
 </script>
 
 <template lang="pug">
-textarea.input(
+textarea.input.border.border-faint(
   v-if="type === 'textarea'"
   :value="modelValue"
   :placeholder="placeholder"
   autocomplete="off"
   @input="updateValue"
 )
-input.input(
+input.input.border.border-faint(
   v-else
   :type="type"
   :value="modelValue"
@@ -38,11 +38,11 @@ input.input(
 .input
   padding 10px 8px
   font-size 18px
-  border 1px solid rgba(#dcdcdc,1)
   border-radius 4px
   width 100%
   max-width 100%
   min-height 42px
+  background-color var(--colorBg)
 
   &._error
     border 1px solid rgba(red,.6)

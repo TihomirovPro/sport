@@ -112,7 +112,7 @@ function selectEase(ease:EnumEase) {
 .grid.gap-3
   .wrap.grid.gap-3.pb-4
     .size-14.rounded-lg.flex-center.p-1(
-      class="bg-[#5182dc] min-w-[56px]"
+      class="bg-accent min-w-[56px]"
       :style="`background: ${exercise.color}`"
     )
       Icon(
@@ -174,6 +174,7 @@ function selectEase(ease:EnumEase) {
 
   ModalColor(
     :isShow="showModalColor"
+    :activeColor="exercise.color"
     @hiden="showModalColor = false"
     @selectColor="(color) => selectColor(color)"
   )

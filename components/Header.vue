@@ -8,13 +8,16 @@ const selectUpdateExercise = useSelectUpdateExercise()
 const selectUpdateWorkout = useSelectUpdateWorkout()
 const activeExercise = useActiveExercise()
 
-const name = computed(() => cyrToLat(activeExercise.value?.name))
-
 function back() {
   if (route.name === 'workout') {
     selectUpdateWorkout.value = null
     localStorage.removeItem('newWorkout')
     localStorage.removeItem('approaches')
+    router.push('/exercise-item')
+    return
+  }
+
+  if (activeExercise.value && route.name === 'settings') {
     router.push('/exercise-item')
     return
   }
@@ -25,29 +28,17 @@ function back() {
   }
 
   if (selectUpdateExercise.value) selectUpdateExercise.value = null
+
   router.push('/')
 }
 </script>
 
 <template lang="pug">
-header.header.px-3.sticky.top-0.bg-blue-500
+.header.px-3.sticky.top-0.bg-accent.shadow-md(class="z-50")
   .max-w-2xl.mx-auto.flex.flex-wrap.items-center.justify-between.h-14
-    .header__title {{ headerTitle }}
-    .header__back(
+    .text-xl(class="text-white/80") {{ headerTitle }}
+    div(class="text-white/80")(
       v-if="isShowBackBtn"
       @click="back"
     ) Назад
 </template>
-
-<style lang="stylus">
-.header
-  z-index 100
-  box-shadow 0 0 10px rgba(darken(#5182dc, 30%), .6)
-
-  &__title
-    color rgba(#fff,.8)
-    font-size 20px
-
-  &__back
-    color rgba(#fff,.8)
-</style>

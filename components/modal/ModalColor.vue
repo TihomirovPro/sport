@@ -1,5 +1,8 @@
 <script setup lang="ts">
-defineProps<{ isShow: boolean }>()
+defineProps<{ 
+  isShow: boolean
+  activeColor?: string
+}>()
 
 const emit = defineEmits<{
   hiden: []
@@ -13,9 +16,10 @@ const colors = useColors()
 Modal(:isShow="isShow" @hiden="emit('hiden')")
   template(#content)
     .grid.gap-1.grid-cols-6.-mx-3.-my-5
-      .h-14.rounded-lg(
+      .h-14.rounded-lg.transition(
         v-for="color in colors"
         @click="emit('selectColor', color)"
-        :style="`background: ${color}`"
+        :class="{ 'border-[2px] border-accent p-1' : activeColor === color }"
       )
+        .size-full.rounded-lg(:style="`background: ${color}`")
 </template>
