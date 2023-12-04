@@ -1,23 +1,32 @@
-<script setup>
+<script setup type="ts">
+import draggable from 'vuedraggable'
+
 const allExercises = useAllExercises()
+const headerTitle = useHeaderTitle()
+
+useHead({
+  title: 'Упражнения',
+})
+
+headerTitle.value = 'Упражнения'
 </script>
 
 <template lang="pug">
-.exercisesList
-  ModalExercise
-  .exercisesList__items
+draggable(
+  v-model="allExercises"
+  @end="sortExercises(allExercises)"
+  item-key="id"
+  handle=".hangle"
+  delay="100"
+)
+  template(#item="{element}")
     Exercise(
-      v-for="(item, i) in allExercises"
-      :style="`order: ${item.order ? item.order : i}`"
-      :key="item.name"
-      :name="item.name"
-      :color="item.color"
-      :icon="item.icon"
-      :id="item.id"
+      :style="`order: ${element.order}`"
+      :key="element.name"
+      :name="element.name"
+      :color="element.color"
+      :icon="element.icon"
+      :id="element.id"
+      :ease="element.ease"
     )
 </template>
-
-<style lang="stylus" scoped>
-.exercisesList__items
-  display grid
-</style>

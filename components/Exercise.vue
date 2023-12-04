@@ -1,72 +1,41 @@
-<script setup>
-const props = defineProps({
-  name: String,
-  color: { type: String, default: '#5182dc' },
-  icon: { type: String, default: '' },
-  id: String,
-})
+<script setup lang="ts">
+import type { TypeExercise } from '~/composables/types'
 
-const allExercises = useAllExercises()
-const isShowModalExercise = useShowModalExercise()
+const props = defineProps<TypeExercise>()
+
 const updateExercise = useSelectUpdateExercise()
 const activeExercise = useActiveExercise()
-const activeUser = useActiveUser()
+const router = useRouter()
 
-const updateModal = () => {
-  updateExercise.value = allExercises.value.find(item => item.id === props.id)
-  isShowModalExercise.value = true
+function update() {
+  updateExercise.value = props
+  router.push('/exercise')
 }
 
-const active = async () => {
-  activeExercise.value = props.id
-  getWorkouts(activeUser.value, props.id)
+async function active() {
+  activeExercise.value = props
+  localStorage.setItem('activeExercise', JSON.stringify(props))
+  await getWorkouts(props.id)
+  router.push('/exercise-item')
 }
 </script>
 
 <template lang="pug">
-.exercise
-  .exercise__block(
+.grid.gap-5.items-center.border-b.border-faint(
+  class="grid-cols-[56px_1fr_40px]"
+)
+  .flex-center.size-14.text-4xl.p-1.rounded-xl.uppercase.text-white.bg-accent(
     :style="`background: ${color}`"
-    @click="updateModal"
+    @click="update"
   )
-    .exercise__text(v-if="!icon") {{ name[0] }}
-    .exercise__icon(v-else :class="`icon-${icon}`")
+    .text-2xl.text-white(v-if="!icon") {{ name[0] }}
+    Icon(v-else :icon="icon" color="#fff")
 
-  NuxtLink(
-    class="exercise__link"
+  .cursor-pointer.py-6.text-xl(
+    class="text-[rgb(var(--colorIcon))]"
     @click="active"
-    :to="`/exercise-${name}`"
   ) {{ name }}
+  .hangle.flex-center.flex-col.gap-1.h-full
+    .w-6.bg-accent.rounded(class="h-0.5 opacity-50")
+    .w-6.bg-accent.rounded(class="h-0.5 opacity-50")
 </template>
-    
-<style lang="stylus" scoped>
-.exercise
-  display grid
-  grid-template-columns 50px 1fr
-  gap 20px
-  align-items center
-  padding 0 12px
-
-  &__block
-    display flex
-    align-items center
-    justify-content center
-    color: #fff
-    font-size 40px
-    padding 4px
-    width 50px
-    height 50px
-    background #5182dc
-    border-radius 10px
-    text-transform uppercase
-
-  &__text
-    font-size 24px
-
-  &__link
-    padding 24px 0
-    color #5182dc
-    font-size 20px
-    cursor pointer
-    border-bottom: 1px solid rgba(#dcdcdc,.5)
-</style>

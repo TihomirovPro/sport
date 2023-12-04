@@ -1,7 +1,15 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
-  css: ['@/assets/stylus/main.styl'],
+  typescript: {
+    strict: true,
+    shim: false,
+    tsConfig: {
+      compilerOptions: {
+        moduleResolution: 'bundler',
+      },
+    },
+  },
 
   app: {
     pageTransition: {
@@ -11,8 +19,25 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    '@kevinmarrec/nuxt-pwa'
+    '@kevinmarrec/nuxt-pwa',
+    '@nuxtjs/tailwindcss',
+    '@nuxtjs/color-mode'
   ],
+
+  colorMode: {
+    preference: 'system', // default value of $colorMode.preference
+    fallback: 'light', // fallback value if not system preference found
+    hid: 'nuxt-color-mode-script',
+    globalName: '__NUXT_COLOR_MODE__',
+    componentName: 'ColorScheme',
+    classPrefix: '',
+    classSuffix: '',
+    storageKey: 'nuxt-color-mode'
+  },
+
+  tailwindcss: {
+    viewer: false,
+  },
 
   ssr: false,
   modern: 'client',
@@ -25,7 +50,7 @@ export default defineNuxtConfig({
       lang: 'ru',
       useWebmanifestExtension: false,
       background_color: '#ffffff',
-      theme_color: '#5182dc',
+      theme_color: '#000000',
     },
     icon: {
       fileName: "icon.png",
@@ -34,7 +59,7 @@ export default defineNuxtConfig({
     meta: {
       lang: 'ru',
       title: 'Power Progress',
-      theme_color: '#5182dc',
+      theme_color: '#000000',
       ogTitle: 'Power Progress',
       ogSiteName: 'Power Progress',
       nativeUI: true

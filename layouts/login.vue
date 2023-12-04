@@ -5,8 +5,8 @@ onMounted(async () => {
 </script>
 
 <template lang="pug">
-.page
-  .page__content
+.flex-center.h-full
+  .h-full.overflow-auto
     slot
 </template>
 
@@ -20,16 +20,4 @@ onMounted(async () => {
 .page-leave-to {
   opacity: 0;
 }
-</style>
-
-<style lang="stylus" scoped>
-.page
-  display flex
-  align-items center
-  justify-content center
-  height 100%
-
-  &__content
-    height 100%
-    overflow auto
 </style>

@@ -1,37 +1,25 @@
-<script setup>
-defineProps({
-  text: String,
-  red: { type: Boolean, default: false }
+<script setup lang="ts">
+const props = defineProps<{
+  text: string
+  red?: boolean
+}>()
+
+const classes = computed(() => {
+  const cls = [
+    `cursor-pointer transition
+    block py-2.5 px-4 w-full rounded
+    text-white text-center text-lg`
+  ]
+
+  if (props.red) cls.push('bg-error hover_bg-erorr/80')
+  else cls.push('bg-accent hover_bg-accent/80')
+
+  return cls
 })
 </script>
 
 <template lang="pug">
-button.button(
-  :class="{ _red: red }"
-) {{text}}
+button(
+  :class="classes"
+) {{ text }}
 </template>
-
-<style lang="stylus" scoped>
-.button
-  cursor pointer
-  display block
-  width 100%
-  padding 10px 16px
-  background #3b6ec9
-  color #fff
-  font-size 18px
-  text-align center
-  border-radius 4px
-  transition .24s
-
-
-  &._red
-    background darken(red, 10%)
-
-    &:hover
-      background darken(red, 20%)
-
-  &:hover
-    background #5682d0
-
-</style>

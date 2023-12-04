@@ -1,21 +1,25 @@
+import type { TypeExercise, TypeWorkout } from "./types"
+
+export const useHeaderTitle = () => useState('headerTitle', () => 'Упражнения')
+
+// User
 export const useActiveUser = () => useState('activeUser', () => '')
 
-export const useAllExercises = () => useState('allExercises', () => [])
-export const useActiveExercise = () => useState('activeExercise', () => '')
-export const useSelectUpdateExercise = () => useState('updateExercise', () => '')
+// Exercise
+export const useAllExercises = () => useState<TypeExercise[]>('allExercises', () => [])
+export const useActiveExercise = () => useState<TypeExercise | null>('activeExercise', () => null)
+export const useSelectUpdateExercise = () => useState<TypeExercise | null>('updateExercise', () => null)
 
-export const useWorkouts = () => useState('workouts', () => [])
-export const useSelectUpdateWorkout = () => useState('updateWorkout', () => '')
+// Workout
+export const useWorkouts = () => useState<TypeWorkout[]>('workouts', () => [])
+export const useFilteredWorkouts = () => useState<TypeWorkout[]>('filteredWorkouts', () => [])
+export const useSelectUpdateWorkout = () => useState<TypeWorkout | null>('updateWorkout', () => null)
 
-export const useActiveFilters = () => useState('activeFilters', () => false)
-export const useShowMenu = () => useState('showMenu', () => false)
-export const useShowModal = () => useState('showModal', () => false)
-export const useShowModalExercise = () => useState('showModalExercise', () => false)
-export const useShowModalWorkout = () => useState('showModalWorkout', () => false)
+// settings
+export const useSettings = () => useState<[]>('settings', () => [])
 
-export const useEaseus = () => useState('easeus', () => ['Свой вес', 'С весом', 'В резине'])
-
-export const useRubbers = () => useState('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
+// All
+export const useRubbers = () => useState<string[]>('rubbers', () => ['Розовая резина', 'Желтая резина', 'Оранжевая резина', 'Черная резина', 'Филетовая резина', 'Серо-синяя резина', 'Зеленая резина', 'Синяя резина'])
 
 export const useRubbersColor = () => useState('rubbersColor', () => [
   {name: 'Розовая резина', color: 'rgb(236, 72, 153)'},
@@ -28,7 +32,15 @@ export const useRubbersColor = () => useState('rubbersColor', () => [
   {name: 'Синяя резина', color: 'rgb(29, 78, 216)'}
 ])
 
-export const useIcons = () => useState('icons', () => ['push-up', 'pull-up', 'bars', 'bars-2', 'rings'])
+export const useIcons = () => useState('icons', () => [
+  'push-up', 'push-up-1',
+  'bars', 'bars-1',
+  'rings',
+  'pull-up', 'pull-up-1', 'pull-up-2', 'pull-up-3',
+  'deadlift',
+  'squats',
+  'bench-press'
+])
 
 export const useColors = () => useState('colors', () => [
   '#f87171', '#fb7185', '#f43f5e', '#ef4444', '#dc2626', '#b91c1c',

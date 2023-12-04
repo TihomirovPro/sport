@@ -1,44 +1,40 @@
-<script setup>
+<script setup lang="ts">
+const route = useRoute()
+const user = useActiveUser()
+
 onMounted(async () => {
   initUser()
 })
 
-const route = useRoute()
-const user = useActiveUser()
+const isShowMenu = computed(()=> {
+  if (route.name === 'exercise-item' || route.name === 'index') return true
+  return false
+})
 
-const backBtn = ref(false)
+if (localStorage.getItem('baseColor')) {
+  const color = localStorage.getItem('baseColor')
 
-const pageName = () => {
-  if (route.name === 'index') {
-    backBtn.value = false
-    return 'Упражнения'
-  } else if (route.name === 'settings') {
-    backBtn.value = true
-    return 'Настройки'
-  } else if (route.name === 'measure') {
-    backBtn.value = true
-    return 'Замеры'
-  } else if (route.name === 'profile') {
-    backBtn.value = true
-    return 'Профиль'
-  } else {
-    backBtn.value = true
-    return route.params.name
-  }
+  const r = parseInt(color.slice(1, 3), 16)
+  const g = parseInt(color.slice(3, 5), 16)
+  const b = parseInt(color.slice(5, 7), 16)
+
+  const html = document.querySelector('html')
+  html.style.setProperty('--colorAccent', `${r} ${g} ${b}`)
 }
+
 </script>
 
 <template lang="pug">
-.page
-  Header(
-    v-if="user"
-    :title="pageName()"
-    :backBtn="backBtn"
-  )
-  .page__content
+.grid.min-h-full(
+  v-if="user"
+  class="grid-rows-[56px_1fr]"
+)
+  Header
+
+  main.px-2.py-3.max-w-2xl.size-full.mx-auto
     slot
-  Footer(v-if="user")
-  Menu
+
+  Menu(v-if="isShowMenu")
 </template>
 
 <style>
@@ -51,16 +47,4 @@ const pageName = () => {
 .page-leave-to {
   opacity: 0;
 }
-</style>
-
-<style lang="stylus">
-.page
-  display grid
-  grid-template-rows 50px 1fr
-  height 100%
-
-  &__content
-    height 100%
-    padding-bottom 80px
-    overflow auto
 </style>
