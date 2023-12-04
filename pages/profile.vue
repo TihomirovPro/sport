@@ -1,4 +1,7 @@
-<script setup>
+<script setup type="ts">
+definePageMeta({
+  title: 'Профиль',
+})
 </script>
 
 <template lang="pug">

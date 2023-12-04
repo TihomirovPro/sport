@@ -1,62 +1,82 @@
-<script setup>
-const isActiveFilters = useActiveFilters()
+<script setup lang="ts">
+import type { Filter } from '~/composables/types'
+import { EnumEase } from '~/composables/types'
 
 const allWorkouts = useWorkouts()
-const easeus = useEaseus()
-const interval = ref('1') 
+const filteredWorkouts = useFilteredWorkouts()
 
-const easeusFilter = ['Все', 'Только в резине', ...easeus.value]
-const ease = ref(easeusFilter[0])
+const filter = ref<Filter>({
+  ease: '',
+  interval: 0,
 
-const filter = () => {
-  if (ease.value === easeusFilter[0]) {
-    allWorkouts.value.forEach(element => {
-      if (element.interval === interval.value || interval.value === '0.5') {
-        element.filter = true
-      } else {
-        element.filter = false
-      }
-    })
+  changeEase: (ease: '' | EnumEase) => {
+    if (ease === filter.value.ease) filter.value.ease = ''
+    else filter.value.ease = ease
+    useFilter()
+  },
+
+  changeInterval: (interval: number) => {
+    if (interval === filter.value.interval) filter.value.interval = 0
+    else filter.value.interval = interval
+    useFilter()
+  },
+})
+
+const filterElements = computed(() => {
+  const obj:{ eases: EnumEase[], intervals: number[] } = {
+    eases: [],
+    intervals: []
   }
-  else if (ease.value === easeusFilter[1]) {
-    allWorkouts.value.forEach(element => {
-      if ((element.interval === interval.value || interval.value === '0.5') && element.ease !== 'Свой вес' && element.ease !== 'С весом') {
-        element.filter = true
-      } else {
-        element.filter = false
-      }
-    })
-  }
-  else {
-    allWorkouts.value.forEach(element => {
-      if ((element.interval === interval.value || interval.value === '0.5') && element.ease === ease.value) {
-        element.filter = true
-      } else {
-        element.filter = false
-      }
-    })
-  }
+  allWorkouts.value.forEach(item => {  
+    if (!obj.eases.includes(item.ease)) obj.eases.push(item.ease)
+    if (!obj.intervals.includes(+item.interval)) obj.intervals.push(+item.interval)
+  })
+
+  obj.intervals.sort((a, b) => {
+    if (a < b) return -1
+    if (a > b) return 1
+    return 0
+  })
+
+  return obj
+})
+
+function filterEase(itemEase:EnumEase):boolean {  
+  if (!filter.value.ease || filter.value.ease === itemEase) return true
+  return false
+}
+
+function filterEaseInterval(itemEase:EnumEase, itemInterval:number):boolean {
+  if (!filter.value.interval || filter.value.interval === itemInterval) return filterEase(itemEase)
+  return false
+}
+
+function useFilter() {
+  filteredWorkouts.value = allWorkouts.value.filter(item => filterEaseInterval(item.ease, +item.interval))
 }
 </script>
 
 <template lang="pug">
-.filters(v-if="isActiveFilters")
-  BaseInputRange(v-model="interval" @input="filter" min="0.5")
-  BaseSelect(
-    v-model="ease"
-    placeholder="Сложность"
-    :options="easeusFilter"
-    @change="filter"
-  )
-</template>
-
-<style lang="stylus" scoped>
 .filters
-  top 0
-  position sticky
-  display grid
-  gap 12px
-  background #fafafa
-  padding 12px 16px
-  box-shadow 0 0 10px rgba(darken(#fafafa, 30%), .6)
-</style>
+  template(v-if="filterElements.intervals.length > 1")
+    .pb-2.text-sm Интервал
+    TabsWrap.pb-2
+      TabsItem(
+        v-for="interval in filterElements.intervals"
+        :key="interval"
+        :active="filter.interval === interval"
+        @click="filter.changeInterval(interval)"
+        :title="interval"
+      ).text-xs
+  
+  template(v-if="filterElements.eases.length > 1")
+    .pb-2.text-sm Сложность
+    TabsWrap(v-if="allWorkouts")
+      TabsItem(
+        v-for="ease in filterElements.eases"
+        :key="ease"
+        :active="filter.ease === ease"
+        @click="filter.changeEase(ease)"
+        :title="ease"
+      ).text-xs
+</template>

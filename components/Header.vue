@@ -1,51 +1,44 @@
-<script setup>
-const props = defineProps({
-  title: String,
-  backBtn: Boolean
-})
-
+<script setup lang="ts">
+const route = useRoute()
+const router = useRouter()
+const pagesWithoutBackBtn = ['index']
+const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
+const headerTitle = useHeaderTitle()
+const selectUpdateExercise = useSelectUpdateExercise()
+const selectUpdateWorkout = useSelectUpdateWorkout()
 const activeExercise = useActiveExercise()
-const isActiveFilters = useActiveFilters()
 
-const removeActive = async () => {
-  activeExercise.value = ''
-  isActiveFilters.value = false
+function back() {
+  if (route.name === 'workout') {
+    selectUpdateWorkout.value = null
+    localStorage.removeItem('newWorkout')
+    localStorage.removeItem('approaches')
+    router.push('/exercise-item')
+    return
+  }
+
+  if (activeExercise.value && route.name === 'settings') {
+    router.push('/exercise-item')
+    return
+  }
+
+  if (activeExercise.value && route.name === 'exercise-item') {
+    activeExercise.value = null
+    localStorage.removeItem('activeExercise')
+  }
+
+  if (selectUpdateExercise.value) selectUpdateExercise.value = null
+
+  router.push('/')
 }
 </script>
 
 <template lang="pug">
-header.header   
-  .header__title {{ title }}
-  NuxtLink.header__back(
-    v-if="backBtn"
-    to="/"
-    @click="removeActive"
+.header.px-3.sticky.top-0.bg-accent.shadow-md(class="z-50")
+  .max-w-2xl.mx-auto.flex.flex-wrap.items-center.justify-between.h-14
+    .text-xl(class="text-white/80") {{ headerTitle }}
+    div(class="text-white/80")(
+      v-if="isShowBackBtn"
+      @click="back"
     ) Назад
 </template>
-
-<style lang="stylus">
-.header
-  z-index 100
-  position relative
-  width 100%
-  display flex
-  flex-wrap wrap
-  align-items center
-  justify-content space-between
-  padding 0 12px
-  height 50px
-  background #5182dc
-  box-shadow 0 0 10px rgba(darken(#5182dc, 30%), .6)
-
-  &__title
-    color rgba(#fff,.8)
-    font-size 20px
-
-  &__back
-    color rgba(#fff,.8)
-
-  &__wrap
-    display flex
-    align-items center
-    gap 10px
-</style>
