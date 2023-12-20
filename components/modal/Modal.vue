@@ -13,11 +13,10 @@ Transition
     class="bg-[rgba(0,0,0,.7)] z-[100]"
     @click.self="emit('hiden')"
   )
-    .grid.gap-4.py-5.px-2.rounded-t-lg(
-      class="w-full bg-[rgb(var(--colorBg))] mt-auto"
+    .overflow-auto.grid.gap-4.py-5.px-3.rounded-t-lg.w-full.mt-auto(
+      class="bg-[rgb(var(--colorBg))] max-h-[80%]"
     )
-      .overflow-auto.rounded-lg.py-5.px-3
-        slot(name="content")
+      slot(name="content")
 
       .grid.grid-flow-col.place-items-center.gap-5.mt-4(v-if="slots.bottom")
         slot(name="bottom")
