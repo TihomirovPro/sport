@@ -15,7 +15,7 @@ const colors = useColors()
 <template lang="pug">
 Modal(:isShow="isShow" @hiden="emit('hiden')")
   template(#content)
-    .grid.gap-1.grid-cols-6.-mx-3.-my-5.h-full
+    .grid.gap-1.grid-cols-6
       .h-14.rounded-lg.transition(
         v-for="color in colors"
         @click="emit('selectColor', color)"
