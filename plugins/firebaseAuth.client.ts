@@ -1,9 +1,19 @@
 import { initializeApp } from 'firebase/app'
 
+interface firebaseConfig {
+  apiKey: string
+  authDomain: string
+  databaseURL: string
+  projectId: string
+  storageBucket: string
+  messagingSenderId: string
+  appId: string
+}
+
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig()
 
-  const firebaseConfig = {
+  const firebaseConfig:firebaseConfig = {
     apiKey: config.public.FIREBASE_API_KEY,
     authDomain: config.public.AUTH_DOMAIN,
     databaseURL: config.public.DATABASE_URL,
@@ -13,5 +23,7 @@ export default defineNuxtPlugin(() => {
     appId: config.public.APP_ID
   }
 
-  const app = initializeApp(firebaseConfig)
+  const firebaseApp = initializeApp(firebaseConfig)
+
+  return firebaseApp
 })

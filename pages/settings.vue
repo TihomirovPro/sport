@@ -7,6 +7,7 @@ const headerTitle = useHeaderTitle()
 const colorMode = useColorMode()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
+const showModalRubbers = ref(false)
 
 if (localStorage.getItem('baseColor')) baseColor.value = localStorage.getItem('baseColor')
 
@@ -43,10 +44,17 @@ function changeTheme() {
     p основной цвет
     .size-9.rounded(:style="`background: ${baseColor}`")
 
+  //- .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
+  //-   p Набор резин
+
   ModalColor(
     :isShow="showModalColor"
     :activeColor="baseColor"
     @hiden="showModalColor = false"
     @selectColor="(color) => selectColor(color)"
   )
+  //- ModalRubbers(
+  //-   :isShow="showModalRubbers"
+  //-   @hiden="showModalRubbers = false"
+  //- )
 </template>
