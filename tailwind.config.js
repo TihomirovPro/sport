@@ -16,6 +16,7 @@ module.exports = {
       accent: 'rgb(var(--colorAccent) / <alpha-value>)',
       faint: 'rgb(var(--colorFaint) / <alpha-value>)',
       white: 'rgb(255 255 255 / <alpha-value>)',
+      black: 'rgb(0 0 0 / <alpha-value>)',
       error: 'rgb(248 113 113 / <alpha-value>)',
       transparent: 'transparent'
     }
