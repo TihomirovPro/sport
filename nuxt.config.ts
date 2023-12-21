@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    '@kevinmarrec/nuxt-pwa',
+    '@vite-pwa/nuxt',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode'
   ],
