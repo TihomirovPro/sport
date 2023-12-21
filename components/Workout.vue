@@ -22,13 +22,13 @@ const resWeightAll = computed(() => {
 })
 
 const cols = computed(()=> {
-  let res = 'grid-template-columns: min-content'
+  let res = 'grid-template-columns: 1fr'
 
   for (let index = 0; index < props.approach.length; index++) {
-    res += ' auto'
+    res += ' 1fr'
   }
 
-  return res += ' min-content'
+  return res += ' 1fr'
 })
 
 function selectUpdate() {
@@ -45,13 +45,13 @@ function selectUpdate() {
     p {{ ease === EnumEase.rubber ? rubber : ease }}
 
   .grid(:style="cols")
-    .text-left.pr-2.py-1(class="text-[rgb(var(--colorIcon))]/40") пвт
+    .text-left.py-1.pr-1(class="text-[rgb(var(--colorIcon))]/40") пвт
     .text-center.border-l.border-faint.py-1(v-for="item in approach") {{ item }}
-    .text-error.text-right.border-l.border-faint.pl-2.py-1 {{ res }}
+    .text-error.text-right.border-l.border-faint.py-1.pl-1 {{ res }}
     template(v-if="weight")
-      .text-left.pr-2.py-1.border-t.border-faint(class="text-[rgb(var(--colorIcon))]/40") кг
+      .text-left.pr-1.py-1.border-t.border-faint(class="text-[rgb(var(--colorIcon))]/40") кг
       .text-center.border-l.border-faint.border-t.py-1(v-for="item in weight") {{ item }}
-      .text-error.text-right.border-l.border-faint.border-t.pl-2.py-1 {{ resWeightAll }}
+      .text-error.text-right.border-l.border-faint.border-t.py-1.pl-1 {{ resWeightAll }}
 
   .border-t.border-faint.p-2.mt-2(v-if="desc") {{ desc }}
 
