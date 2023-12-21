@@ -76,7 +76,7 @@ export default defineNuxtConfig({
     PROJECT_ID: process.env.PROJECT_ID,
     STORAGE_BUCKET: process.env.STORAGE_BUCKET,
     MESSAGING_SENDER_ID: process.env.MESSAGING_SENDER_ID,
-    API_ID: process.env.API_ID,
+    APP_ID: process.env.APP_ID,
 
     public: {
       FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
@@ -85,7 +85,7 @@ export default defineNuxtConfig({
       PROJECT_ID: process.env.PROJECT_ID,
       STORAGE_BUCKET: process.env.STORAGE_BUCKET,
       MESSAGING_SENDER_ID: process.env.MESSAGING_SENDER_ID,
-      API_ID: process.env.API_ID
+      APP_ID: process.env.APP_ID
     }
   },
 })
