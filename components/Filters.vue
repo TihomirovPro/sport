@@ -27,6 +27,7 @@ const filterElements = computed(() => {
     eases: [],
     intervals: []
   }
+  
   allWorkouts.value.forEach(item => {  
     if (!obj.eases.includes(item.ease)) obj.eases.push(item.ease)
     if (!obj.intervals.includes(+item.interval)) obj.intervals.push(+item.interval)

@@ -20,7 +20,7 @@ export const enum EnumEase {
 export interface TypeWorkout {
   id: string
   exercisesId: string
-  date: string
+  date: number
   interval: string
   ease: EnumEase
   rubber?: string | false
