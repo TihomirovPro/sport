@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TypeWorkoutCreate } from '~/composables/types'
+import { EnumEase } from '~/composables/types'
 
 const router = useRouter()
 const activeExercise = useActiveExercise()
@@ -13,11 +14,11 @@ useHead({
 })
 
 if (!activeExercise.value && localStorage.getItem('activeExercise')) {
-  activeExercise.value = JSON.parse(localStorage.getItem('activeExercise'))    
-  await getWorkouts(activeExercise.value.id)
+  activeExercise.value = JSON.parse(localStorage.getItem('activeExercise')!)    
+  getWorkouts(activeExercise.value!.id)
 }
 
-function formatDate(date:number | string) {
+function formatDate(date:number | string):string {
   return new Intl.DateTimeFormat('ru-RU', {
     year: 'numeric',
     month: 'long',
@@ -111,7 +112,7 @@ async function removeSelectWorkout() {
   router.push('/exercise-item')
 }
 
-function timer(time){
+function timer(time:number){
   if (time > 0) {
     const s = +workout.value.interval * time * 60;
     const minutes = String(Math.floor(s / 60)).length == 1 ? '0' + Math.floor(s / 60) : Math.floor(s / 60)
@@ -123,8 +124,8 @@ function timer(time){
 }
 
 if (!selectUpdateWorkout.value && localStorage.getItem('newWorkout')) {
-  const newWorkout = JSON.parse(localStorage.getItem('newWorkout'))
-  approaches.value = +JSON.parse(localStorage.getItem('approaches'))
+  const newWorkout = JSON.parse(localStorage.getItem('newWorkout')!)
+  approaches.value = +JSON.parse(localStorage.getItem('approaches')!)
 
   workout.value = {
     exercisesId: activeExercise.value?.id,
@@ -146,12 +147,12 @@ function saveNewWorkout() {
   }
 }
 
-function selectEase(ease) {
+function selectEase(ease:EnumEase) {
   workout.value.ease = ease
   saveNewWorkout()
 }
 
-function selectRubber(name) {
+function selectRubber(name:string) {
   workout.value.rubber = name
   saveNewWorkout()
 }
