@@ -13,12 +13,22 @@ const formatDate = new Intl.DateTimeFormat('ru-RU', {
   day: 'numeric'
 }).format(new Date(props.date)).slice(0, -3)
 
-const resWeight = computed(() => {
+const resWeightAll = computed(() => {
   if (props.weight) {
-    return props.weight.reduce((acc, item) => acc + +item, 0)
+    return props.weight.reduce((acc, item, index) => acc + (+item * props.approach[index]), 0)
   }
 
   return 0
+})
+
+const cols = computed(()=> {
+  let res = 'grid-template-columns: min-content'
+
+  for (let index = 0; index < props.approach.length; index++) {
+    res += ' auto'
+  }
+
+  return res += ' min-content'
 })
 
 function selectUpdate() {
@@ -34,22 +44,14 @@ function selectUpdate() {
     p {{ approach.length }} x {{ interval }}
     p {{ ease === EnumEase.rubber ? rubber : ease }}
 
-  .grid.text-center.items-center.pb-1(class="grid-cols-[repeat(auto-fit,minmax(0,1fr))]")
-    .text-left(class="text-[rgb(var(--colorIcon))]/40") пвт
-    .border-l.border-faint(
-      v-for="item in approach"
-    ) {{ item }}
-    .text-error.text-right.text-sm.border-l.border-faint {{ res }}
-
-  .grid.text-center.items-center.border-t.border-faint.py-1(
-    class="grid-cols-[repeat(auto-fit,minmax(0,1fr))]"
-    v-if="weight"
-  )
-    .text-left(class="text-[rgb(var(--colorIcon))]/40") кг
-    .border-l.border-faint(
-      v-for="item in weight"
-    ) {{ item }}
-    .text-error.text-right.text-sm.border-l.border-faint {{ resWeight }}
+  .grid(:style="cols")
+    .text-left.pr-2.py-1(class="text-[rgb(var(--colorIcon))]/40") пвт
+    .text-center.border-l.border-faint.py-1(v-for="item in approach") {{ item }}
+    .text-error.text-right.border-l.border-faint.pl-2.py-1 {{ res }}
+    template(v-if="weight")
+      .text-left.pr-2.py-1.border-t.border-faint(class="text-[rgb(var(--colorIcon))]/40") кг
+      .text-center.border-l.border-faint.border-t.py-1(v-for="item in weight") {{ item }}
+      .text-error.text-right.border-l.border-faint.border-t.pl-2.py-1 {{ resWeightAll }}
 
   .border-t.border-faint.p-2.mt-2(v-if="desc") {{ desc }}
 
