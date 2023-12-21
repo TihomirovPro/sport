@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   },
 
   modules: [
-    '@vite-pwa/nuxt',
+    '@kevinmarrec/nuxt-pwa',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode'
   ],
@@ -48,7 +48,6 @@ export default defineNuxtConfig({
       name: 'Power Progress',
       short_name: 'Power Progress',
       lang: 'ru',
-      useWebmanifestExtension: false,
       background_color: '#ffffff',
       theme_color: '#000000',
     },
