@@ -13,6 +13,14 @@ const formatDate = new Intl.DateTimeFormat('ru-RU', {
   day: 'numeric'
 }).format(new Date(props.date)).slice(0, -3)
 
+const resWeight = computed(() => {
+  if (props.weight) {
+    return props.weight.reduce((acc, item) => acc + +item, 0)
+  }
+
+  return 0
+})
+
 function selectUpdate() {
   selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
   router.push('/workout')
@@ -41,7 +49,7 @@ function selectUpdate() {
     .border-l.border-faint(
       v-for="item in weight"
     ) {{ item }}
-    .border-l.border-faint.h-full
+    .text-error.text-right.text-sm.border-l.border-faint {{ resWeight }}
 
   .border-t.border-faint.p-2.mt-2(v-if="desc") {{ desc }}
 
