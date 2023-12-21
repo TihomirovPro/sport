@@ -39,7 +39,10 @@ export const useIcons = () => useState('icons', () => [
   'pull-up', 'pull-up-1', 'pull-up-2', 'pull-up-3',
   'deadlift',
   'squats',
-  'bench-press'
+  'bench-press',
+  'standing-barbell-press',
+  'kettlebell', 'kettlebell-1',
+  'situps',
 ])
 
 export const useColors = () => useState('colors', () => [
