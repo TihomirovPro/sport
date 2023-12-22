@@ -1,13 +1,10 @@
-import { ref, onValue, child, push, query, orderByChild, once } from 'firebase/database'
 import type { TypeExercise, TypeExerciseCreate } from "./types"
-import { db, dbPath, createData, updateData } from './firebaseInit'
+import { updateData, onData } from './firebaseInit'
 
-export const getAllExercises = async () => {
+export const getAllExercises = () => {
   const allExercises = useAllExercises()
 
-  const exercises = ref(db, dbPath('exercises'))
-
-  onValue(exercises, (snapshot) => {
+  onData('exercises', (snapshot:any) => {
     const data = snapshot.val()
 
     if (data) {
@@ -33,15 +30,8 @@ export const getAllExercises = async () => {
   })
 }
 
-// Create
-export const createExercise = (exercise:TypeExerciseCreate) => {
-  const newExerciseKey = push(child(ref(db), 'exercises')).key
-  createData(`exercises/${newExerciseKey}`, exercise)
-}
-
-
-export const sortExercises = async (exercises) => {
-  const newExercises = {}
+export const sortExercises = (exercises:TypeExercise[]) => {
+  const newExercises:{ [key:string]:TypeExerciseCreate } = {}
 
   exercises.forEach((el, i) => {
     newExercises[`${el.id}`] = {

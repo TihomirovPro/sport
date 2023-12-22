@@ -7,7 +7,7 @@ export const initUser = async () => {
   const activeUser = useActiveUser()
 
   onAuthStateChanged(auth, (user) => {    
-    if (user) {
+    if (user) {      
       activeUser.value = user.uid
     
       getAllExercises()

@@ -21,12 +21,12 @@ draggable(
 )
   template(#item="{element}")
     Exercise(
-      :style="`order: ${element.order}`"
       :key="element.name"
       :name="element.name"
       :color="element.color"
       :icon="element.icon"
       :id="element.id"
       :ease="element.ease"
+      :order="element.order"
     )
 </template>

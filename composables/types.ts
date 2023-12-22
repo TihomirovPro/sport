@@ -24,11 +24,12 @@ export interface TypeWorkout {
   date: number
   interval: string
   ease: EnumEase
-  rubber?: string | false
-  desc?: string | false
+  rubber?: string
+  desc?: string
   approach: number[]
-  weight?: number[] | false
-  res: number,
+  weight?: number[]
+  res: number
+  resWeigth: number
 }
 
 export type TypeWorkoutCreate = Omit<TypeWorkout, 'id'>
@@ -36,8 +37,8 @@ export type TypeWorkoutPage = Omit<TypeWorkout, 'exercisesId'>
 
 // Filter
 export interface Filter {
-  ease: '' | EnumEase,
-  interval: number,
-  changeEase: (ease:'' | EnumEase) => void,
+  ease: '' | EnumEase
+  interval: number
+  changeEase: (ease:'' | EnumEase) => void
   changeInterval: (interval:number) => void
 }
