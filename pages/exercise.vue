@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { updateData, removeData } from '~/composables/firebaseInit'
+import { updateData, removeData, createData } from '~/composables/firebaseInit'
 import type { TypeExerciseCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types';
 
@@ -62,7 +62,7 @@ watchEffect(() => {
 
 async function newExercise() {
   if (exercise.value.name) {
-    createExercise(exercise.value)
+    createData('exercises', exercise.value)
     reset()
     router.push('/')
   } else {

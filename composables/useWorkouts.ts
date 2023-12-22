@@ -1,21 +1,17 @@
-import { ref, onValue, child, push } from 'firebase/database'
-import { db, dbPath, createData } from './firebaseInit'
-import type { TypeWorkout, TypeWorkoutCreate } from "./types"
+import { onData } from './firebaseInit'
+import type { TypeWorkout } from "./types"
 
-export const getWorkouts = async (exercisesId:string) => {
+export const getWorkouts = (exercisesId:string) => {
   const filteredWorkouts = useFilteredWorkouts()
   const allworkouts = useWorkouts()
-  
-  const workouts = ref(db, dbPath(`workout/${exercisesId}`))
 
-  onValue(workouts, (snapshot) => {
+  onData(`workout/${exercisesId}`, (snapshot:any) => {
     const data = snapshot.val()
 
     if (data) {
       allworkouts.value = []
       Object.keys(data).forEach((key) => {
         const workout:TypeWorkout = data[key]
-        if (exercisesId === workout.exercisesId) {
           allworkouts.value.push({
             id: key,
             exercisesId: workout.exercisesId,
@@ -27,8 +23,8 @@ export const getWorkouts = async (exercisesId:string) => {
             weight: workout.weight,
             desc: workout.desc,
             res: workout.res,
+            resWeigth: workout.weight ? workout.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.approach[index]), 0) : 0
           })
-        }
       })
 
       allworkouts.value.sort((a, b) => {
@@ -43,10 +39,4 @@ export const getWorkouts = async (exercisesId:string) => {
       filteredWorkouts.value = []
     }
   })
-}
-
-// Create
-export const createWorkout = (workout:TypeWorkoutCreate) => {
-  const newWorkoutKey = push(child(ref(db), 'workout')).key
-  createData(`workout/${workout.exercisesId}/${newWorkoutKey}`, workout)
 }

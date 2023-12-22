@@ -13,14 +13,6 @@ const formatDate = new Intl.DateTimeFormat('ru-RU', {
   day: 'numeric'
 }).format(new Date(props.date)).slice(0, -3)
 
-const resWeightAll = computed(() => {
-  if (props.weight) {
-    return props.weight.reduce((acc, item, index) => acc + (+item * props.approach[index]), 0)
-  }
-
-  return 0
-})
-
 const cols = computed(()=> {
   let res = 'grid-template-columns: 1fr'
 
@@ -51,7 +43,7 @@ function selectUpdate() {
     template(v-if="weight")
       .text-left.pr-1.py-1.border-t.border-faint(class="text-[rgb(var(--colorIcon))]/40") кг
       .text-center.border-l.border-faint.border-t.py-1(v-for="item in weight") {{ item }}
-      .text-error.text-right.border-l.border-faint.border-t.py-1.pl-1 {{ resWeightAll }}
+      .text-error.text-right.border-l.border-faint.border-t.py-1.pl-1 {{ resWeigth }}
 
   .border-t.border-faint.p-2.mt-2(v-if="desc") {{ desc }}
 

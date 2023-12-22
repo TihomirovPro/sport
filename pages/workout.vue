@@ -43,7 +43,8 @@ const workout = ref<TypeWorkoutCreate>({
   weight: [],
   desc: '',
   exercisesId: activeExercise.value?.id,
-  res: 0
+  res: 0,
+  resWeigth: 0
 })
 
 function reset () {
@@ -58,7 +59,8 @@ function reset () {
     approach: [],
     weight: [],
     desc: '',
-    res: 0
+    res: 0,
+    resWeigth: 0
   }
 }
 
@@ -85,9 +87,15 @@ watchEffect(() => {
 async function add() {
   if (workout.value.approach) {
     workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-    await createWorkout(workout.value)
-    reset()
+
+    if (workout.value.weight) {
+      workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
+    }
+
+    createData(`workout/${workout.value.exercisesId}`, workout.value)
+
     router.push('/exercise-item')
+    reset()
     localStorage.removeItem('newWorkout')
     localStorage.removeItem('approaches')
   } else {
@@ -137,7 +145,8 @@ if (!selectUpdateWorkout.value && localStorage.getItem('newWorkout')) {
     rubber: newWorkout.rubber || '',
     weight: newWorkout.weight || [],
     desc: newWorkout.desc || '',
-    res: 0
+    res: 0,
+    resWeigth: newWorkout.resWeidth || 0
   }
 }
 

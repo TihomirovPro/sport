@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth } from 'firebase/auth'
-import { child, get, getDatabase, off, onValue, ref, remove, set, update } from 'firebase/database'
+import { child, getDatabase, onValue, ref, remove, set, update, push } from 'firebase/database'
 
-export interface firebaseConfig {
+interface firebaseConfig {
   apiKey: string
   authDomain: string
   databaseURL: string
@@ -33,13 +33,13 @@ export function dbPath(path:string):string {
   return `users/${userID}/${path}`
 }
 
-export const createData = (path:string, data:any) => set(ref(db, dbPath(path)), data)
+export const createData = (path:string, data:any) => {
+  const key = push(child(ref(db), path)).key
+  set(ref(db, dbPath(`${path}/${key}`)), data)
+}
+
 export const updateData = (path:string, data:any) => update(ref(db, dbPath(path)), data)
 export const removeData = (path:string) => remove(ref(db, dbPath(path)))
-
-// export const readData = (path:string) => get(ref(db, path))
-// export const readDataOnce = (path:string) => get(child(ref(db), path))
-// export const onData = (path:string, callback:any) => onValue(ref(db, path), callback)
-// export const offData = (path:string, callback:any) => off(ref(db, path), callback)
+export const onData = (path:string, callback:any) => onValue(ref(db, dbPath(path)), callback)
 
 

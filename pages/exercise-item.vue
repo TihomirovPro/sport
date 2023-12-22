@@ -4,8 +4,8 @@ const activeExercise = useActiveExercise()
 const headerTitle = useHeaderTitle()
 
 if (!activeExercise.value && localStorage.getItem('activeExercise')) {
-  activeExercise.value = JSON.parse(localStorage.getItem('activeExercise'))
-  await getWorkouts(activeExercise.value.id)
+  activeExercise.value = JSON.parse(localStorage.getItem('activeExercise')!)
+  await getWorkouts(activeExercise.value!.id)
 }
 
 headerTitle.value = String(activeExercise.value?.name)
@@ -30,5 +30,6 @@ div
         :weight="item.weight"
         :desc="item.desc"
         :res="item.res"
+        :resWeigth="item.resWeigth"
       )
 </template>
