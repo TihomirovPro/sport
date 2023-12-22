@@ -1,4 +1,7 @@
 <script setup ts="ts">
+import { signOut } from 'firebase/auth'
+import { auth } from '~/composables/firebaseInit'
+
 useHead({
   title: 'Настройки',
 })
@@ -43,6 +46,9 @@ function changeTheme() {
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalColor = true")
     p основной цвет
     .size-9.rounded(:style="`background: ${baseColor}`")
+
+  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOut(auth)")
+    p Выход
 
   //- .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
   //-   p Набор резин

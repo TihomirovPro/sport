@@ -1,12 +1,11 @@
-import { getDatabase, ref, onValue, set, child, push, remove, update, query, orderByChild } from 'firebase/database'
-import { getAuth } from 'firebase/auth'
+import { ref, onValue, child, push, query, orderByChild, once } from 'firebase/database'
 import type { TypeExercise, TypeExerciseCreate } from "./types"
+import { db, dbPath, createData, updateData } from './firebaseInit'
 
-export const getAllExercises = async (userId:string) => {
-  const db = getDatabase()
+export const getAllExercises = async () => {
   const allExercises = useAllExercises()
 
-  const exercises = query(ref(db, `users/${userId}/exercises`), orderByChild('order'))  
+  const exercises = ref(db, dbPath('exercises'))
 
   onValue(exercises, (snapshot) => {
     const data = snapshot.val()
@@ -35,39 +34,16 @@ export const getAllExercises = async (userId:string) => {
 }
 
 // Create
-export const createExercise = async (exercise:TypeExerciseCreate) => {
-  const auth = getAuth()
-  const db = getDatabase()
-  
+export const createExercise = (exercise:TypeExerciseCreate) => {
   const newExerciseKey = push(child(ref(db), 'exercises')).key
-  await set(ref(db, `users/${auth.currentUser?.uid}/exercises/${newExerciseKey}`), exercise)
+  createData(`exercises/${newExerciseKey}`, exercise)
 }
 
-// Remove
-export const removeExercise = async (id:string) => {
-  const auth = getAuth()
-  const db = getDatabase()
-
-  remove(ref(db, `users/${auth.currentUser?.uid}/exercises/${id}`))
-  remove(ref(db, `users/${auth.currentUser?.uid}/workout/${id}`))
-}
-
-// Update
-export const updateExercise = async (id:string, exercise:TypeExerciseCreate) => {
-  const auth = getAuth()
-  const db = getDatabase()
-
-  update(ref(db, `users/${auth.currentUser?.uid}/exercises/${id}`), exercise)
-}
 
 export const sortExercises = async (exercises) => {
-  const auth = getAuth()
-  const db = getDatabase()
-
   const newExercises = {}
 
   exercises.forEach((el, i) => {
-
     newExercises[`${el.id}`] = {
       color: el.color,
       ease: el.ease,
@@ -77,5 +53,5 @@ export const sortExercises = async (exercises) => {
     }
   })
 
-  update(ref(db, `users/${auth.currentUser?.uid}/exercises`), newExercises)
+  updateData('exercises', newExercises)
 }

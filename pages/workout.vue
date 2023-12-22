@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { updateData, removeData } from '~/composables/firebaseInit'
 import type { TypeWorkoutCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 
@@ -94,10 +95,10 @@ async function add() {
   }
 }
 
-async function updateSelectWorkout() {
+function updateSelectWorkout() {
   if (workout.value.approach.length > 0) {
     workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-    await updateWorkout(selectUpdateWorkout.value!.id, workout.value)
+    updateData(`workout/${workout.value.exercisesId}/${selectUpdateWorkout.value!.id}`, workout.value)
     reset()
     router.push('/exercise-item')
   } else {
@@ -105,8 +106,8 @@ async function updateSelectWorkout() {
   }
 }
 
-async function removeSelectWorkout() {
-  removeWorkout(selectUpdateWorkout.value!.id, selectUpdateWorkout.value!.exercisesId)
+function removeSelectWorkout() {
+  removeData(`workout/${selectUpdateWorkout.value!.exercisesId}/${selectUpdateWorkout.value!.id}`)
   removeConfirm.value = false
   reset()
   router.push('/exercise-item')

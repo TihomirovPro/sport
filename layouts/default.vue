@@ -31,7 +31,7 @@ if (localStorage.getItem('baseColor')) {
 )
   Header
 
-  main.px-2.py-3.max-w-2xl.size-full.mx-auto
+  main.px-2.py-3.max-w-2xl.size-full.mx-auto.relative
     slot
 
   Menu(v-if="isShowMenu")

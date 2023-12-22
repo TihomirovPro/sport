@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { updateData, removeData } from '~/composables/firebaseInit'
 import type { TypeExerciseCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types';
 
@@ -10,6 +11,7 @@ const headerTitle = useHeaderTitle()
 headerTitle.value = 'Добавить упражнение'
 
 const allWorkouts = useWorkouts()
+const allExercises = useAllExercises()
 const selectUpdateExercise = useSelectUpdateExercise()
 const router = useRouter()
 
@@ -26,7 +28,8 @@ const exercise = ref<TypeExerciseCreate>({
   name: '',
   color: '',
   icon: '',
-  ease: constEases
+  ease: constEases,
+  order: allExercises.value.length ? allExercises.value.length : 0
 })
 
 function reset() {
@@ -67,14 +70,15 @@ async function newExercise() {
   }
 }
 
-async function updateData() {
-  updateExercise(selectUpdateExercise.value!.id, exercise.value)
+function update() {
+  updateData(`exercises/${selectUpdateExercise.value!.id}`, exercise.value)
   reset()
   router.push('/')
 }
 
-async function remove() {
-  removeExercise(selectUpdateExercise.value!.id)
+function remove() {
+  removeData(`workout/${selectUpdateExercise.value!.id}`)
+  removeData(`exercises/${selectUpdateExercise.value!.id}`)
   removeConfirm.value = false
   router.push('/')
   reset()
@@ -157,7 +161,7 @@ function selectEase(ease:EnumEase) {
       )
       BaseButton(
         text="Сохранить"
-        @click="updateData"
+        @click="update"
       )
 
   ModalRemoveConfirm(
