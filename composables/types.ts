@@ -3,6 +3,7 @@ export interface TypeExercise {
   id: string
   name: string
   ease: EnumEase[]
+  order: number
   color?: string
   icon?: string
 }

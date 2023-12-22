@@ -1,10 +1,13 @@
 <script setup type="ts">
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { auth } from '~/composables/firebaseInit'
+
 definePageMeta({
   layout: 'login'
 })
 
 function loginWithGoogle() {
-  signInWithGoogle()
+  signInWithPopup(auth, new GoogleAuthProvider())
 }
 </script>
 

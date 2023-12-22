@@ -1,15 +1,12 @@
-import { getDatabase, ref, onValue, set, child, push, remove, update } from 'firebase/database'
-import { getAuth } from 'firebase/auth'
+import { ref, onValue, child, push } from 'firebase/database'
+import { db, dbPath, createData } from './firebaseInit'
 import type { TypeWorkout, TypeWorkoutCreate } from "./types"
 
 export const getWorkouts = async (exercisesId:string) => {
-  const db = getDatabase()
-  const auth = getAuth()
-
   const filteredWorkouts = useFilteredWorkouts()
   const allworkouts = useWorkouts()
   
-  const workouts = ref(db, `users/${auth.currentUser?.uid}/workout/${exercisesId}`)
+  const workouts = ref(db, dbPath(`workout/${exercisesId}`))
 
   onValue(workouts, (snapshot) => {
     const data = snapshot.val()
@@ -49,23 +46,7 @@ export const getWorkouts = async (exercisesId:string) => {
 }
 
 // Create
-export const createWorkout = async (workout:TypeWorkoutCreate) => {
-  const db = getDatabase()
-  const auth = getAuth()
+export const createWorkout = (workout:TypeWorkoutCreate) => {
   const newWorkoutKey = push(child(ref(db), 'workout')).key
-  await set(ref(db, `users/${auth.currentUser?.uid}/workout/${workout.exercisesId}/${newWorkoutKey}`), workout)
-}
-
-// Remove
-export const removeWorkout = async (id:string, exercisesId:string) => {
-  const db = getDatabase()
-  const auth = getAuth()
-  remove(ref(db, `users/${auth.currentUser?.uid}/workout/${exercisesId}/${id}`))
-}
-
-// Update
-export const updateWorkout = async (id:string, workout:TypeWorkoutCreate) => {
-  const db = getDatabase()
-  const auth = getAuth()
-  update(ref(db,  `users/${auth.currentUser?.uid}/workout/${workout.exercisesId}/${id}`), workout);
+  createData(`workout/${workout.exercisesId}/${newWorkoutKey}`, workout)
 }
