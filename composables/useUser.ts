@@ -6,7 +6,7 @@ export const initUser = async () => {
   const route = useRoute()
   const activeUser = useActiveUser()
 
-  onAuthStateChanged(auth, (user) => {    
+  onAuthStateChanged(auth, (user) => {
     if (user) {      
       activeUser.value = user.uid
     

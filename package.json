@@ -10,15 +10,15 @@
   "devDependencies": {
     "@kevinmarrec/nuxt-pwa": "^0.17.0",
     "@nuxtjs/color-mode": "^3.3.0",
-    "@nuxtjs/tailwindcss": "^6.7.0",
-    "@vue/language-plugin-pug": "^1.8.26",
-    "nuxt": "^3.5.3",
+    "@nuxtjs/tailwindcss": "^6.11.4",
+    "@vue/language-plugin-pug": "^2.0.2",
+    "nuxt": "^3.10.3",
     "pug": "^3.0.2",
     "stylus": "^0.62.0",
     "typescript": "^5.1.3"
   },
   "dependencies": {
-    "firebase": "^10.7.1",
+    "firebase": "^10.8.1",
     "vuedraggable": "^4.1.0"
   }
 }

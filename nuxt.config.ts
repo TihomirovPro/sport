@@ -40,16 +40,19 @@ export default defineNuxtConfig({
   },
 
   ssr: false,
-  modern: 'client',
-  target: 'static',
+  // modern: 'client',
+  // target: 'static',
 
   pwa: {
     manifest: {
+      display: "fullscreen",
       name: 'Power Progress',
       short_name: 'Power Progress',
+      description: 'Дневник для записи тренировок и отслеживания прогресса',
       lang: 'ru',
       background_color: '#ffffff',
       theme_color: '#000000',
+      start_url: 'https://training-diary.ru/'
     },
     icon: {
       fileName: "icon.png",

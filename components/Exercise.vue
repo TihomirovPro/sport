@@ -12,10 +12,10 @@ function update() {
   router.push('/exercise')
 }
 
-async function active() {
+function active() {
   activeExercise.value = props
   localStorage.setItem('activeExercise', JSON.stringify(props))
-  await getWorkouts(props.id)
+  getWorkouts(props.id)
   router.push('/exercise-item')
 }
 </script>
@@ -35,7 +35,7 @@ async function active() {
     class="text-[rgb(var(--colorIcon))]"
     @click="active"
   ) {{ name }}
-  .hangle.flex-center.flex-col.gap-1.h-full
-    .w-6.bg-accent.rounded(class="h-0.5 opacity-50")
-    .w-6.bg-accent.rounded(class="h-0.5 opacity-50")
+  .hangle.flex-center.flex-col.gap-1.h-full.cursor-pointer.hover_opacity-90.opacity-50.transition
+    .w-6.bg-accent.rounded(class="h-0.5")
+    .w-6.bg-accent.rounded(class="h-0.5")
 </template>
