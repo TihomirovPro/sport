@@ -4,7 +4,7 @@ const router = useRouter()
 
 function link() {
   if (route.name === 'index') router.push('/exercise')
-  if (route.name === 'exercise-item') router.push(`/workout`)
+  if (route.name === 'exercise-item') router.push('/workout')
 }
 
 function toSettings() {

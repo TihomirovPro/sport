@@ -6,6 +6,7 @@ onMounted(async () => {
 
 <template lang="pug">
 .flex-center.h-full
+  PwaInstall
   .h-full.overflow-auto
     slot
 </template>

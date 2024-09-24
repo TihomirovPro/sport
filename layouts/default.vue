@@ -29,6 +29,7 @@ if (localStorage.getItem('baseColor')) {
   v-if="user"
   class="grid-rows-[56px_1fr]"
 )
+  PwaInstall
   Header
 
   main.px-2.py-3.max-w-2xl.size-full.mx-auto.relative

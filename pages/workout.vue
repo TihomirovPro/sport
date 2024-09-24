@@ -166,6 +166,11 @@ function selectRubber(name:string) {
   workout.value.rubber = name
   saveNewWorkout()
 }
+
+function addWeight(idx, e) {
+  if (e.data === ',') workout.value.weight[idx] = workout.value.weight[idx].replace(',', '.')
+  saveNewWorkout()
+}
 </script>
 
 <template lang="pug">
@@ -214,9 +219,9 @@ function selectRubber(name:string) {
         v-if="workout.ease === EnumEase.weight"
         v-model="workout.weight[index-1]"
         type="text"
-        inputmode="numeric"
+        inputmode="decimal"
         :placeholder="`Вес ${index}`"
-        @input="saveNewWorkout"
+        @input="(e) => addWeight(index-1, e)"
       )  
 
   BaseInput(
