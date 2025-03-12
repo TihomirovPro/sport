@@ -29,7 +29,7 @@ const exercise = ref<TypeExerciseCreate>({
   color: '',
   icon: '',
   ease: constEases,
-  order: allExercises.value.length ? allExercises.value.length : 0
+  order: allExercises.value.length
 })
 
 function reset() {
@@ -39,7 +39,8 @@ function reset() {
     name: '',
     color: '',
     icon: '',
-    ease: constEases
+    ease: constEases,
+    order: 0
   }
 }
 
@@ -62,6 +63,7 @@ watchEffect(() => {
 
 async function newExercise() {
   if (exercise.value.name) {
+    exercise.value.order = allExercises.value.length
     createData('exercises', exercise.value)
     reset()
     router.push('/')
@@ -71,6 +73,7 @@ async function newExercise() {
 }
 
 function update() {
+  if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
   updateData(`exercises/${selectUpdateExercise.value!.id}`, exercise.value)
   reset()
   router.push('/')
