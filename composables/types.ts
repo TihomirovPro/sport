@@ -39,6 +39,8 @@ export type TypeWorkoutPage = Omit<TypeWorkout, 'exercisesId'>
 export interface Filter {
   ease: '' | EnumEase
   interval: number
+  approach: number
   changeEase: (ease:'' | EnumEase) => void
   changeInterval: (interval:number) => void
+  changeApproach: (approach:number) => void
 }
