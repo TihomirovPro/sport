@@ -211,6 +211,7 @@ function fnTimer() {
       let notificationTimer = `${notificationMins}:${notificationSecs}`
       if (approachesTimes.value.includes(notificationTimer)) notification()
       seconds++
+      document.body.dispatchEvent(new Event('touchstart'));
     }, 1000)
   } else {
     clearInterval(interval)
