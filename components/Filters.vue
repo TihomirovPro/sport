@@ -73,13 +73,13 @@ const data = computed(() => {
   const weights:number[] = [];
 
   const options = {
-    labels: dates.reverse(),
+    labels: dates,
     datasets: [
       {
         label: 'Повторений',
         borderColor: 'rgb(248 113 113)',
         backgroundColor: 'rgb(59 130 246)',
-        data: approaches.reverse()
+        data: approaches
       }
     ]
   }
@@ -89,15 +89,15 @@ const data = computed(() => {
       year: 'numeric',
       month: 'numeric',
       day: 'numeric'
-    }).format(new Date(item.date)).slice(0, -3)
+    }).format(new Date(item.date))
 
-    dates.push(formatDate)
-    approaches.push(item.approach.reduce((acc, currentValue) => acc + +currentValue, 0))
+    dates.unshift(formatDate)
+    approaches.unshift(item.approach.reduce((acc, currentValue) => acc + +currentValue, 0))
 
     const weight = item.weight?.reduce((acc, currentValue, index) => acc + (currentValue*item.approach[index]), 0) ?? 0
 
     if (weight > 0) {
-      weights.push(weight)
+      weights.unshift(weight)
     }
   })
   
@@ -106,7 +106,7 @@ const data = computed(() => {
       label: 'Вес',
       borderColor: 'rgb(59 130 246)',
       backgroundColor: 'rgb(248 113 113)',
-      data: weights.reverse(),
+      data: weights,
     })
   }
 
