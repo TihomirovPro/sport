@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Line } from 'vue-chartjs'
+import { Chart } from 'vue-chartjs'
 import type { Filter } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 
@@ -8,6 +8,7 @@ import {
   CategoryScale,
   LinearScale,
   PointElement,
+  BarElement,
   LineElement,
   Title,
   Tooltip,
@@ -17,6 +18,7 @@ import {
 ChartJS.register(
   CategoryScale,
   LinearScale,
+  BarElement,
   PointElement,
   LineElement,
   Title,
@@ -67,19 +69,41 @@ const filterElements = computed(() => {
   };
 });
 
+const optionsLines = ref({
+  scales: {
+    y: {
+      type: 'linear',
+      display: true,
+      position: 'left',
+    },
+    y1: {
+      type: 'linear',
+      display: false,
+      position: 'right',
+      grid: {
+        drawOnChartArea: false, 
+      },
+    }
+  }
+})
+
 const data = computed(() => {
-  let approaches:number[] = [];
+  const approaches:number[] = [0];
   const dates:string[] = [];
-  const weights:number[] = [];
+  const weights:number[] = [0];
 
   const options = {
     labels: dates,
     datasets: [
       {
         label: 'Повторений',
-        borderColor: 'rgb(248 113 113)',
-        backgroundColor: 'rgb(59 130 246)',
-        data: approaches
+        borderColor: 'blue',
+        backgroundColor: 'blue',
+        data: approaches,
+        yAxisID: 'y',
+        pointRadius: 6,
+        order: 1,
+        type: 'line',
       }
     ]
   }
@@ -91,10 +115,14 @@ const data = computed(() => {
       day: 'numeric'
     }).format(new Date(item.date))
 
+    if (!item.weight && approaches[0] === 0) {
+      approaches.shift()
+    } 
+
     dates.unshift(formatDate)
     approaches.unshift(item.approach.reduce((acc, currentValue) => acc + +currentValue, 0))
 
-    const weight = item.weight?.reduce((acc, currentValue, index) => acc + (currentValue*item.approach[index]), 0) ?? 0
+    const weight = item.weight?.reduce((acc, currentValue, index) => acc + +currentValue, 0) ?? 0
 
     if (weight > 0) {
       weights.unshift(weight)
@@ -104,10 +132,16 @@ const data = computed(() => {
   if (weights.length > 0) {
     options.datasets.push({
       label: 'Вес',
-      borderColor: 'rgb(59 130 246)',
-      backgroundColor: 'rgb(248 113 113)',
+      borderColor: 'red',
+      backgroundColor: 'red',
       data: weights,
+      yAxisID: 'y1',
+      pointRadius: 6,
+      order: 2,
+      type: 'bar',
     })
+
+    optionsLines.value.scales.y1.display = true
   }
 
   return options
@@ -166,8 +200,9 @@ function useFilter() {
         @click="filter.changeEase(ease)"
         :title="ease"
       ).text-xs
-  Line(
+  Chart(
     v-if="[filter.interval, filter.approach, filter.ease].filter(Boolean).length >= 2"
     :data="data"
+    :options="optionsLines"
   )
 </template>

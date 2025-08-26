@@ -23,7 +23,7 @@ export const getWorkouts = (exercisesId:string) => {
             weight: workout.weight,
             desc: workout.desc,
             res: workout.res,
-            resWeigth: workout.weight ? workout.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.approach[index]), 0) : 0
+            resWeigth: workout.weight ? workout.weight.reduce((acc:number, item:number, index:number):number => acc + +item, 0) : 0
           })
       })
 
