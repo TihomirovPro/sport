@@ -35,7 +35,17 @@ const forceChartUpdate = () => {
 const filteredWorkouts = useFilteredWorkouts()
 
 const optionsLines = reactive({
+  plugins: {
+    legend: {
+      display: false,
+    },
+  },
   scales: {
+    x: {
+      ticks: {
+        display: false
+      }
+    },
     y: {
       type: 'linear',
       display: true,
@@ -120,7 +130,7 @@ const data = computed(() => {
 
   filteredWorkouts.value.forEach(item => {
     const formatDate = new Intl.DateTimeFormat('ru-RU', {
-      year: 'numeric',
+      year: '2-digit',
       month: 'numeric',
       day: 'numeric'
     }).format(new Date(item.date))
