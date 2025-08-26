@@ -27,7 +27,30 @@ ChartJS.register(
 )
 
 const allWorkouts = useWorkouts()
+const chartKey = ref(0)
+
+const forceChartUpdate = () => {
+  chartKey.value++
+}
 const filteredWorkouts = useFilteredWorkouts()
+
+const optionsLines = reactive({
+  scales: {
+    y: {
+      type: 'linear',
+      display: true,
+      position: 'left',
+    },
+    y1: {
+      type: 'linear',
+      display: true,
+      position: 'right',
+      grid: {
+        drawOnChartArea: false, 
+      },
+    }
+  }
+})
 
 const filter = ref<Filter>({
   ease: '',
@@ -37,6 +60,11 @@ const filter = ref<Filter>({
   changeEase: (ease: '' | EnumEase) => {
     if (ease === filter.value.ease) filter.value.ease = ''
     else filter.value.ease = ease
+
+    if (ease === EnumEase.weight) optionsLines.scales.y1.display = true
+    else optionsLines.scales.y1.display = false
+    
+    forceChartUpdate()
     useFilter()
   },
 
@@ -69,28 +97,10 @@ const filterElements = computed(() => {
   };
 });
 
-const optionsLines = ref({
-  scales: {
-    y: {
-      type: 'linear',
-      display: true,
-      position: 'left',
-    },
-    y1: {
-      type: 'linear',
-      display: false,
-      position: 'right',
-      grid: {
-        drawOnChartArea: false, 
-      },
-    }
-  }
-})
-
 const data = computed(() => {
   const approaches:number[] = [0];
   const dates:string[] = [];
-  const weights:number[] = [0];
+  const weights:number[] = [];
 
   const options = {
     labels: dates,
@@ -140,8 +150,6 @@ const data = computed(() => {
       order: 2,
       type: 'bar',
     })
-
-    optionsLines.value.scales.y1.display = true
   }
 
   return options
@@ -204,5 +212,6 @@ function useFilter() {
     v-if="[filter.interval, filter.approach, filter.ease].filter(Boolean).length >= 2"
     :data="data"
     :options="optionsLines"
+    :key="chartKey"
   )
 </template>
