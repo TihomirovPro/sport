@@ -12,15 +12,19 @@ import {
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  LineController,
+  BarController
 } from 'chart.js'
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
   PointElement,
   LineElement,
+  LineController,
   Title,
   Tooltip,
   Legend
@@ -47,12 +51,10 @@ const optionsLines = reactive({
       }
     },
     y: {
-      type: 'linear',
       display: true,
       position: 'left',
     },
     y1: {
-      type: 'linear',
       display: true,
       position: 'right',
       grid: {
@@ -106,6 +108,13 @@ const filterElements = computed(() => {
     approaches: [...obj.approaches].sort((a, b) => a - b)
   };
 });
+const color = localStorage.getItem('baseColor') || '#3b82f6'
+const r = parseInt(color.slice(1, 3), 16)
+const g = parseInt(color.slice(3, 5), 16)
+const b = parseInt(color.slice(5, 7), 16)
+
+const baseColor = color
+const secondColor = `rgba(${r},${g},${b},0.2)`
 
 const data = computed(() => {
   const approaches:number[] = [0];
@@ -117,8 +126,8 @@ const data = computed(() => {
     datasets: [
       {
         label: 'Повторений',
-        borderColor: 'blue',
-        backgroundColor: 'blue',
+        borderColor: baseColor,
+        backgroundColor: baseColor,
         data: approaches,
         yAxisID: 'y',
         pointRadius: 6,
@@ -152,8 +161,8 @@ const data = computed(() => {
   if (weights.length > 0) {
     options.datasets.push({
       label: 'Вес',
-      borderColor: 'red',
-      backgroundColor: 'red',
+      borderColor: secondColor,
+      backgroundColor: secondColor,
       data: weights,
       yAxisID: 'y1',
       pointRadius: 6,
@@ -181,6 +190,11 @@ function useFilter() {
   filteredWorkouts.value = allWorkouts.value.filter(item =>
     filterWorkouts(item.ease, +item.interval, item.approach.length)
   );
+}
+
+function showChart() {
+  if (filter.value.ease && (filter.value.interval || filter.value.approach)) return true
+  return false
 }
 </script>
 
@@ -219,7 +233,7 @@ function useFilter() {
         :title="ease"
       ).text-xs
   Chart(
-    v-if="[filter.interval, filter.approach, filter.ease].filter(Boolean).length >= 2"
+    v-if="showChart()"
     :data="data"
     :options="optionsLines"
     :key="chartKey"
