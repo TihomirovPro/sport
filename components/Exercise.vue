@@ -31,7 +31,7 @@ function active() {
     .text-2xl.text-white(v-if="!icon") {{ name[0] }}
     Icon(v-else :icon="icon" color="#fff")
 
-  .cursor-pointer.py-6.text-xl(
+  .cursor-pointer.py-6.text-lg(
     class="text-[rgb(var(--colorIcon))]"
     @click="active"
   ) {{ name }}
