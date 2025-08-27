@@ -8,6 +8,7 @@ useHead({
 
 const headerTitle = useHeaderTitle()
 const colorMode = useColorMode()
+const hideFilterTitles = useHideFilterTitles()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
 const showModalRubbers = ref(false)
@@ -46,6 +47,10 @@ function changeTheme() {
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalColor = true")
     p основной цвет
     .size-9.rounded(:style="`background: ${baseColor}`")
+
+  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="hideFilterTitles = !hideFilterTitles")
+    p Скрыть заголовки фильтров
+    p {{ hideFilterTitles ? 'Да' : 'Нет' }}
 
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOut(auth)")
     p Выход

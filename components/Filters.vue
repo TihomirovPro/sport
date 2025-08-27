@@ -31,6 +31,7 @@ ChartJS.register(
 )
 
 const allWorkouts = useWorkouts()
+const hideFilterTitles = useHideFilterTitles()
 const chartKey = ref(0)
 
 const forceChartUpdate = () => {
@@ -41,7 +42,7 @@ const filteredWorkouts = useFilteredWorkouts()
 const optionsLines = reactive({
   plugins: {
     legend: {
-      display: false,
+      display: !hideFilterTitles.value,
     },
   },
   scales: {
@@ -201,7 +202,7 @@ function showChart() {
 <template lang="pug">
 .filters
   template(v-if="filterElements.intervals.length > 1")
-    .pb-1.text-xs Интервал
+    .pb-1.text-xs(v-if="!hideFilterTitles") Интервал
     TabsWrap.pb-1
       TabsItem(
         v-for="interval in filterElements.intervals"
@@ -212,7 +213,7 @@ function showChart() {
       ).text-xs
   
   template(v-if="filterElements.approaches.length > 1")
-    .pb-1.text-xs Пoдходы
+    .pb-1.text-xs(v-if="!hideFilterTitles") Пoдходы
     TabsWrap.pb-1
       TabsItem(
         v-for="approach in filterElements.approaches"
@@ -223,7 +224,7 @@ function showChart() {
       ).text-xs
   
   template(v-if="filterElements.eases.length > 1")
-    .pb-1.text-xs Сложность
+    .pb-1.text-xs(v-if="!hideFilterTitles") Сложность
     TabsWrap(v-if="allWorkouts")
       TabsItem(
         v-for="ease in filterElements.eases"
