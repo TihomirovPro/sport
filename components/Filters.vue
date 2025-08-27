@@ -65,8 +65,24 @@ const optionsLines = reactive({
   }
 })
 
+const filterElements = computed(() => {
+  const obj = { eases: new Set<EnumEase>(), intervals: new Set<number>(), approaches: new Set<number>() };
+
+  allWorkouts.value.forEach(item => {
+    obj.eases.add(item.ease);
+    obj.intervals.add(+item.interval);
+    obj.approaches.add(item.approach.length);
+  });
+
+  return {
+    eases: [...obj.eases],
+    intervals: [...obj.intervals].sort((a, b) => a - b),
+    approaches: [...obj.approaches].sort((a, b) => a - b)
+  };
+});
+
 const filter = ref<Filter>({
-  ease: '',
+  ease: filterElements.value.eases.length === 1 ? filterElements.value.eases[0] : '',
   interval: 0,
   approach: 0,
 
@@ -94,21 +110,6 @@ const filter = ref<Filter>({
   },
 })
 
-const filterElements = computed(() => {
-  const obj = { eases: new Set<EnumEase>(), intervals: new Set<number>(), approaches: new Set<number>() };
-
-  allWorkouts.value.forEach(item => {
-    obj.eases.add(item.ease);
-    obj.intervals.add(+item.interval);
-    obj.approaches.add(item.approach.length);
-  });
-
-  return {
-    eases: [...obj.eases],
-    intervals: [...obj.intervals].sort((a, b) => a - b),
-    approaches: [...obj.approaches].sort((a, b) => a - b)
-  };
-});
 const color = localStorage.getItem('baseColor') || '#3b82f6'
 const r = parseInt(color.slice(1, 3), 16)
 const g = parseInt(color.slice(3, 5), 16)
@@ -193,7 +194,7 @@ function useFilter() {
   );
 }
 
-function showChart() {
+function showChart() { 
   if (filter.value.ease && (filter.value.interval || filter.value.approach)) return true
   return false
 }
