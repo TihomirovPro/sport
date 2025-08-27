@@ -6,11 +6,6 @@ onMounted(async () => {
   initUser()
 })
 
-const isShowMenu = computed(()=> {
-  if (route.name === 'exercise-item' || route.name === 'index') return true
-  return false
-})
-
 if (localStorage.getItem('baseColor')) {
   const color = localStorage.getItem('baseColor')
 
@@ -27,15 +22,13 @@ if (localStorage.getItem('baseColor')) {
 <template lang="pug">
 .grid.min-h-full(
   v-if="user"
-  class="grid-rows-[56px_1fr]"
+  class="grid-rows-[auto_1fr]"
 )
   PwaInstall
   Header
 
   main.px-2.py-3.max-w-2xl.size-full.mx-auto.relative
     slot
-
-  Menu(v-if="isShowMenu")
 </template>
 
 <style>
