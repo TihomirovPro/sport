@@ -231,7 +231,7 @@ function resetInterval() {
 .flex.flex-col.gap-3.min-h-full
   label.date-label
     span {{ formatDate(workout.date) }}
-    BaseInput(
+    input(
       v-model="workout.date"
       type="date"
     )

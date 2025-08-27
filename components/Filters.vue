@@ -201,8 +201,8 @@ function showChart() {
 <template lang="pug">
 .filters
   template(v-if="filterElements.intervals.length > 1")
-    .pb-2.text-sm Интервал
-    TabsWrap.pb-2
+    .pb-1.text-xs Интервал
+    TabsWrap.pb-1
       TabsItem(
         v-for="interval in filterElements.intervals"
         :key="interval"
@@ -212,8 +212,8 @@ function showChart() {
       ).text-xs
   
   template(v-if="filterElements.approaches.length > 1")
-    .pb-2.text-sm Пoдходы
-    TabsWrap.pb-2
+    .pb-1.text-xs Пoдходы
+    TabsWrap.pb-1
       TabsItem(
         v-for="approach in filterElements.approaches"
         :key="approach"
@@ -223,7 +223,7 @@ function showChart() {
       ).text-xs
   
   template(v-if="filterElements.eases.length > 1")
-    .pb-2.text-sm Сложность
+    .pb-1.text-xs Сложность
     TabsWrap(v-if="allWorkouts")
       TabsItem(
         v-for="ease in filterElements.eases"
@@ -237,5 +237,6 @@ function showChart() {
     :data="data"
     :options="optionsLines"
     :key="chartKey"
+    class="mt-2"
   )
 </template>
