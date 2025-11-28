@@ -153,7 +153,7 @@ const data = computed(() => {
     dates.unshift(formatDate)
     approaches.unshift(item.approach.reduce((acc, currentValue) => acc + +currentValue, 0))
 
-    const weight = item.weight?.reduce((acc, currentValue, index) => acc + +currentValue, 0) ?? 0
+    const weight = item.weight?.reduce((acc, currentValue) => acc + +currentValue, 0) ?? 0
 
     if (weight > 0) {
       weights.unshift(weight)
@@ -194,7 +194,7 @@ function useFilter() {
   );
 }
 
-function showChart() { 
+function showChart() {
   if (filter.value.ease && (filter.value.interval || filter.value.approach)) return true
   return false
 }

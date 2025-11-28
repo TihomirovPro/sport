@@ -37,6 +37,9 @@ export const createData = (path:string, data:any) => {
   const key = push(child(ref(db), path)).key
   set(ref(db, dbPath(`${path}/${key}`)), data)
 }
+export const createDataWithoutKey = (path:string, data:any) => {
+  set(ref(db, dbPath(path)), data)
+}
 
 export const updateData = (path:string, data:any) => update(ref(db, dbPath(path)), data)
 export const removeData = (path:string) => remove(ref(db, dbPath(path)))

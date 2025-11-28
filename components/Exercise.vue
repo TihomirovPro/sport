@@ -16,7 +16,9 @@ function active() {
   activeExercise.value = props
   localStorage.setItem('activeExercise', JSON.stringify(props))
   getWorkouts(props.id)
-  router.push('/exercise-item')
+
+  if (!props.isComplex) router.push('/exercise-item')
+  else router.push('/exercise-item?complex=true')
 }
 </script>
 

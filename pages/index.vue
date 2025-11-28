@@ -26,6 +26,8 @@ draggable(
       :color="element.color"
       :icon="element.icon"
       :id="element.id"
+      :isComplex="element.isComplex"
+      :complexDesc="element.complexDesc"
       :ease="element.ease"
       :order="element.order"
     )

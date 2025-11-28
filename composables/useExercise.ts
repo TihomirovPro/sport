@@ -16,6 +16,8 @@ export const getAllExercises = () => {
           color: exercise.color,
           icon: exercise.icon,
           ease: exercise.ease,
+          isComplex: exercise.isComplex,
+          complexDesc: exercise.complexDesc,
           order: exercise.order,
           id: key,
         })
@@ -39,6 +41,8 @@ export const sortExercises = (exercises:TypeExercise[]) => {
       ease: el.ease,
       icon: el.icon,
       name: el.name,
+      isComplex: el.isComplex,
+      complexDesc: el.complexDesc,
       order: i
     }
   })

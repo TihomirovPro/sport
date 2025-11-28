@@ -35,6 +35,7 @@ function back() {
 function addItem() {
   if (route.name === 'index') router.push('/exercise')
   if (route.name === 'exercise-item') router.push('/workout')
+  if (route.name === 'exercise-item' && activeExercise.value?.isComplex) router.push('/complex')
 }
 
 function toSettings() {
