@@ -29,6 +29,8 @@ const exercise = ref<TypeExerciseCreate>({
   color: '',
   icon: '',
   ease: constEases,
+  isComplex: false,
+  complexDesc: '',
   order: allExercises.value.length
 })
 
@@ -40,6 +42,8 @@ function reset() {
     color: '',
     icon: '',
     ease: constEases,
+    isComplex: false,
+    complexDesc: '',
     order: 0
   }
 }
@@ -48,6 +52,10 @@ watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(selectUpdateExercise.value.id)
     headerTitle.value = 'Изменить упражнение'
+
+    if (selectUpdateExercise.value.isComplex) {
+      headerTitle.value = 'Изменить комплекс'
+    }
 
     const { id, ...exerciseUpdate } = selectUpdateExercise.value
     exercise.value = {...exerciseUpdate }
@@ -74,6 +82,8 @@ async function newExercise() {
 
 function update() {
   if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
+  if (exercise.value.isComplex === undefined) exercise.value.isComplex = false
+  if (exercise.value.complexDesc === undefined) exercise.value.complexDesc = ''
   updateData(`exercises/${selectUpdateExercise.value!.id}`, exercise.value)
   reset()
   router.push('/')
@@ -148,6 +158,20 @@ function selectEase(ease:EnumEase) {
     :selected="exercise.ease"
     @selectEase="(ease) => selectEase(ease)"
   )
+
+  //- TabsItem(
+  //-   title="Комплекс"
+  //-   :active="exercise.isComplex"
+  //-   @click="exercise.isComplex = !exercise.isComplex"
+  //- )
+
+  //- .grid.gap-5(v-if="exercise.isComplex")
+  //-   BaseInput(
+  //-     v-model="exercise.complexDesc"
+  //-     type="textarea"
+  //-     placeholder="Описание комплекса"
+  //-     class="min-h-[120px]"
+  //-   )
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
     BaseButton(

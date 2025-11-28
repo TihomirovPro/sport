@@ -6,6 +6,8 @@ export interface TypeExercise {
   order: number
   color?: string
   icon?: string
+  isComplex?: boolean
+  complexDesc?: string
 }
 
 export type TypeExerciseCreate = Omit<TypeExercise, 'id'>

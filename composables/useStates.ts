@@ -3,7 +3,12 @@ import type { TypeExercise, TypeWorkout } from "./types"
 export const useHeaderTitle = () => useState('headerTitle', () => 'Упражнения')
 
 // User
-export const useActiveUser = () => useState('activeUser', () => '')
+export const useActiveUser = () => useState('activeUser', () => ({
+  uid: '',
+  name: '',
+  email: '',
+  photoURL: ''
+}))
 
 // Exercise
 export const useAllExercises = () => useState<TypeExercise[]>('allExercises', () => [])
