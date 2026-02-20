@@ -1,14 +1,16 @@
 <script setup type="ts">
+import { storeToRefs } from 'pinia'
 import draggable from 'vuedraggable'
 
-const allExercises = useAllExercises()
-const headerTitle = useHeaderTitle()
+const exerciseStore = useExerciseStore()
+const appStore = useAppStore()
+const { allExercises } = storeToRefs(exerciseStore)
 
 useHead({
   title: 'Упражнения',
 })
 
-headerTitle.value = 'Упражнения'
+appStore.headerTitle = 'Упражнения'
 </script>
 
 <template lang="pug">

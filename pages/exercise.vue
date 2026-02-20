@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { updateData, removeData, createData } from '~/composables/firebaseInit'
 import type { TypeExerciseCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types';
@@ -7,12 +8,13 @@ useHead({
   title: 'Добавить упражнение'
 })
 
-const headerTitle = useHeaderTitle()
-headerTitle.value = 'Добавить упражнение'
+const appStore = useAppStore()
+appStore.headerTitle = 'Добавить упражнение'
 
-const allWorkouts = useWorkouts()
-const allExercises = useAllExercises()
-const selectUpdateExercise = useSelectUpdateExercise()
+const workoutStore = useWorkoutStore()
+const exerciseStore = useExerciseStore()
+const { workouts } = storeToRefs(workoutStore)
+const { allExercises, selectUpdateExercise } = storeToRefs(exerciseStore)
 const router = useRouter()
 
 const showModalColor = ref<boolean>(false)
@@ -52,10 +54,10 @@ function reset() {
 watchEffect(() => {
   if (selectUpdateExercise.value) {
     getWorkouts(selectUpdateExercise.value.id)
-    headerTitle.value = 'Изменить упражнение'
+    appStore.headerTitle = 'Изменить упражнение'
 
     if (selectUpdateExercise.value.isComplex) {
-      headerTitle.value = 'Изменить комплекс'
+      appStore.headerTitle = 'Изменить комплекс'
     }
 
     const { id, ...exerciseUpdate } = selectUpdateExercise.value
@@ -65,7 +67,7 @@ watchEffect(() => {
     else exercise.value.ease = selectUpdateExercise.value.ease
 
   } else {
-    headerTitle.value = 'Добавить упражнение'
+    appStore.headerTitle = 'Добавить упражнение'
     reset()
   }
 })
@@ -99,7 +101,7 @@ function remove() {
 }
 
 function deleted() {
-  if (allWorkouts.value.length) {
+  if (workouts.value.length) {
     text.value = 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
   } else {
     text.value = 'Ты уверен, что хочешь удалить?)'

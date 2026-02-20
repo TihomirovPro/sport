@@ -2,16 +2,16 @@ import type { TypeExercise, TypeExerciseCreate } from "./types"
 import { updateData, onData } from './firebaseInit'
 
 export const getAllExercises = () => {
-  const allExercises = useAllExercises()
+  const exerciseStore = useExerciseStore()
 
   onData('exercises', (snapshot:any) => {
     const data = snapshot.val()
 
     if (data) {
-      allExercises.value = []
+      exerciseStore.allExercises = []
       Object.keys(data).forEach((key) => {
         const exercise:TypeExercise = data[key]
-        allExercises.value.push({
+        exerciseStore.allExercises.push({
           name: exercise.name,
           color: exercise.color,
           icon: exercise.icon,
@@ -24,7 +24,7 @@ export const getAllExercises = () => {
       })
     }
 
-    allExercises.value.sort((a, b) => {
+    exerciseStore.allExercises.sort((a, b) => {
       if (a.order < b.order) return -1
       if (a.order > b.order) return 1
       return 0

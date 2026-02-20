@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 defineProps<{ 
   isShow: boolean
   activeColor?: string
@@ -9,7 +11,8 @@ const emit = defineEmits<{
   selectColor: [color: string]
 }>()
 
-const colors = useColors()
+const catalogStore = useCatalogStore()
+const { colors } = storeToRefs(catalogStore)
 </script>
 
 <template lang="pug">

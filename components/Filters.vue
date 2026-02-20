@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Chart } from 'vue-chartjs'
+import { storeToRefs } from 'pinia'
 import type { Filter } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 
@@ -30,14 +31,15 @@ ChartJS.register(
   Legend
 )
 
-const allWorkouts = useWorkouts()
-const hideFilterTitles = useHideFilterTitles()
+const appStore = useAppStore()
+const workoutStore = useWorkoutStore()
+const { hideFilterTitles } = storeToRefs(appStore)
+const { workouts, filteredWorkouts } = storeToRefs(workoutStore)
 const chartKey = ref(0)
 
 const forceChartUpdate = () => {
   chartKey.value++
 }
-const filteredWorkouts = useFilteredWorkouts()
 
 const optionsLines = reactive({
   plugins: {
@@ -68,7 +70,7 @@ const optionsLines = reactive({
 const filterElements = computed(() => {
   const obj = { eases: new Set<EnumEase>(), intervals: new Set<number>(), approaches: new Set<number>() };
 
-  allWorkouts.value.forEach(item => {
+  workouts.value.forEach(item => {
     obj.eases.add(item.ease);
     obj.intervals.add(+item.interval);
     obj.approaches.add(item.approach.length);
@@ -189,7 +191,7 @@ function filterWorkouts(
 }
 
 function useFilter() {
-  filteredWorkouts.value = allWorkouts.value.filter(item =>
+  filteredWorkouts.value = workouts.value.filter(item =>
     filterWorkouts(item.ease, +item.interval, item.approach.length)
   );
 }
@@ -226,7 +228,7 @@ function showChart() {
   
   template(v-if="filterElements.eases.length > 1")
     .pb-1.text-xs(v-if="!hideFilterTitles") Сложность
-    TabsWrap(v-if="allWorkouts")
+    TabsWrap(v-if="workouts")
       TabsItem(
         v-for="ease in filterElements.eases"
         :key="ease"

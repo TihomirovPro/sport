@@ -1,8 +1,11 @@
 <script setup lang="ts">
-const headerTitle = useHeaderTitle()
-headerTitle.value = 'Добавить комплекс'
+import { storeToRefs } from 'pinia'
 
-const activeExercise = useActiveExercise()
+const appStore = useAppStore()
+const exerciseStore = useExerciseStore()
+const { activeExercise } = storeToRefs(exerciseStore)
+
+appStore.headerTitle = 'Добавить комплекс'
 
 interface TypeComplex {
   exerciseId: string

@@ -1,12 +1,16 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 const route = useRoute()
 const router = useRouter()
 const pagesWithoutBackBtn = ['index']
 const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
-const headerTitle = useHeaderTitle()
-const selectUpdateExercise = useSelectUpdateExercise()
-const selectUpdateWorkout = useSelectUpdateWorkout()
-const activeExercise = useActiveExercise()
+const appStore = useAppStore()
+const exerciseStore = useExerciseStore()
+const workoutStore = useWorkoutStore()
+const { headerTitle } = storeToRefs(appStore)
+const { selectUpdateExercise, activeExercise } = storeToRefs(exerciseStore)
+const { selectUpdateWorkout } = storeToRefs(workoutStore)
 
 function back() {
   if (route.name === 'workout') {

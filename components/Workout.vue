@@ -1,11 +1,12 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import type { TypeWorkoutPage } from '~/composables/types'
 
 const props = defineProps<TypeWorkoutPage>()
 
 const router = useRouter()
-const allWorkouts = useWorkouts()
-const selectUpdateWorkout = useSelectUpdateWorkout()
+const workoutStore = useWorkoutStore()
+const { workouts, selectUpdateWorkout } = storeToRefs(workoutStore)
 
 const formatDate = new Intl.DateTimeFormat('ru-RU', {
   year: 'numeric',
@@ -24,7 +25,7 @@ const cols = computed(()=> {
 })
 
 function selectUpdate() {
-  selectUpdateWorkout.value = allWorkouts.value.find(item => item.id === props.id)
+  selectUpdateWorkout.value = workouts.value.find(item => item.id === props.id) || null
   router.push('/workout')
 }
 </script>

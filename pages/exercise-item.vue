@@ -1,14 +1,18 @@
 <script setup lang="ts">
-const filteredWorkouts = useFilteredWorkouts()
-const activeExercise = useActiveExercise()
-const headerTitle = useHeaderTitle()
+import { storeToRefs } from 'pinia'
+
+const workoutStore = useWorkoutStore()
+const exerciseStore = useExerciseStore()
+const appStore = useAppStore()
+const { filteredWorkouts } = storeToRefs(workoutStore)
+const { activeExercise } = storeToRefs(exerciseStore)
 
 if (!activeExercise.value && localStorage.getItem('activeExercise')) {
   activeExercise.value = JSON.parse(localStorage.getItem('activeExercise')!)
   await getWorkouts(activeExercise.value!.id)
 }
 
-headerTitle.value = String(activeExercise.value?.name)
+appStore.headerTitle = String(activeExercise.value?.name)
 
 useHead({
   title: activeExercise.value?.name
