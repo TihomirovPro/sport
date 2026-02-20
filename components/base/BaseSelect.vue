@@ -1,8 +1,8 @@
 <script setup lang="ts">
 defineProps<{
-  options: []
+  options: Array<string | number>
   placeholder: string
-  modelValue: string
+  modelValue?: string | number
 }>()
 
 const emit = defineEmits<{
@@ -10,7 +10,7 @@ const emit = defineEmits<{
 }>()
 
 function updateValue(e:Event) {
-  emit('update:modelValue', (e.target as HTMLInputElement).value)
+  emit('update:modelValue', (e.target as HTMLSelectElement).value)
 }
 </script>
 

@@ -1,6 +1,6 @@
 <script setup type="ts">
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { auth } from '~/composables/firebaseInit'
+import { getFirebaseAuth } from '~/composables/firebaseInit'
 
 definePageMeta({
   layout: 'login'
@@ -8,6 +8,7 @@ definePageMeta({
 
 async function loginWithGoogle() {
   try {
+    const auth = getFirebaseAuth()
     await signInWithPopup(auth, new GoogleAuthProvider())
   } catch (error) {
     console.error('[firebase:loginWithGoogle]', error)

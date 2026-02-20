@@ -1,42 +1,44 @@
-# Nuxt 3 Minimal Starter
+# Power Progress (Nuxt 4)
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Приложение-дневник тренировок на Nuxt 4.
 
-## Setup
+## Требования
 
-Make sure to install the dependencies:
+- Node.js 20+
+- npm 10+
+
+## Установка
 
 ```bash
-# yarn
-yarn install
-
-# npm
 npm install
-
-# pnpm
-pnpm install --shamefully-hoist
 ```
 
-## Development Server
+## Локальная разработка
 
-Start the development server on http://localhost:3000
+Запуск dev-сервера на [http://localhost:3000](http://localhost:3000):
 
 ```bash
 npm run dev
 ```
 
-## Production
+## Quality Gate
 
-Build the application for production:
+```bash
+npm run typecheck
+npm run lint
+npm run test
+```
+
+## Продакшен сборка
+
+Сборка:
 
 ```bash
 npm run build
 ```
 
-Locally preview production build:
+Локальный preview:
 
 ```bash
 npm run preview
 ```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.

@@ -75,29 +75,44 @@ watchEffect(() => {
 async function newExercise() {
   if (!validateExercise()) return
 
-  exercise.value.order = allExercises.value.length
-  createData('exercises', exercise.value)
-  reset()
-  router.push('/')
+  try {
+    exercise.value.order = allExercises.value.length
+    await createData('exercises', exercise.value)
+    reset()
+    await router.push('/')
+  } catch (error) {
+    console.error('[firebase:newExercise]', error)
+    notifyError('Не удалось добавить упражнение. Попробуйте снова.')
+  }
 }
 
-function update() {
+async function update() {
   if (!validateExercise()) return
 
-  if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
-  if (exercise.value.isComplex === undefined) exercise.value.isComplex = false
-  if (exercise.value.complexDesc === undefined) exercise.value.complexDesc = ''
-  updateData(`exercises/${selectUpdateExercise.value!.id}`, exercise.value)
-  reset()
-  router.push('/')
+  try {
+    if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
+    if (exercise.value.isComplex === undefined) exercise.value.isComplex = false
+    if (exercise.value.complexDesc === undefined) exercise.value.complexDesc = ''
+    await updateData(`exercises/${selectUpdateExercise.value!.id}`, exercise.value)
+    reset()
+    await router.push('/')
+  } catch (error) {
+    console.error('[firebase:updateExercise]', error)
+    notifyError('Не удалось сохранить упражнение. Попробуйте снова.')
+  }
 }
 
-function remove() {
-  removeData(`workout/${selectUpdateExercise.value!.id}`)
-  removeData(`exercises/${selectUpdateExercise.value!.id}`)
-  removeConfirm.value = false
-  router.push('/')
-  reset()
+async function remove() {
+  try {
+    await removeData(`workout/${selectUpdateExercise.value!.id}`)
+    await removeData(`exercises/${selectUpdateExercise.value!.id}`)
+    removeConfirm.value = false
+    await router.push('/')
+    reset()
+  } catch (error) {
+    console.error('[firebase:removeExercise]', error)
+    notifyError('Не удалось удалить упражнение. Попробуйте снова.')
+  }
 }
 
 function deleted() {

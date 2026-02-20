@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { updateData, removeData } from '~/composables/firebaseInit'
+import { createData, updateData, removeData } from '~/composables/firebaseInit'
 import type { TypeWorkoutCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 
@@ -98,32 +98,47 @@ watchEffect(() => {
 async function add() {
   if (!validateWorkout()) return
 
-  workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-  workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
+  try {
+    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
+    workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
 
-  createData(`workout/${workout.value.exercisesId}`, workout.value)
+    await createData(`workout/${workout.value.exercisesId}`, workout.value)
 
-  router.push('/exercise-item')
-  reset()
-  localStorage.removeItem('newWorkout')
-  localStorage.removeItem('approaches')
+    await router.push('/exercise-item')
+    reset()
+    localStorage.removeItem('newWorkout')
+    localStorage.removeItem('approaches')
+  } catch (error) {
+    console.error('[firebase:addWorkout]', error)
+    notifyError('Не удалось добавить тренировку. Попробуйте снова.')
+  }
 }
 
-function updateSelectWorkout() {
+async function updateSelectWorkout() {
   if (!validateWorkout()) return
 
-  workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-  workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
-  updateData(`workout/${workout.value.exercisesId}/${selectUpdateWorkout.value!.id}`, workout.value)
-  reset()
-  router.push('/exercise-item')
+  try {
+    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
+    workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
+    await updateData(`workout/${workout.value.exercisesId}/${selectUpdateWorkout.value!.id}`, workout.value)
+    reset()
+    await router.push('/exercise-item')
+  } catch (error) {
+    console.error('[firebase:updateWorkout]', error)
+    notifyError('Не удалось сохранить тренировку. Попробуйте снова.')
+  }
 }
 
-function removeSelectWorkout() {
-  removeData(`workout/${selectUpdateWorkout.value!.exercisesId}/${selectUpdateWorkout.value!.id}`)
-  removeConfirm.value = false
-  reset()
-  router.push('/exercise-item')
+async function removeSelectWorkout() {
+  try {
+    await removeData(`workout/${selectUpdateWorkout.value!.exercisesId}/${selectUpdateWorkout.value!.id}`)
+    removeConfirm.value = false
+    reset()
+    await router.push('/exercise-item')
+  } catch (error) {
+    console.error('[firebase:removeWorkout]', error)
+    notifyError('Не удалось удалить тренировку. Попробуйте снова.')
+  }
 }
 
 function timerApproach(time:number){
@@ -233,6 +248,17 @@ function normalizeNumberArray(value: unknown[]): number[] {
   })
 }
 
+function normalizeWorkoutDate(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Date.parse(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+
+  return Date.now()
+}
+
 function validateWorkout(): boolean {
   const approachValues = normalizeNumberArray(workout.value.approach as unknown[])
 
@@ -262,6 +288,7 @@ function validateWorkout(): boolean {
 
   workout.value.approach = approachValues
   workout.value.weight = weightValues
+  workout.value.date = normalizeWorkoutDate(workout.value.date)
   error.value = false
 
   return true
@@ -381,8 +408,8 @@ watch(
   text-align center
   min-height: 52px
   border-radius 12px
-  background-color rgb(var(--colorAccent) / 0.3)
-  border solid 2px rgb(var(--colorAccent))
+  background-color unquote('rgba(var(--colorAccent), 0.3)')
+  border solid 2px unquote('rgb(var(--colorAccent))')
 
   input
     position absolute

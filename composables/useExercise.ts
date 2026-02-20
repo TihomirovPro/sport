@@ -1,16 +1,27 @@
 import type { TypeExercise, TypeExerciseCreate } from "./types"
 import { updateData, onData } from './firebaseInit'
 
+let exercisesUnsubscribe: (() => void) | null = null
+type TypeExerciseDb = Omit<TypeExercise, 'id'>
+
+export const stopAllExercisesSubscription = () => {
+  if (!exercisesUnsubscribe) return
+  exercisesUnsubscribe()
+  exercisesUnsubscribe = null
+}
+
 export const getAllExercises = () => {
   const exerciseStore = useExerciseStore()
 
-  onData('exercises', (snapshot:any) => {
-    const data = snapshot.val()
+  stopAllExercisesSubscription()
+
+  exercisesUnsubscribe = onData('exercises', (snapshot) => {
+    const data = snapshot.val() as Record<string, TypeExerciseDb> | null
 
     if (data) {
       exerciseStore.allExercises = []
       Object.keys(data).forEach((key) => {
-        const exercise:TypeExercise = data[key]
+        const exercise = data[key]
         exerciseStore.allExercises.push({
           name: exercise.name,
           color: exercise.color,
@@ -22,6 +33,8 @@ export const getAllExercises = () => {
           id: key,
         })
       })
+    } else {
+      exerciseStore.allExercises = []
     }
 
     exerciseStore.allExercises.sort((a, b) => {
@@ -30,6 +43,8 @@ export const getAllExercises = () => {
       return 0
     })
   })
+
+  return exercisesUnsubscribe
 }
 
 export const sortExercises = (exercises:TypeExercise[]) => {
@@ -47,5 +62,7 @@ export const sortExercises = (exercises:TypeExercise[]) => {
     }
   })
 
-  updateData('exercises', newExercises)
+  void updateData('exercises', newExercises).catch((error) => {
+    console.error('[firebase:sortExercises]', error)
+  })
 }

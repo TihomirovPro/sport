@@ -1,20 +1,56 @@
 import { onData } from './firebaseInit'
 import type { TypeWorkout } from "./types"
 
+let workoutsUnsubscribe: (() => void) | null = null
+let activeWorkoutExerciseId = ''
+type TypeWorkoutDb = Omit<TypeWorkout, 'id' | 'date'> & { date: number | string }
+
+function normalizeWorkoutDate(value: unknown): number {
+  if (typeof value === 'number' && Number.isFinite(value)) return value
+
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Date.parse(value)
+    if (Number.isFinite(parsed)) return parsed
+  }
+
+  return Date.now()
+}
+
+export const stopWorkoutsSubscription = () => {
+  if (workoutsUnsubscribe) {
+    workoutsUnsubscribe()
+    workoutsUnsubscribe = null
+  }
+  activeWorkoutExerciseId = ''
+}
+
 export const getWorkouts = (exercisesId:string) => {
   const workoutStore = useWorkoutStore()
+  if (!exercisesId) {
+    stopWorkoutsSubscription()
+    workoutStore.workouts = []
+    workoutStore.filteredWorkouts = []
+    return () => {}
+  }
 
-  onData(`workout/${exercisesId}`, (snapshot:any) => {
-    const data = snapshot.val()
+  if (activeWorkoutExerciseId === exercisesId && workoutsUnsubscribe) {
+    return workoutsUnsubscribe
+  }
+
+  stopWorkoutsSubscription()
+  activeWorkoutExerciseId = exercisesId
+
+  workoutsUnsubscribe = onData(`workout/${exercisesId}`, (snapshot) => {
+    const data = snapshot.val() as Record<string, TypeWorkoutDb> | null
 
     if (data) {
       workoutStore.workouts = []
       Object.keys(data).forEach((key) => {
-        const workout:TypeWorkout = data[key]
+        const workout = data[key]
           workoutStore.workouts.push({
             id: key,
             exercisesId: workout.exercisesId,
-            date: workout.date,
+            date: normalizeWorkoutDate(workout.date),
             interval: workout.interval,
             ease: workout.ease,
             rubber: workout.rubber,
@@ -38,4 +74,6 @@ export const getWorkouts = (exercisesId:string) => {
       workoutStore.filteredWorkouts = []
     }
   })
+
+  return workoutsUnsubscribe
 }
