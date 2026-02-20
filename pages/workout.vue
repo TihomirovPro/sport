@@ -1,13 +1,18 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
 import { updateData, removeData } from '~/composables/firebaseInit'
 import type { TypeWorkoutCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 
 const router = useRouter()
-const activeExercise = useActiveExercise()
-const selectUpdateWorkout = useSelectUpdateWorkout()
-const rubbersColor = useRubbersColor()
-const headerTitle = useHeaderTitle()
+const exerciseStore = useExerciseStore()
+const workoutStore = useWorkoutStore()
+const catalogStore = useCatalogStore()
+const appStore = useAppStore()
+const { activeExercise } = storeToRefs(exerciseStore)
+const { selectUpdateWorkout } = storeToRefs(workoutStore)
+const { rubbersColor } = storeToRefs(catalogStore)
+const { headerTitle } = storeToRefs(appStore)
 headerTitle.value = 'Добавить тренировку'
 
 useHead({

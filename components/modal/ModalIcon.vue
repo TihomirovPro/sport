@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 defineProps<{
   isShow: boolean
   activeIcon: string | undefined
@@ -9,7 +11,8 @@ const emit = defineEmits<{
   selectIcon: [icon: string]
 }>()
 
-const icons = useIcons()
+const catalogStore = useCatalogStore()
+const { icons } = storeToRefs(catalogStore)
 </script>
 
 <template lang="pug">

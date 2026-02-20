@@ -4,16 +4,16 @@ import { auth, createDataWithoutKey } from './firebaseInit'
 export const initUser = async () => {
   const router = useRouter()
   const route = useRoute()
-  const activeUser = useActiveUser()
+  const userStore = useUserStore()
 
   try {
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        activeUser.value.uid = user.uid
+        userStore.activeUser.uid = user.uid
         getUserData()
         
         setTimeout(() => {
-          if (!activeUser.value.name && !activeUser.value.email) void createUserData()
+          if (!userStore.activeUser.name && !userStore.activeUser.email) void createUserData()
         }, 3000)
 
         getAllExercises()
@@ -28,14 +28,14 @@ export const initUser = async () => {
 }
 
 export const getUserData = () => {
-  const activeUser = useActiveUser()
+  const userStore = useUserStore()
 
   try {
     onData('user', (snapshot:any) => {
       const data = snapshot.val()
-      activeUser.value.name = data?.name || ''
-      activeUser.value.email = data?.email || ''
-      activeUser.value.photoURL = data?.photoURL || ''
+      userStore.activeUser.name = data?.name || ''
+      userStore.activeUser.email = data?.email || ''
+      userStore.activeUser.photoURL = data?.photoURL || ''
     })
   } catch (error) {
     console.error('[firebase:getUserData]', error)

@@ -2,17 +2,16 @@ import { onData } from './firebaseInit'
 import type { TypeWorkout } from "./types"
 
 export const getWorkouts = (exercisesId:string) => {
-  const filteredWorkouts = useFilteredWorkouts()
-  const allworkouts = useWorkouts()
+  const workoutStore = useWorkoutStore()
 
   onData(`workout/${exercisesId}`, (snapshot:any) => {
     const data = snapshot.val()
 
     if (data) {
-      allworkouts.value = []
+      workoutStore.workouts = []
       Object.keys(data).forEach((key) => {
         const workout:TypeWorkout = data[key]
-          allworkouts.value.push({
+          workoutStore.workouts.push({
             id: key,
             exercisesId: workout.exercisesId,
             date: workout.date,
@@ -27,16 +26,16 @@ export const getWorkouts = (exercisesId:string) => {
           })
       })
 
-      allworkouts.value.sort((a, b) => {
+      workoutStore.workouts.sort((a, b) => {
         if (new Date(a.date) < new Date(b.date)) return 1
         if (new Date(a.date) > new Date(b.date)) return -1
         return 0
       })
 
-      filteredWorkouts.value = [...allworkouts.value]
+      workoutStore.filteredWorkouts = [...workoutStore.workouts]
     } else {
-      allworkouts.value = []
-      filteredWorkouts.value = []
+      workoutStore.workouts = []
+      workoutStore.filteredWorkouts = []
     }
   })
 }

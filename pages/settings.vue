@@ -1,21 +1,22 @@
-<script setup ts="ts">
+<script setup lang="ts">
 import { signOut } from 'firebase/auth'
+import { storeToRefs } from 'pinia'
 import { auth } from '~/composables/firebaseInit'
 
 useHead({
   title: 'Настройки',
 })
 
-const headerTitle = useHeaderTitle()
+const appStore = useAppStore()
+const { hideFilterTitles } = storeToRefs(appStore)
 const colorMode = useColorMode()
-const hideFilterTitles = useHideFilterTitles()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
 const showModalRubbers = ref(false)
 
 if (localStorage.getItem('baseColor')) baseColor.value = localStorage.getItem('baseColor')
 
-headerTitle.value = 'Настройки'
+appStore.headerTitle = 'Настройки'
 
 function selectColor(color) {
   showModalColor.value = false

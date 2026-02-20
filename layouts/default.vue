@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+
 const route = useRoute()
-const user = useActiveUser()
+const userStore = useUserStore()
+const { activeUser } = storeToRefs(userStore)
 
 onMounted(async () => {
   initUser()
@@ -21,7 +24,7 @@ if (localStorage.getItem('baseColor')) {
 
 <template lang="pug">
 .grid.min-h-full(
-  v-if="user"
+  v-if="activeUser"
   class="grid-rows-[auto_1fr]"
 )
   PwaInstall
