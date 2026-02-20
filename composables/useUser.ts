@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from 'firebase/auth'
-import { getFirebaseAuth, createDataWithoutKey } from './firebaseInit'
+import { getFirebaseAuth, createDataWithoutKey, clearOfflineUserData } from './firebaseInit'
 
 let authUnsubscribe: (() => void) | null = null
 let userUnsubscribe: (() => void) | null = null
@@ -34,7 +34,13 @@ export const initUser = () => {
 
   try {
     authUnsubscribe = onAuthStateChanged(auth, (user) => {
+      const previousUid = userStore.activeUser.uid
+
       if (user) {
+        if (previousUid && previousUid !== user.uid) {
+          clearOfflineUserData(previousUid)
+        }
+
         userStore.activeUser.uid = user.uid
         getUserData()
 
@@ -49,6 +55,8 @@ export const initUser = () => {
           clearTimeout(createUserTimeout)
           createUserTimeout = null
         }
+
+        clearOfflineUserData(previousUid)
 
         stopUserDataSubscription()
         stopAllExercisesSubscription()

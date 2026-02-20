@@ -161,6 +161,12 @@ function validateExercise(): boolean {
   }
 
   exercise.value.name = name
+
+  if (!Array.isArray(exercise.value.ease) || exercise.value.ease.length === 0) {
+    notifyError('Выберите хотя бы один тип сложности')
+    return false
+  }
+
   error.value = false
 
   return true

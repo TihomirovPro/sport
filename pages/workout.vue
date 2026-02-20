@@ -34,6 +34,14 @@ function readStoredActiveExercise() {
   }
 }
 
+function safeParseJson<T>(value: string, fallback: T): T {
+  try {
+    return JSON.parse(value) as T
+  } catch {
+    return fallback
+  }
+}
+
 if (!activeExercise.value) {
   const storedActiveExercise = readStoredActiveExercise()
   if (storedActiveExercise?.id) {
@@ -274,8 +282,9 @@ if (!selectUpdateWorkout.value) {
   const approachesRaw = localStorage.getItem('approaches')
 
   if (newWorkoutRaw) {
-    const newWorkout = JSON.parse(newWorkoutRaw) as Partial<TypeWorkoutCreate> & { resWeidth?: number }
-    const parsedApproaches = approachesRaw ? Number(JSON.parse(approachesRaw) as unknown) : 5
+    const newWorkout = safeParseJson<Partial<TypeWorkoutCreate> & { resWeidth?: number }>(newWorkoutRaw, {})
+    const parsedApproachesRaw = approachesRaw ? safeParseJson<unknown>(approachesRaw, 5) : 5
+    const parsedApproaches = Number(parsedApproachesRaw)
     approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : 5
 
     workout.value = {
@@ -366,6 +375,10 @@ function resetInterval() {
   startInterval.value = false
   timer.value = '00:00'
 }
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval)
+})
 
 function normalizeNumberArray(value: unknown): number[] {
   if (!Array.isArray(value)) return []

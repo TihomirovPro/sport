@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import type { TypeExercise } from '~/composables/types'
 
 const workoutStore = useWorkoutStore()
 const exerciseStore = useExerciseStore()
@@ -20,10 +21,29 @@ function readStoredActiveExercise() {
   }
 }
 
+function normalizeStoredActiveExercise(value: unknown) {
+  if (!value || typeof value !== 'object') return null
+
+  const candidate = value as Partial<TypeExercise>
+  if (!candidate.id) return null
+
+  return {
+    id: candidate.id,
+    name: candidate.name ?? '',
+    ease: Array.isArray(candidate.ease) ? candidate.ease : [],
+    order: typeof candidate.order === 'number' ? candidate.order : 0,
+    color: candidate.color,
+    icon: candidate.icon,
+    isComplex: candidate.isComplex,
+    complexDesc: candidate.complexDesc,
+  } satisfies TypeExercise
+}
+
 if (!activeExercise.value) {
   const storedActiveExercise = readStoredActiveExercise()
-  if (storedActiveExercise && storedActiveExercise.id) {
-    activeExercise.value = storedActiveExercise as any
+  const normalizedActiveExercise = normalizeStoredActiveExercise(storedActiveExercise)
+  if (normalizedActiveExercise) {
+    activeExercise.value = normalizedActiveExercise
   }
 }
 
