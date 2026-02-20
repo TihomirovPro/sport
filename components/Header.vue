@@ -40,9 +40,15 @@ function back() {
 }
 
 function addItem() {
-  if (routeName.value === 'index') router.push('/exercise')
-  if (routeName.value === 'exercise-item') router.push('/workout')
-  if (routeName.value === 'exercise-item' && activeExercise.value?.isComplex) router.push('/complex')
+  if (routeName.value === 'index') {
+    router.push('/exercise')
+    return
+  }
+
+  if (routeName.value === 'exercise-item') {
+    if (activeExercise.value?.isComplex) router.push('/complex')
+    else router.push('/workout')
+  }
 }
 
 function toSettings() {

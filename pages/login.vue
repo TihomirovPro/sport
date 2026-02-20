@@ -1,4 +1,4 @@
-<script setup type="ts">
+<script setup lang="ts">
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
 
@@ -7,6 +7,12 @@ definePageMeta({
 })
 
 async function loginWithGoogle() {
+  if (!navigator.onLine) {
+    const { notifyError } = useNotifications()
+    notifyError('Для входа через Google нужен интернет')
+    return
+  }
+
   try {
     const auth = getFirebaseAuth()
     await signInWithPopup(auth, new GoogleAuthProvider())

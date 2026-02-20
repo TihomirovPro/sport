@@ -57,10 +57,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   userStore.activeUser.uid = ''
 
-  if (process.client && !navigator.onLine) {
-    return
-  }
-
   if (!isPublicRoute) {
     return navigateTo('/login')
   }

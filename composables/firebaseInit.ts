@@ -194,8 +194,25 @@ function writePendingOperations(operations: PendingOperation[]) {
   writeJson(OFFLINE_QUEUE_KEY, operations)
 }
 
+function prunePendingOperationsToUid(uid: string): PendingOperation[] {
+  const queue = readPendingOperations()
+  const filtered = queue.filter((item) => item.uid === uid)
+
+  if (filtered.length !== queue.length) {
+    writePendingOperations(filtered)
+  }
+
+  return filtered
+}
+
 function updatePendingStatus() {
-  const operations = readPendingOperations()
+  const uid = getCurrentUid()
+  if (!uid) {
+    setOfflinePendingOperations(0)
+    return
+  }
+
+  const operations = prunePendingOperationsToUid(uid)
   setOfflinePendingOperations(operations.length)
 }
 
@@ -225,7 +242,7 @@ function enqueueOperation(type: PendingOperationType, path: string, data?: unkno
   const uid = getCurrentUid()
   if (!uid) throw new Error('Пользователь не авторизован')
 
-  const operations = readPendingOperations()
+  const operations = prunePendingOperationsToUid(uid)
   operations.push({
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     uid,
@@ -270,8 +287,8 @@ export async function flushOfflineQueue() {
     return
   }
 
-  const queue = readPendingOperations()
-  const currentUserQueue = queue.filter((item) => item.uid === uid)
+  const queue = prunePendingOperationsToUid(uid)
+  const currentUserQueue = queue
 
   if (!currentUserQueue.length) {
     updatePendingStatus()
@@ -296,6 +313,24 @@ export async function flushOfflineQueue() {
     isFlushingQueue = false
     updatePendingStatus()
   }
+}
+
+export function clearOfflineUserData(uid: string) {
+  if (!process.client || !uid) return
+
+  const cache = readOfflineCache()
+  if (cache[uid]) {
+    delete cache[uid]
+    writeOfflineCache(cache)
+  }
+
+  const queue = readPendingOperations()
+  const filtered = queue.filter((item) => item.uid !== uid)
+  if (filtered.length !== queue.length) {
+    writePendingOperations(filtered)
+  }
+
+  updatePendingStatus()
 }
 
 export function initOfflineSync() {

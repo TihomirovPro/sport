@@ -1,36 +1,37 @@
-<script>
-export default {
-  data: () => ({
-    shown: false,
-    installEvent: null
-  }),
-
-  beforeMount() {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault()
-      this.installEvent = e
-      this.shown = true
-    })
-  },
-
-  methods: {
-    dismissPrompt() {
-      this.shown = false
-    },
-
-    installPWA() {
-      this.installEvent.prompt()
-      this.installEvent.userChoice.then((choice) => {
-        this.dismissPrompt() // Hide the prompt once the user's clicked
-        if (choice.outcome === 'accepted') {
-          // Do something additional if the user chose to install
-        } else {
-          // Do something additional if the user declined
-        }
-      })
-    },
-  }
+<script setup lang="ts">
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
 }
+
+const shown = ref(false)
+const installEvent = ref<BeforeInstallPromptEvent | null>(null)
+
+function onBeforeInstallPrompt(event: Event) {
+  event.preventDefault()
+  installEvent.value = event as BeforeInstallPromptEvent
+  shown.value = true
+}
+
+function dismissPrompt() {
+  shown.value = false
+}
+
+async function installPWA() {
+  if (!installEvent.value) return
+
+  await installEvent.value.prompt()
+  await installEvent.value.userChoice
+  dismissPrompt()
+}
+
+onMounted(() => {
+  window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+})
 </script>
 
 <template>

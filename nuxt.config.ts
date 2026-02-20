@@ -1,6 +1,26 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite'
 
+const isDev = process.env.NODE_ENV !== 'production'
+
+const cspDirectives = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "img-src 'self' data: blob: https:",
+  "media-src 'self' https: blob:",
+  "font-src 'self' data:",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://apis.google.com https://www.gstatic.com https://*.firebasedatabase.app https://*.firebaseio.com`,
+  "script-src-elem 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com https://*.firebasedatabase.app https://*.firebaseio.com",
+  "style-src 'self' 'unsafe-inline'",
+  `connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app wss://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com${isDev ? ' http://localhost:* ws://localhost:* wss://localhost:*' : ''}`,
+  "frame-src 'self' https://accounts.google.com https://*.google.com https://*.firebasedatabase.app https://*.firebaseio.com",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  "form-action 'self'"
+].join('; ')
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-20',
 
@@ -141,4 +161,18 @@ export default defineNuxtConfig({
       APP_ID: process.env.APP_ID
     }
   },
+
+  nitro: {
+    routeRules: {
+      '/**': {
+        headers: {
+          'Content-Security-Policy': cspDirectives,
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'SAMEORIGIN',
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+        }
+      }
+    }
+  }
 })

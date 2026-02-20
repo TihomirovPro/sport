@@ -11,6 +11,13 @@ function getUserErrorMessage(error: unknown): string {
 }
 
 export default defineNuxtPlugin((nuxtApp) => {
+  const globalState = globalThis as typeof globalThis & {
+    __ppGlobalErrorHandlerInstalled?: boolean
+  }
+
+  if (globalState.__ppGlobalErrorHandlerInstalled) return
+  globalState.__ppGlobalErrorHandlerInstalled = true
+
   const { notifyError } = useNotifications()
 
   const isDynamicImportFetchError = (error: unknown): boolean => {
