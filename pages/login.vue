@@ -6,8 +6,12 @@ definePageMeta({
   layout: 'login'
 })
 
-function loginWithGoogle() {
-  signInWithPopup(auth, new GoogleAuthProvider())
+async function loginWithGoogle() {
+  try {
+    await signInWithPopup(auth, new GoogleAuthProvider())
+  } catch (error) {
+    console.error('[firebase:loginWithGoogle]', error)
+  }
 }
 </script>
 

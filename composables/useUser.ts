@@ -6,42 +6,54 @@ export const initUser = async () => {
   const route = useRoute()
   const activeUser = useActiveUser()
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      activeUser.value.uid = user.uid
-      getUserData()
-      
-      setTimeout(() => {
-        if (!activeUser.value.name && !activeUser.value.email) createUserData()
-      }, 3000)
+  try {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        activeUser.value.uid = user.uid
+        getUserData()
+        
+        setTimeout(() => {
+          if (!activeUser.value.name && !activeUser.value.email) void createUserData()
+        }, 3000)
 
-      getAllExercises()
-      if (route.name === 'login') router.push('/')
-    } else {
-      router.push('/login')
-    }
-  })
+        getAllExercises()
+        if (route.name === 'login') router.push('/')
+      } else {
+        router.push('/login')
+      }
+    })
+  } catch (error) {
+    console.error('[firebase:initUser]', error)
+  }
 }
 
 export const getUserData = () => {
   const activeUser = useActiveUser()
 
-  onData('user', (snapshot:any) => {
-    const data = snapshot.val()
-    activeUser.value.name = data?.name || ''
-    activeUser.value.email = data?.email || ''
-    activeUser.value.photoURL = data?.photoURL || ''
-  })
+  try {
+    onData('user', (snapshot:any) => {
+      const data = snapshot.val()
+      activeUser.value.name = data?.name || ''
+      activeUser.value.email = data?.email || ''
+      activeUser.value.photoURL = data?.photoURL || ''
+    })
+  } catch (error) {
+    console.error('[firebase:getUserData]', error)
+  }
 
   console.log('Получен');
 }
 
-export const createUserData = () => {
+export const createUserData = async () => {
   console.log('Создан');
-  
-  createDataWithoutKey('user', {
-    name: auth.currentUser?.displayName,
-    email: auth.currentUser?.email,
-    photoURL: auth.currentUser?.photoURL
-  })
+
+  try {
+    await createDataWithoutKey('user', {
+      name: auth.currentUser?.displayName,
+      email: auth.currentUser?.email,
+      photoURL: auth.currentUser?.photoURL
+    })
+  } catch (error) {
+    console.error('[firebase:createUserData]', error)
+  }
 }

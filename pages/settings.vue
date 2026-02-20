@@ -35,6 +35,14 @@ function changeTheme() {
   if (colorMode.preference === 'dark') colorMode.preference = 'light'
   else colorMode.preference = 'dark'
 }
+
+async function signOutUser() {
+  try {
+    await signOut(auth)
+  } catch (error) {
+    console.error('[firebase:signOutUser]', error)
+  }
+}
 </script>
 
 <template lang="pug">
@@ -52,7 +60,7 @@ function changeTheme() {
     p Скрыть заголовки фильтров
     p {{ hideFilterTitles ? 'Да' : 'Нет' }}
 
-  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOut(auth)")
+  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOutUser")
     p Выход
 
   //- .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
