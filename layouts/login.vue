@@ -9,6 +9,7 @@ onMounted(async () => {
   PwaInstall
   .h-full.overflow-auto
     slot
+  GlobalNotifications
 </template>
 
 <style>
