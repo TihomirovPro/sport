@@ -8,14 +8,17 @@ type UserData = {
   name?: string
   email?: string
   photoURL?: string
+  rubbersColor?: unknown
 }
 
 function resetActiveUserState() {
   const userStore = useUserStore()
+  const catalogStore = useCatalogStore()
   userStore.activeUser.uid = ''
   userStore.activeUser.name = ''
   userStore.activeUser.email = ''
   userStore.activeUser.photoURL = ''
+  catalogStore.setRubbersFromUser(null)
 }
 
 function stopUserDataSubscription() {
@@ -79,6 +82,7 @@ export const initUser = () => {
 
 export const getUserData = () => {
   const userStore = useUserStore()
+  const catalogStore = useCatalogStore()
 
   try {
     stopUserDataSubscription()
@@ -88,6 +92,7 @@ export const getUserData = () => {
       userStore.activeUser.name = data?.name || ''
       userStore.activeUser.email = data?.email || ''
       userStore.activeUser.photoURL = data?.photoURL || ''
+      catalogStore.setRubbersFromUser(data?.rubbersColor)
     })
   } catch (error) {
     console.error('[firebase:getUserData]', error)

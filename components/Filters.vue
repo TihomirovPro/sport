@@ -68,6 +68,12 @@ const optionsLines = reactive({
 })
 
 const filterElements = computed(() => {
+  const easeOrder: Record<EnumEase, number> = {
+    [EnumEase.noWeight]: 0,
+    [EnumEase.weight]: 1,
+    [EnumEase.rubber]: 2,
+  }
+
   const obj = { eases: new Set<EnumEase>(), intervals: new Set<number>(), approaches: new Set<number>() };
 
   workouts.value.forEach(item => {
@@ -77,7 +83,7 @@ const filterElements = computed(() => {
   });
 
   return {
-    eases: [...obj.eases],
+    eases: [...obj.eases].sort((a, b) => easeOrder[a] - easeOrder[b]),
     intervals: [...obj.intervals].sort((a, b) => a - b),
     approaches: [...obj.approaches].sort((a, b) => a - b)
   };
