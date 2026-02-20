@@ -52,19 +52,23 @@ export const getWorkouts = (exercisesId:string) => {
       workoutStore.workouts = []
       Object.keys(data).forEach((key) => {
         const workout = data[key]
-          workoutStore.workouts.push({
-            id: key,
-            exercisesId: workout.exercisesId,
-            date: normalizeWorkoutDate(workout.date),
-            interval: workout.interval,
-            ease: workout.ease,
-            rubber: workout.rubber,
-            approach: workout.approach,
-            weight: workout.weight,
-            desc: workout.desc,
-            res: workout.res,
-            resWeigth: workout.weight ? workout.weight.reduce((acc:number, item:number, index:number):number => acc + +item, 0) : 0
-          })
+        if (!workout) return
+
+        workoutStore.workouts.push({
+          id: key,
+          exercisesId: workout.exercisesId,
+          date: normalizeWorkoutDate(workout.date),
+          interval: workout.interval,
+          ease: workout.ease,
+          rubber: workout.rubber,
+          approach: workout.approach,
+          weight: workout.weight,
+          desc: workout.desc,
+          res: workout.res,
+          resWeigth: Array.isArray(workout.weight)
+            ? workout.weight.reduce((acc:number, item:number):number => acc + Number(item), 0)
+            : 0
+        })
       })
 
       workoutStore.workouts.sort((a, b) => {

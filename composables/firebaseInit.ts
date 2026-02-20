@@ -140,6 +140,7 @@ function deepSet(
 
   for (let index = 0; index < path.length - 1; index++) {
     const key = path[index]
+    if (key === undefined) continue
     const next = current[key]
 
     if (!next || typeof next !== 'object' || Array.isArray(next)) {
@@ -150,6 +151,7 @@ function deepSet(
   }
 
   const leaf = path[path.length - 1]
+  if (leaf === undefined) return
 
   if (options.remove) {
     delete current[leaf]
@@ -377,7 +379,7 @@ export const createDataWithoutKey = async <T>(path:string, data:T) => {
   }
 }
 
-export const updateData = async <T>(path:string, data:T) => {
+export const updateData = async <T extends object>(path:string, data:T) => {
   initOfflineSync()
 
   try {

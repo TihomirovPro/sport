@@ -10,6 +10,7 @@ async function loginWithGoogle() {
   try {
     const auth = getFirebaseAuth()
     await signInWithPopup(auth, new GoogleAuthProvider())
+    await navigateTo('/')
   } catch (error) {
     console.error('[firebase:loginWithGoogle]', error)
   }

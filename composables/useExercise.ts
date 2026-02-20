@@ -22,6 +22,8 @@ export const getAllExercises = () => {
       exerciseStore.allExercises = []
       Object.keys(data).forEach((key) => {
         const exercise = data[key]
+        if (!exercise) return
+
         exerciseStore.allExercises.push({
           name: exercise.name,
           color: exercise.color,

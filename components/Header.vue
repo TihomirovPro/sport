@@ -3,8 +3,9 @@ import { storeToRefs } from 'pinia'
 
 const route = useRoute()
 const router = useRouter()
-const pagesWithoutBackBtn = ['index']
-const isShowBackBtn = computed(() => !pagesWithoutBackBtn.includes(route.name))
+const pagesWithoutBackBtn = new Set(['index'])
+const routeName = computed(() => String(route.name ?? ''))
+const isShowBackBtn = computed(() => !pagesWithoutBackBtn.has(routeName.value))
 const appStore = useAppStore()
 const exerciseStore = useExerciseStore()
 const workoutStore = useWorkoutStore()
@@ -15,7 +16,7 @@ const { selectUpdateExercise, activeExercise } = storeToRefs(exerciseStore)
 const { selectUpdateWorkout } = storeToRefs(workoutStore)
 
 function back() {
-  if (route.name === 'workout') {
+  if (routeName.value === 'workout') {
     selectUpdateWorkout.value = null
     localStorage.removeItem('newWorkout')
     localStorage.removeItem('approaches')
@@ -23,12 +24,12 @@ function back() {
     return
   }
 
-  if (activeExercise.value && route.name === 'settings') {
+  if (activeExercise.value && routeName.value === 'settings') {
     router.push('/exercise-item')
     return
   }
 
-  if (activeExercise.value && route.name === 'exercise-item') {
+  if (activeExercise.value && routeName.value === 'exercise-item') {
     activeExercise.value = null
     localStorage.removeItem('activeExercise')
   }
@@ -39,9 +40,9 @@ function back() {
 }
 
 function addItem() {
-  if (route.name === 'index') router.push('/exercise')
-  if (route.name === 'exercise-item') router.push('/workout')
-  if (route.name === 'exercise-item' && activeExercise.value?.isComplex) router.push('/complex')
+  if (routeName.value === 'index') router.push('/exercise')
+  if (routeName.value === 'exercise-item') router.push('/workout')
+  if (routeName.value === 'exercise-item' && activeExercise.value?.isComplex) router.push('/complex')
 }
 
 function toSettings() {

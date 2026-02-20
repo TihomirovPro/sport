@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { createData, updateData, removeData } from '~/composables/firebaseInit'
 import type { TypeWorkoutCreate } from '~/composables/types'
+import type { TypeExercise } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 
 const router = useRouter()
@@ -25,7 +26,9 @@ function readStoredActiveExercise() {
   if (!raw) return null
 
   try {
-    return JSON.parse(raw) as { id?: string }
+    const parsed = JSON.parse(raw) as Partial<TypeExercise> | null
+    if (!parsed?.id) return null
+    return parsed
   } catch {
     return null
   }
@@ -33,8 +36,19 @@ function readStoredActiveExercise() {
 
 if (!activeExercise.value) {
   const storedActiveExercise = readStoredActiveExercise()
-  if (storedActiveExercise && storedActiveExercise.id) {
-    activeExercise.value = storedActiveExercise as any
+  if (storedActiveExercise?.id) {
+    activeExercise.value = {
+      id: storedActiveExercise.id,
+      name: storedActiveExercise.name ?? '',
+      ease: Array.isArray(storedActiveExercise.ease)
+        ? storedActiveExercise.ease
+        : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber],
+      order: typeof storedActiveExercise.order === 'number' ? storedActiveExercise.order : 0,
+      color: storedActiveExercise.color,
+      icon: storedActiveExercise.icon,
+      isComplex: storedActiveExercise.isComplex,
+      complexDesc: storedActiveExercise.complexDesc,
+    }
   }
 }
 
@@ -59,8 +73,8 @@ const approaches = ref(5)
 const removeConfirm = ref(false)
 const timer = ref('00:00')
 const startInterval = ref(false)
-const approachesTimes = ref([])
-let interval:any
+const approachesTimes = ref<string[]>([])
+let interval: ReturnType<typeof setInterval> | null = null
 let seconds:number = 0
 
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
@@ -68,12 +82,12 @@ const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, E
 const workout = ref<TypeWorkoutCreate>({
   date: nowDate,
   interval: '2.5',
-  ease: activeExercise.value?.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
+  ease: activeExercise.value?.ease?.[0] ?? EnumEase.noWeight,
   rubber: '',
   approach: [],
   weight: [],
   desc: '',
-  exercisesId: activeExercise.value?.id,
+  exercisesId: activeExercise.value?.id ?? '',
   res: 0,
   resWeigth: 0
 })
@@ -86,7 +100,7 @@ type WorkoutStoreItem = {
   ease: EnumEase
   rubber?: string
   approach: number[]
-  weight: number[]
+  weight?: number[]
   desc?: string
   res: number
   resWeigth: number
@@ -115,10 +129,10 @@ function reset () {
   selectUpdateWorkout.value = null
   error.value = false
   workout.value = {
-    exercisesId: activeExercise.value?.id,
+    exercisesId: activeExercise.value?.id ?? '',
     date: nowDate,
     interval: '2.5',
-    ease: activeExercise.value?.ease ? activeExercise.value.ease[0] : EnumEase.noWeight,
+    ease: activeExercise.value?.ease?.[0] ?? EnumEase.noWeight,
     rubber: '',
     approach: [],
     weight: [],
@@ -142,6 +156,7 @@ watchEffect(() => {
       weight: selectUpdateWorkout.value.weight || [],
       desc: selectUpdateWorkout.value.desc || '',
       res: selectUpdateWorkout.value.res,
+      resWeigth: selectUpdateWorkout.value.resWeigth,
     }
   } else {
     reset()
@@ -161,13 +176,13 @@ async function add() {
 
     upsertWorkoutInStore({
       id: createdId,
-      exercisesId: workout.value.exercisesId!,
+      exercisesId: workout.value.exercisesId,
       date: workout.value.date as number,
       interval: workout.value.interval,
       ease: workout.value.ease,
       rubber: workout.value.rubber,
       approach: [...workout.value.approach],
-      weight: [...workout.value.weight],
+      weight: Array.isArray(workout.value.weight) ? [...workout.value.weight] : [],
       desc: workout.value.desc,
       res: workout.value.res,
       resWeigth: workout.value.resWeigth
@@ -201,13 +216,13 @@ async function updateSelectWorkout() {
 
     upsertWorkoutInStore({
       id: selectedWorkoutId,
-      exercisesId: workout.value.exercisesId!,
+      exercisesId: workout.value.exercisesId,
       date: workout.value.date as number,
       interval: workout.value.interval,
       ease: workout.value.ease,
       rubber: workout.value.rubber,
       approach: [...workout.value.approach],
-      weight: [...workout.value.weight],
+      weight: Array.isArray(workout.value.weight) ? [...workout.value.weight] : [],
       desc: workout.value.desc,
       res: workout.value.res,
       resWeigth: workout.value.resWeigth
@@ -254,21 +269,27 @@ function timerApproach(time:number){
   return '00:00'
 }
 
-if (!selectUpdateWorkout.value && localStorage.getItem('newWorkout')) {
-  const newWorkout = JSON.parse(localStorage.getItem('newWorkout')!)
-  approaches.value = +JSON.parse(localStorage.getItem('approaches')!)
+if (!selectUpdateWorkout.value) {
+  const newWorkoutRaw = localStorage.getItem('newWorkout')
+  const approachesRaw = localStorage.getItem('approaches')
 
-  workout.value = {
-    exercisesId: activeExercise.value?.id,
-    date: newWorkout.date,
-    interval: newWorkout.interval,
-    approach: newWorkout.approach,
-    ease: newWorkout.ease,
-    rubber: newWorkout.rubber || '',
-    weight: newWorkout.weight || [],
-    desc: newWorkout.desc || '',
-    res: 0,
-    resWeigth: newWorkout.resWeidth || 0
+  if (newWorkoutRaw) {
+    const newWorkout = JSON.parse(newWorkoutRaw) as Partial<TypeWorkoutCreate> & { resWeidth?: number }
+    const parsedApproaches = approachesRaw ? Number(JSON.parse(approachesRaw) as unknown) : 5
+    approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : 5
+
+    workout.value = {
+      exercisesId: activeExercise.value?.id ?? '',
+      date: newWorkout.date ?? nowDate,
+      interval: newWorkout.interval ?? '2.5',
+      approach: Array.isArray(newWorkout.approach) ? newWorkout.approach : [],
+      ease: newWorkout.ease ?? EnumEase.noWeight,
+      rubber: newWorkout.rubber || '',
+      weight: Array.isArray(newWorkout.weight) ? newWorkout.weight : [],
+      desc: newWorkout.desc || '',
+      res: 0,
+      resWeigth: newWorkout.resWeigth ?? newWorkout.resWeidth ?? 0
+    }
   }
 }
 
@@ -289,13 +310,12 @@ function selectRubber(name:string) {
   saveNewWorkout()
 }
 
-function addWeight(idx, e) {
-  const inputEvent = e as InputEvent
+function updateWeight(idx: number, value: string | number | undefined) {
   if (!Array.isArray(workout.value.weight)) workout.value.weight = []
-  if (inputEvent.data === ',') {
-    const current = String(workout.value.weight[idx] ?? '')
-    workout.value.weight[idx] = current.replace(',', '.')
-  }
+
+  const normalized = String(value ?? '').replace(',', '.').trim()
+  workout.value.weight[idx] = normalized === '' ? NaN : Number(normalized)
+
   saveNewWorkout()
 }
 
@@ -321,8 +341,9 @@ function fnTimer() {
       let secs = (seconds % 60).toString().padStart(2, '0')
       timer.value = `${mins}:${secs}`
 
-      if (approachesTimes.value.at(-1) === timer.value) {
-        clearInterval(interval)
+      const lastApproachTime = approachesTimes.value[approachesTimes.value.length - 1]
+      if (lastApproachTime === timer.value) {
+        if (interval) clearInterval(interval)
         startInterval.value = false
       }
       
@@ -331,17 +352,17 @@ function fnTimer() {
       let notificationTimer = `${notificationMins}:${notificationSecs}`
       if (approachesTimes.value.includes(notificationTimer)) notification()
       seconds++
-      document.body.dispatchEvent(new Event('touchstart'));
+      document.body.dispatchEvent(new Event('touchstart'))
     }, 1000)
   } else {
-    clearInterval(interval)
+    if (interval) clearInterval(interval)
     startInterval.value = false
   }
 }
 
 function resetInterval() {
   seconds = 0
-  clearInterval(interval)
+  if (interval) clearInterval(interval)
   startInterval.value = false
   timer.value = '00:00'
 }
@@ -432,7 +453,7 @@ watch(
     v-if="eases.length > 1"
     :eases="eases"
     :selected="workout.ease"
-    @selectEase="(ease) => selectEase(ease)"
+    @selectEase="selectEase"
   )
 
   .rubbers(v-if="workout.ease === EnumEase.rubber")
@@ -472,11 +493,11 @@ watch(
 
       BaseInput(
         v-if="workout.ease === EnumEase.weight"
-        v-model="workout.weight[index-1]"
+        :model-value="Array.isArray(workout.weight) ? workout.weight[index-1] : ''"
+        @update:model-value="(value) => updateWeight(index - 1, value)"
         type="text"
         inputmode="decimal"
         :placeholder="`Вес ${index}`"
-        @input="(e) => addWeight(index-1, e)"
       )  
 
   BaseInput(

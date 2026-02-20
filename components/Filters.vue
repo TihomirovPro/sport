@@ -84,7 +84,7 @@ const filterElements = computed(() => {
 });
 
 const filter = ref<Filter>({
-  ease: filterElements.value.eases.length === 1 ? filterElements.value.eases[0] : '',
+  ease: filterElements.value.eases.length === 1 ? (filterElements.value.eases[0] ?? '') : '',
   interval: 0,
   approach: 0,
 
@@ -120,25 +120,37 @@ const b = parseInt(color.slice(5, 7), 16)
 const baseColor = color
 const secondColor = `rgba(${r},${g},${b},0.2)`
 
+type ChartDataset = {
+  label: string
+  borderColor: string
+  backgroundColor: string
+  data: number[]
+  yAxisID: 'y' | 'y1'
+  pointRadius: number
+  order: number
+  type: 'line' | 'bar'
+}
+
 const data = computed(() => {
   const approaches:number[] = [0];
   const dates:string[] = [];
   const weights:number[] = [];
+  const datasets: ChartDataset[] = [
+    {
+      label: 'Повторений',
+      borderColor: baseColor,
+      backgroundColor: baseColor,
+      data: approaches,
+      yAxisID: 'y',
+      pointRadius: 6,
+      order: 1,
+      type: 'line',
+    }
+  ]
 
-  const options = {
+  const options: { labels: string[]; datasets: ChartDataset[] } = {
     labels: dates,
-    datasets: [
-      {
-        label: 'Повторений',
-        borderColor: baseColor,
-        backgroundColor: baseColor,
-        data: approaches,
-        yAxisID: 'y',
-        pointRadius: 6,
-        order: 1,
-        type: 'line',
-      }
-    ]
+    datasets
   }
 
   filteredWorkouts.value.forEach(item => {
@@ -238,6 +250,7 @@ function showChart() {
       ).text-xs
   Chart(
     v-if="showChart()"
+    type="line"
     :data="data"
     :options="optionsLines"
     :key="chartKey"

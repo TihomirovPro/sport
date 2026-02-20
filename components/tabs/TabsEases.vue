@@ -6,9 +6,13 @@ const props = defineProps<{
   selected: EnumEase | EnumEase[]
 }>()
 
+const emit = defineEmits<{
+  selectEase: [ease: EnumEase]
+}>()
+
 function isActive(ease: EnumEase) {
-  if (props.selected === ease || props.selected.includes(ease)) return true
-  return false
+  if (Array.isArray(props.selected)) return props.selected.includes(ease)
+  return props.selected === ease
 }
 </script>
 
@@ -19,7 +23,7 @@ div
       v-for="ease in eases"
       :key="ease"
       :active="isActive(ease)"
-      @click="$emit('selectEase', ease)"
+      @click="emit('selectEase', ease)"
       :title="ease"
     )
 </template>

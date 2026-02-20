@@ -15,6 +15,16 @@ export default defineNuxtConfig({
   },
 
   app: {
+    head: {
+      link: [
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon-32x32.png' }
+      ],
+      meta: [
+        { name: 'apple-mobile-web-app-capable', content: 'yes' },
+        { name: 'apple-mobile-web-app-status-bar-style', content: 'default' }
+      ]
+    },
     pageTransition: {
       name: 'page',
       mode: 'out-in'
@@ -30,7 +40,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/tailwind.css'],
 
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss() as any]
   },
 
   colorMode: {
@@ -58,7 +68,8 @@ export default defineNuxtConfig({
       lang: 'ru',
       background_color: '#ffffff',
       theme_color: '#000000',
-      start_url: 'https://training-diary.ru/',
+      start_url: '/',
+      scope: '/',
       icons: [
         {
           src: '/icon.png',
@@ -76,8 +87,21 @@ export default defineNuxtConfig({
     },
     workbox: {
       cleanupOutdatedCaches: true,
-      cacheId: 'power-progress-v4',
+      cacheId: 'power-progress-v5',
+      navigateFallback: '/',
       runtimeCaching: [
+        {
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'app-pages',
+            networkTimeoutSeconds: 3,
+            expiration: {
+              maxEntries: 50,
+              maxAgeSeconds: 60 * 60 * 24 * 7
+            }
+          }
+        },
         {
           urlPattern: /\/_nuxt\/.*/i,
           handler: 'CacheFirst',

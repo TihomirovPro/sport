@@ -1,18 +1,41 @@
 import { onAuthStateChanged } from 'firebase/auth'
+import type { User } from 'firebase/auth'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
 
 const publicRouteNames = new Set(['login'])
+const AUTH_RESOLVE_TIMEOUT_MS = 2500
 
 function resolveAuthUser() {
   const auth = getFirebaseAuth()
 
   if (auth.currentUser) return Promise.resolve(auth.currentUser)
 
-  return new Promise<typeof auth.currentUser>((resolve) => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+  return new Promise<User | null>((resolve) => {
+    let settled = false
+    let timer: ReturnType<typeof setTimeout> | null = null
+    let unsubscribe: () => void = () => {}
+
+    const finish = (user: User | null) => {
+      if (settled) return
+      settled = true
+      if (timer) clearTimeout(timer)
       unsubscribe()
       resolve(user)
-    })
+    }
+
+    timer = setTimeout(() => {
+      finish(auth.currentUser ?? null)
+    }, AUTH_RESOLVE_TIMEOUT_MS)
+
+    unsubscribe = onAuthStateChanged(
+      auth,
+      (user) => {
+        finish(user)
+      },
+      () => {
+        finish(auth.currentUser ?? null)
+      }
+    )
   })
 }
 
@@ -33,6 +56,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   userStore.activeUser.uid = ''
+
+  if (process.client && !navigator.onLine) {
+    return
+  }
 
   if (!isPublicRoute) {
     return navigateTo('/login')
