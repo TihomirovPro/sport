@@ -34,6 +34,7 @@ const removeConfirm = ref(false)
 const timer = ref('00:00')
 const startInterval = ref(false)
 const approachesTimes = ref([])
+const { notifyError } = useNotifications()
 let interval:any
 let seconds:number = 0
 
@@ -90,33 +91,27 @@ watchEffect(() => {
 })
 
 async function add() {
-  if (workout.value.approach) {
-    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
+  if (!validateWorkout()) return
 
-    if (workout.value.weight) {
-      workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
-    }
+  workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
+  workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
 
-    createData(`workout/${workout.value.exercisesId}`, workout.value)
+  createData(`workout/${workout.value.exercisesId}`, workout.value)
 
-    router.push('/exercise-item')
-    reset()
-    localStorage.removeItem('newWorkout')
-    localStorage.removeItem('approaches')
-  } else {
-    error.value = true
-  }
+  router.push('/exercise-item')
+  reset()
+  localStorage.removeItem('newWorkout')
+  localStorage.removeItem('approaches')
 }
 
 function updateSelectWorkout() {
-  if (workout.value.approach.length > 0) {
-    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-    updateData(`workout/${workout.value.exercisesId}/${selectUpdateWorkout.value!.id}`, workout.value)
-    reset()
-    router.push('/exercise-item')
-  } else {
-    error.value = true
-  }
+  if (!validateWorkout()) return
+
+  workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
+  workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
+  updateData(`workout/${workout.value.exercisesId}/${selectUpdateWorkout.value!.id}`, workout.value)
+  reset()
+  router.push('/exercise-item')
 }
 
 function removeSelectWorkout() {
@@ -225,6 +220,57 @@ function resetInterval() {
   startInterval.value = false
   timer.value = '00:00'
 }
+
+function normalizeNumberArray(value: unknown[]): number[] {
+  return value.map((item) => {
+    const normalized = String(item ?? '').replace(',', '.').trim()
+    return normalized === '' ? NaN : Number(normalized)
+  })
+}
+
+function validateWorkout(): boolean {
+  const approachValues = normalizeNumberArray(workout.value.approach as unknown[])
+
+  if (!approachValues.length || approachValues.some((item) => !Number.isFinite(item) || item <= 0)) {
+    error.value = true
+    notifyError('Заполните подходы числами больше нуля')
+    return false
+  }
+
+  if (workout.value.ease === EnumEase.rubber && !workout.value.rubber) {
+    notifyError('Выберите резину для режима "В резине"')
+    return false
+  }
+
+  let weightValues:number[] = []
+
+  if (workout.value.ease === EnumEase.weight) {
+    weightValues = normalizeNumberArray(workout.value.weight as unknown[])
+
+    if (weightValues.length !== approachValues.length || weightValues.some((item) => !Number.isFinite(item) || item < 0)) {
+      notifyError('Заполните вес для каждого подхода')
+      return false
+    }
+  } else {
+    weightValues = []
+  }
+
+  workout.value.approach = approachValues
+  workout.value.weight = weightValues
+  error.value = false
+
+  return true
+}
+
+watch(
+  () => workout.value.approach,
+  (approach) => {
+    if (!approach.length) return
+    const hasInvalidValues = normalizeNumberArray(approach as unknown[]).some((item) => !Number.isFinite(item) || item <= 0)
+    if (!hasInvalidValues) error.value = false
+  },
+  { deep: true }
+)
 </script>
 
 <template lang="pug">
