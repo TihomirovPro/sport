@@ -21,6 +21,7 @@ const showModalIcon = ref<boolean>(false)
 const error = ref<boolean>(false)
 const removeConfirm = ref<boolean>(false)
 const text = ref<string>('')
+const { notifyError } = useNotifications()
 
 const constEases = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
 
@@ -70,17 +71,17 @@ watchEffect(() => {
 })
 
 async function newExercise() {
-  if (exercise.value.name) {
-    exercise.value.order = allExercises.value.length
-    createData('exercises', exercise.value)
-    reset()
-    router.push('/')
-  } else {
-    error.value = true
-  }
+  if (!validateExercise()) return
+
+  exercise.value.order = allExercises.value.length
+  createData('exercises', exercise.value)
+  reset()
+  router.push('/')
 }
 
 function update() {
+  if (!validateExercise()) return
+
   if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
   if (exercise.value.isComplex === undefined) exercise.value.isComplex = false
   if (exercise.value.complexDesc === undefined) exercise.value.complexDesc = ''
@@ -120,6 +121,28 @@ function selectEase(ease:EnumEase) {
   if (exercise.value.ease.includes(ease)) exercise.value.ease = [...exercise.value.ease.filter(el => el !== ease)]
   else exercise.value.ease.push(ease)
 }
+
+function validateExercise(): boolean {
+  const name = exercise.value.name.trim()
+
+  if (!name) {
+    error.value = true
+    notifyError('Введите название упражнения')
+    return false
+  }
+
+  exercise.value.name = name
+  error.value = false
+
+  return true
+}
+
+watch(
+  () => exercise.value.name,
+  (name) => {
+    if (name.trim()) error.value = false
+  }
+)
 </script>
 
 <template lang="pug">
