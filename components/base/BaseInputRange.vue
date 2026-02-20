@@ -57,13 +57,13 @@ function updateValue(e:Event) {
 
     &::-webkit-slider-runnable-track
       height 10px
-      background-color theme('colors.faint')
+      background-color rgb(var(--colorFaint))
       border-radius 12px
 
     &::-webkit-slider-thumb
       height 26px
       width 26px
-      background-color theme('colors.accent')
+      background-color rgb(var(--colorAccent))
       border-radius 50%
       transform translateY(-8px)
       box-shadow:shadow 0 0 10px rgba(0, 0, 0, 0.2)

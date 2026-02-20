@@ -38,7 +38,7 @@ function active() {
     class="text-[rgb(var(--colorIcon))]"
     @click="active"
   ) {{ name }}
-  .hangle.flex-center.flex-col.gap-1.h-full.cursor-pointer.hover_opacity-90.opacity-50.transition
+  .hangle.flex-center.flex-col.gap-1.h-full.cursor-pointer.opacity-50.transition(class="hover:opacity-90")
     .w-6.bg-accent.rounded(class="h-0.5")
     .w-6.bg-accent.rounded(class="h-0.5")
 </template>

@@ -49,7 +49,7 @@ export default {
     <button
       class="
         ml-auto transition mr-6 bg-accent
-        hover_bg-accent/80 text-sm  py-2.5 px-4 rounded
+        hover:bg-accent/80 text-sm  py-2.5 px-4 rounded
         text-white text-center cursor-pointer
       "
       @click="installPWA"
@@ -60,7 +60,7 @@ export default {
       @click="dismissPrompt"
       class="
         transition bg-accent
-        hover_bg-accent/80 text-sm py-2.5 px-4 rounded
+        hover:bg-accent/80 text-sm py-2.5 px-4 rounded
         text-white text-center cursor-pointer
       "
     >

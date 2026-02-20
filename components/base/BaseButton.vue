@@ -11,8 +11,8 @@ const classes = computed(() => {
     text-white text-center text-lg`
   ]
 
-  if (props.red) cls.push('bg-error hover_bg-erorr/80')
-  else cls.push('bg-accent hover_bg-accent/80')
+  if (props.red) cls.push('bg-error hover:bg-error/80')
+  else cls.push('bg-accent hover:bg-accent/80')
 
   return cls
 })

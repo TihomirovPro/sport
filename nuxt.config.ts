@@ -1,4 +1,5 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-20',
@@ -23,9 +24,14 @@ export default defineNuxtConfig({
   modules: [
     '@pinia/nuxt',
     '@vite-pwa/nuxt',
-    '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode'
   ],
+
+  css: ['~/assets/css/tailwind.css'],
+
+  vite: {
+    plugins: [tailwindcss()]
+  },
 
   colorMode: {
     preference: 'system', // default value of $colorMode.preference
@@ -36,10 +42,6 @@ export default defineNuxtConfig({
     classPrefix: '',
     classSuffix: '',
     storageKey: 'nuxt-color-mode'
-  },
-
-  tailwindcss: {
-    viewer: false,
   },
 
   ssr: false,
