@@ -12,13 +12,13 @@ const { hideFilterTitles } = storeToRefs(appStore)
 const colorMode = useColorMode()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
-const showModalRubbers = ref(false)
 
-if (localStorage.getItem('baseColor')) baseColor.value = localStorage.getItem('baseColor')
+const storedBaseColor = localStorage.getItem('baseColor')
+if (storedBaseColor) baseColor.value = storedBaseColor
 
 appStore.headerTitle = 'Настройки'
 
-function selectColor(color) {
+function selectColor(color: string) {
   showModalColor.value = false
 
   baseColor.value = color
@@ -29,6 +29,7 @@ function selectColor(color) {
   const b = parseInt(color.slice(5, 7), 16)
 
   const html = document.querySelector('html')
+  if (!html) return
   html.style.setProperty('--colorAccent', `${r} ${g} ${b}`)
 }
 
@@ -41,6 +42,7 @@ async function signOutUser() {
   try {
     const auth = getFirebaseAuth()
     await signOut(auth)
+    await navigateTo('/login')
   } catch (error) {
     console.error('[firebase:signOutUser]', error)
   }
@@ -72,7 +74,7 @@ async function signOutUser() {
     :isShow="showModalColor"
     :activeColor="baseColor"
     @hiden="showModalColor = false"
-    @selectColor="(color) => selectColor(color)"
+    @selectColor="selectColor"
   )
   //- ModalRubbers(
   //-   :isShow="showModalRubbers"

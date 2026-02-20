@@ -208,7 +208,7 @@ watch(
   TabsEases(
     :eases="constEases"
     :selected="exercise.ease"
-    @selectEase="(ease) => selectEase(ease)"
+    @selectEase="selectEase"
   )
 
   //- TabsItem(
