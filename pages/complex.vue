@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 const appStore = useAppStore()
 const exerciseStore = useExerciseStore()
 const { activeExercise } = storeToRefs(exerciseStore)
+const router = useRouter()
+const { notifyError } = useNotifications()
 
 appStore.headerTitle = 'Добавить комплекс'
 
@@ -13,9 +15,14 @@ interface TypeComplex {
 }
 
 const complex = ref<TypeComplex>({
-  exerciseId: activeExercise.value!.id,
+  exerciseId: activeExercise.value?.id || '',
   exercises: []
 })
+
+if (!complex.value.exerciseId) {
+  notifyError('Нет выбранного упражнения. Откройте упражнение из списка.')
+  void router.push('/')
+}
 
 function addExercise() {
   complex.value.exercises.push('')
