@@ -5,5 +5,5 @@
 
 <style lang="stylus">
 .preloader circle
-  fill rgb(var(--colorAccent))
+  fill unquote('rgb(var(--colorAccent))')
 </style>

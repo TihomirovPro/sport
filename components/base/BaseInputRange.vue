@@ -1,10 +1,10 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
     modelValue: string | number
-    min: string
-    max: string
-    step: string
-    view: string
+    min?: string
+    max?: string
+    step?: string
+    view?: string
 }>(), {
   min: '1',
   max: '7',
@@ -57,13 +57,13 @@ function updateValue(e:Event) {
 
     &::-webkit-slider-runnable-track
       height 10px
-      background-color rgb(var(--colorFaint))
+      background-color unquote('rgb(var(--colorFaint))')
       border-radius 12px
 
     &::-webkit-slider-thumb
       height 26px
       width 26px
-      background-color rgb(var(--colorAccent))
+      background-color unquote('rgb(var(--colorAccent))')
       border-radius 50%
       transform translateY(-8px)
       box-shadow:shadow 0 0 10px rgba(0, 0, 0, 0.2)

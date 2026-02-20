@@ -1,9 +1,3 @@
-<script setup>
-onMounted(async () => {
-  initUser()
-})
-</script>
-
 <template lang="pug">
 .flex-center.h-full
   PwaInstall

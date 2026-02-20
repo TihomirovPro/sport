@@ -4,7 +4,10 @@
     "build": "nuxt build",
     "dev": "nuxt dev",
     "generate": "nuxt generate",
+    "lint": "nuxi typecheck",
     "preview": "nuxt preview",
+    "test": "node --test",
+    "typecheck": "nuxi typecheck",
     "postinstall": "nuxt prepare"
   },
   "devDependencies": {

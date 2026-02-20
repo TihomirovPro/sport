@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  modelValue: string
+  modelValue?: string | number
   placeholder?: string
   type: string
   error?: boolean
@@ -19,7 +19,7 @@ function updateValue(e:Event) {
 textarea.input.border.border-faint.p-2.rounded.w-full.max-width-full.bg-transparent(
   v-if="type === 'textarea'"
   class="min-h-[52px]"
-  :value="modelValue"
+  :value="modelValue ?? ''"
   :placeholder="placeholder"
   autocomplete="off"
   @input="updateValue"
@@ -27,7 +27,7 @@ textarea.input.border.border-faint.p-2.rounded.w-full.max-width-full.bg-transpar
 input.input.border.border-faint.p-2.rounded.w-full.max-width-full.bg-transparent(
   v-else
   :type="type"
-  :value="modelValue"
+  :value="modelValue ?? ''"
   :placeholder="placeholder"
   :class="{ 'border-error': error }"
   autocomplete="off"

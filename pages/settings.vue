@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { signOut } from 'firebase/auth'
 import { storeToRefs } from 'pinia'
-import { auth } from '~/composables/firebaseInit'
+import { getFirebaseAuth } from '~/composables/firebaseInit'
 
 useHead({
   title: 'Настройки',
@@ -39,6 +39,7 @@ function changeTheme() {
 
 async function signOutUser() {
   try {
+    const auth = getFirebaseAuth()
     await signOut(auth)
   } catch (error) {
     console.error('[firebase:signOutUser]', error)
