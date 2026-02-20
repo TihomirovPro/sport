@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
+  compatibilityDate: '2026-02-20',
+
   typescript: {
     strict: true,
     shim: false,
@@ -20,7 +22,7 @@ export default defineNuxtConfig({
 
   modules: [
     '@pinia/nuxt',
-    '@kevinmarrec/nuxt-pwa',
+    '@vite-pwa/nuxt',
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode'
   ],
@@ -45,6 +47,7 @@ export default defineNuxtConfig({
   // target: 'static',
 
   pwa: {
+    registerType: 'autoUpdate',
     manifest: {
       display: "fullscreen",
       name: 'Power Progress',
@@ -53,22 +56,27 @@ export default defineNuxtConfig({
       lang: 'ru',
       background_color: '#ffffff',
       theme_color: '#000000',
-      start_url: 'https://training-diary.ru/'
-    },
-    icon: {
-      fileName: "icon.png",
-      purpose: "maskable"
-    },
-    meta: {
-      lang: 'ru',
-      title: 'Power Progress',
-      theme_color: '#000000',
-      ogTitle: 'Power Progress',
-      ogSiteName: 'Power Progress',
-      nativeUI: true
+      start_url: 'https://training-diary.ru/',
+      icons: [
+        {
+          src: '/icon.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable any'
+        },
+        {
+          src: '/icon.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable any'
+        }
+      ]
     },
     workbox: {
       enabled: true
+    },
+    devOptions: {
+      enabled: false
     }
   },
 
