@@ -1,27 +1,64 @@
+import { removeData, updateData } from '~/composables/firebaseInit'
+
 export const useCatalogStore = defineStore('catalog', () => {
   const settings = ref<[]>([])
 
-  const rubbers = ref<string[]>([
-    'Розовая резина',
-    'Желтая резина',
-    'Оранжевая резина',
-    'Черная резина',
-    'Филетовая резина',
-    'Серо-синяя резина',
-    'Зеленая резина',
-    'Синяя резина'
-  ])
+  type RubberItem = {
+    name: string
+    color: string
+  }
 
-  const rubbersColor = ref([
+  const defaultRubbersColor: RubberItem[] = [
     { name: 'Розовая резина', color: 'rgb(236, 72, 153)' },
     { name: 'Желтая резина', color: 'rgb(250, 204, 21)' },
     { name: 'Оранжевая резина', color: 'rgb(249, 115, 22)' },
     { name: 'Черная резина', color: 'rgb(64, 64, 64)' },
     { name: 'Филетовая резина', color: 'rgb(126, 34, 206)' },
-    { name: 'Серо-синяя резина', color: 'rgb(163, 163, 163)' },
     { name: 'Зеленая резина', color: 'rgb(22, 163, 74)' },
     { name: 'Синяя резина', color: 'rgb(29, 78, 216)' }
-  ])
+  ]
+
+  function normalizeRubbers(value: unknown): RubberItem[] {
+    if (!Array.isArray(value)) return []
+
+    return value
+      .map((item) => {
+        if (!item || typeof item !== 'object') return null
+        const rawName = String((item as RubberItem).name ?? '').trim()
+        const rawColor = String((item as RubberItem).color ?? '').trim()
+        if (!rawName || !rawColor) return null
+        return {
+          name: rawName,
+          color: rawColor,
+        }
+      })
+      .filter((item): item is RubberItem => Boolean(item))
+  }
+
+  function defaultRubbers(): RubberItem[] {
+    return [...defaultRubbersColor]
+  }
+
+  const rubbersColor = ref<RubberItem[]>(defaultRubbers())
+  const rubbers = computed(() => rubbersColor.value.map((item) => item.name))
+
+  function setRubbersFromUser(value: unknown) {
+    const normalized = normalizeRubbers(value)
+    rubbersColor.value = normalized.length ? normalized : defaultRubbers()
+  }
+
+  async function saveRubbers(items: RubberItem[]) {
+    const normalized = normalizeRubbers(items)
+    rubbersColor.value = normalized.length ? normalized : defaultRubbers()
+    await updateData('user', {
+      rubbersColor: rubbersColor.value,
+    })
+  }
+
+  async function resetRubbers() {
+    rubbersColor.value = defaultRubbers()
+    await removeData('user/rubbersColor')
+  }
 
   const icons = ref([
     'push-up', 'push-up-1',
@@ -60,6 +97,9 @@ export const useCatalogStore = defineStore('catalog', () => {
     settings,
     rubbers,
     rubbersColor,
+    setRubbersFromUser,
+    saveRubbers,
+    resetRubbers,
     icons,
     colors,
   }

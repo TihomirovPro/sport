@@ -15,7 +15,7 @@ const cspDirectives = [
   "script-src-elem 'self' 'unsafe-inline' https://apis.google.com https://www.gstatic.com https://*.firebasedatabase.app https://*.firebaseio.com",
   "style-src 'self' 'unsafe-inline'",
   `connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebasedatabase.app wss://*.firebasedatabase.app wss://*.firebaseio.com https://securetoken.googleapis.com https://identitytoolkit.googleapis.com${isDev ? ' http://localhost:* ws://localhost:* wss://localhost:*' : ''}`,
-  "frame-src 'self' https://accounts.google.com https://*.google.com https://*.firebasedatabase.app https://*.firebaseio.com",
+  "frame-src 'self' https://accounts.google.com https://*.google.com https://*.firebasedatabase.app https://*.firebaseio.com https://*.firebaseapp.com https://*.web.app",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
   "form-action 'self'"

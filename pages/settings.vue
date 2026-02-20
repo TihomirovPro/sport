@@ -8,10 +8,13 @@ useHead({
 })
 
 const appStore = useAppStore()
+const catalogStore = useCatalogStore()
 const { hideFilterTitles } = storeToRefs(appStore)
+const { rubbersColor } = storeToRefs(catalogStore)
 const colorMode = useColorMode()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
+const showModalRubbers = ref(false)
 
 const storedBaseColor = localStorage.getItem('baseColor')
 if (storedBaseColor) baseColor.value = storedBaseColor
@@ -64,11 +67,12 @@ async function signOutUser() {
     p Скрыть заголовки фильтров
     p {{ hideFilterTitles ? 'Да' : 'Нет' }}
 
+  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
+    p Набор резин
+    p {{ rubbersColor.length }} шт
+
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOutUser")
     p Выход
-
-  //- .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
-  //-   p Набор резин
 
   ModalColor(
     :isShow="showModalColor"
@@ -76,8 +80,8 @@ async function signOutUser() {
     @hiden="showModalColor = false"
     @selectColor="selectColor"
   )
-  //- ModalRubbers(
-  //-   :isShow="showModalRubbers"
-  //-   @hiden="showModalRubbers = false"
-  //- )
+  ModalRubbers(
+    :isShow="showModalRubbers"
+    @hiden="showModalRubbers = false"
+  )
 </template>
