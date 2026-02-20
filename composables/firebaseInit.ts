@@ -30,19 +30,63 @@ export const auth = getAuth(firebaseApp)
 
 export function dbPath(path:string):string {
   const userID = auth.currentUser?.uid
+  if (!userID) throw new Error('Пользователь не авторизован')
   return `users/${userID}/${path}`
 }
 
-export const createData = (path:string, data:any) => {
-  const key = push(child(ref(db), path)).key
-  set(ref(db, dbPath(`${path}/${key}`)), data)
-}
-export const createDataWithoutKey = (path:string, data:any) => {
-  set(ref(db, dbPath(path)), data)
+function logFirebaseError(operation:string, error:unknown) {
+  console.error(`[firebase:${operation}]`, error)
 }
 
-export const updateData = (path:string, data:any) => update(ref(db, dbPath(path)), data)
-export const removeData = (path:string) => remove(ref(db, dbPath(path)))
-export const onData = (path:string, callback:any) => onValue(ref(db, dbPath(path)), callback)
+export const createData = async (path:string, data:any) => {
+  try {
+    const key = push(child(ref(db), path)).key
+    if (!key) throw new Error('Не удалось создать ключ записи')
+    await set(ref(db, dbPath(`${path}/${key}`)), data)
+  } catch (error) {
+    logFirebaseError('createData', error)
+  }
+}
 
+export const createDataWithoutKey = async (path:string, data:any) => {
+  try {
+    await set(ref(db, dbPath(path)), data)
+  } catch (error) {
+    logFirebaseError('createDataWithoutKey', error)
+  }
+}
 
+export const updateData = async (path:string, data:any) => {
+  try {
+    await update(ref(db, dbPath(path)), data)
+  } catch (error) {
+    logFirebaseError('updateData', error)
+  }
+}
+
+export const removeData = async (path:string) => {
+  try {
+    await remove(ref(db, dbPath(path)))
+  } catch (error) {
+    logFirebaseError('removeData', error)
+  }
+}
+
+export const onData = (path:string, callback:any) => {
+  try {
+    return onValue(
+      ref(db, dbPath(path)),
+      (snapshot) => {
+        try {
+          callback(snapshot)
+        } catch (error) {
+          logFirebaseError('onDataCallback', error)
+        }
+      },
+      (error) => logFirebaseError('onData', error)
+    )
+  } catch (error) {
+    logFirebaseError('onDataInit', error)
+    return () => {}
+  }
+}
