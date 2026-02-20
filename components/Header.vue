@@ -48,7 +48,7 @@ function toSettings() {
 </script>
 
 <template lang="pug">
-.px-2.py-1.sticky.top-0.bg-accent.shadow-md(class="z-50")
+header.px-2.py-1.sticky.top-0.bg-accent.shadow-md(class="z-50")
   .max-w-2xl.mx-auto.flex.flex-wrap.items-center.justify-between
     .size-8.text-l.flex-center(class="text-white/80")(
       v-if="isShowBackBtn"

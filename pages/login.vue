@@ -18,7 +18,7 @@ async function loginWithGoogle() {
 <template lang="pug">
 .flex-center.size-full
   .cursor-pointer.grid.items-center.transition.py-3.px-6.rounded-3xl(
-    class="gap-2.5 border border-accent grid-cols-[25px_1fr] hover_bg-accent/10"
+    class="gap-2.5 border border-accent grid-cols-[25px_1fr] hover:bg-accent/10"
     @click="loginWithGoogle"
   )
     svg(

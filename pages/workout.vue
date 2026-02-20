@@ -300,7 +300,7 @@ watch(
     .text-white.text-xs.text-center.flex-center.cursor-pointer(
       v-for="item in rubbersColor"
       :style="`background: ${item.color}`"
-      :class="{_active : workout.rubber === item.name}"
+      :class="{ active: workout.rubber === item.name }"
       @click="selectRubber(item.name)"
     ) {{ item.name.replace(' резина', '') }}
 
@@ -381,8 +381,8 @@ watch(
   text-align center
   min-height: 52px
   border-radius 12px
-  background-color theme('colors.accent/.3')
-  border solid 2px theme('colors.accent')
+  background-color rgb(var(--colorAccent) / 0.3)
+  border solid 2px rgb(var(--colorAccent))
 
   input
     position absolute
@@ -404,7 +404,7 @@ watch(
     border-radius 4px
     height 40px
 
-    &._active
+    &.active
       border 2px solid #fff
       outline 2px solid #5182dc
 </style>
