@@ -13,7 +13,17 @@ function getUserErrorMessage(error: unknown): string {
 export default defineNuxtPlugin((nuxtApp) => {
   const { notifyError } = useNotifications()
 
+  const isDynamicImportFetchError = (error: unknown): boolean => {
+    const message = error instanceof Error ? error.message : String(error ?? '')
+    return message.includes('Failed to fetch dynamically imported module')
+  }
+
   const reportError = (error: unknown, source: string) => {
+    if (isDynamicImportFetchError(error) && !navigator.onLine) {
+      notifyError('Оффлайн-перезагрузка в dev-режиме ограничена. Проверьте в сборке preview.')
+      return
+    }
+
     const normalized =
       error instanceof Error
         ? {

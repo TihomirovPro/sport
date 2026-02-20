@@ -37,6 +37,11 @@ export const getWorkouts = (exercisesId:string) => {
     return workoutsUnsubscribe
   }
 
+  // Prevent showing stale workouts from previously selected exercise,
+  // especially when offline cache for the new exercise is empty.
+  workoutStore.workouts = []
+  workoutStore.filteredWorkouts = []
+
   stopWorkoutsSubscription()
   activeWorkoutExerciseId = exercisesId
 

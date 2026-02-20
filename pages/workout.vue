@@ -13,15 +13,36 @@ const { activeExercise } = storeToRefs(exerciseStore)
 const { selectUpdateWorkout } = storeToRefs(workoutStore)
 const { rubbersColor } = storeToRefs(catalogStore)
 const { headerTitle } = storeToRefs(appStore)
+const { notifyError } = useNotifications()
 headerTitle.value = 'Добавить тренировку'
 
 useHead({
   title: headerTitle.value
 })
 
-if (!activeExercise.value && localStorage.getItem('activeExercise')) {
-  activeExercise.value = JSON.parse(localStorage.getItem('activeExercise')!)    
-  getWorkouts(activeExercise.value!.id)
+function readStoredActiveExercise() {
+  const raw = localStorage.getItem('activeExercise')
+  if (!raw) return null
+
+  try {
+    return JSON.parse(raw) as { id?: string }
+  } catch {
+    return null
+  }
+}
+
+if (!activeExercise.value) {
+  const storedActiveExercise = readStoredActiveExercise()
+  if (storedActiveExercise && storedActiveExercise.id) {
+    activeExercise.value = storedActiveExercise as any
+  }
+}
+
+if (activeExercise.value?.id) {
+  getWorkouts(activeExercise.value.id)
+} else {
+  notifyError('Нет данных упражнения в оффлайн-кэше. Сначала откройте его онлайн.')
+  void router.push('/')
 }
 
 function formatDate(date:number | string):string {
@@ -39,7 +60,6 @@ const removeConfirm = ref(false)
 const timer = ref('00:00')
 const startInterval = ref(false)
 const approachesTimes = ref([])
-const { notifyError } = useNotifications()
 let interval:any
 let seconds:number = 0
 
@@ -57,6 +77,39 @@ const workout = ref<TypeWorkoutCreate>({
   res: 0,
   resWeigth: 0
 })
+
+type WorkoutStoreItem = {
+  id: string
+  exercisesId: string
+  date: number
+  interval: string
+  ease: EnumEase
+  rubber?: string
+  approach: number[]
+  weight: number[]
+  desc?: string
+  res: number
+  resWeigth: number
+}
+
+function sortByDateDesc(list: WorkoutStoreItem[]): WorkoutStoreItem[] {
+  return [...list].sort((a, b) => {
+    if (new Date(a.date) < new Date(b.date)) return 1
+    if (new Date(a.date) > new Date(b.date)) return -1
+    return 0
+  })
+}
+
+function upsertWorkoutInStore(item: WorkoutStoreItem) {
+  const withoutCurrent = workoutStore.workouts.filter((workoutItem) => workoutItem.id !== item.id)
+  workoutStore.workouts = sortByDateDesc([item, ...withoutCurrent])
+  workoutStore.filteredWorkouts = [...workoutStore.workouts]
+}
+
+function removeWorkoutFromStore(id: string) {
+  workoutStore.workouts = workoutStore.workouts.filter((workoutItem) => workoutItem.id !== id)
+  workoutStore.filteredWorkouts = workoutStore.filteredWorkouts.filter((workoutItem) => workoutItem.id !== id)
+}
 
 function reset () {
   selectUpdateWorkout.value = null
@@ -99,10 +152,26 @@ async function add() {
   if (!validateWorkout()) return
 
   try {
-    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-    workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
+    const approachValues = Array.isArray(workout.value.approach) ? workout.value.approach : []
+    const weightValues = Array.isArray(workout.value.weight) ? workout.value.weight : []
+    workout.value.res = approachValues.reduce((sum:number, current:number):number => +sum + +current, 0)
+    workout.value.resWeigth = weightValues.reduce((acc:number, item:number, index:number):number => acc + (+item * +(approachValues[index] ?? 0)), 0)
 
-    await createData(`workout/${workout.value.exercisesId}`, workout.value)
+    const createdId = await createData(`workout/${workout.value.exercisesId}`, workout.value)
+
+    upsertWorkoutInStore({
+      id: createdId,
+      exercisesId: workout.value.exercisesId!,
+      date: workout.value.date as number,
+      interval: workout.value.interval,
+      ease: workout.value.ease,
+      rubber: workout.value.rubber,
+      approach: [...workout.value.approach],
+      weight: [...workout.value.weight],
+      desc: workout.value.desc,
+      res: workout.value.res,
+      resWeigth: workout.value.resWeigth
+    })
 
     await router.push('/exercise-item')
     reset()
@@ -118,9 +187,32 @@ async function updateSelectWorkout() {
   if (!validateWorkout()) return
 
   try {
-    workout.value.res = workout.value.approach.reduce((sum:number, current:number):number => +sum + +current)
-    workout.value.resWeigth = workout.value.weight.reduce((acc:number, item:number, index:number):number => acc + (+item * +workout.value.approach[index]), 0)
-    await updateData(`workout/${workout.value.exercisesId}/${selectUpdateWorkout.value!.id}`, workout.value)
+    const selectedWorkoutId = selectUpdateWorkout.value?.id
+    if (!selectedWorkoutId) {
+      notifyError('Не выбрана тренировка для изменения')
+      return
+    }
+
+    const approachValues = Array.isArray(workout.value.approach) ? workout.value.approach : []
+    const weightValues = Array.isArray(workout.value.weight) ? workout.value.weight : []
+    workout.value.res = approachValues.reduce((sum:number, current:number):number => +sum + +current, 0)
+    workout.value.resWeigth = weightValues.reduce((acc:number, item:number, index:number):number => acc + (+item * +(approachValues[index] ?? 0)), 0)
+    await updateData(`workout/${workout.value.exercisesId}/${selectedWorkoutId}`, workout.value)
+
+    upsertWorkoutInStore({
+      id: selectedWorkoutId,
+      exercisesId: workout.value.exercisesId!,
+      date: workout.value.date as number,
+      interval: workout.value.interval,
+      ease: workout.value.ease,
+      rubber: workout.value.rubber,
+      approach: [...workout.value.approach],
+      weight: [...workout.value.weight],
+      desc: workout.value.desc,
+      res: workout.value.res,
+      resWeigth: workout.value.resWeigth
+    })
+
     reset()
     await router.push('/exercise-item')
   } catch (error) {
@@ -131,7 +223,15 @@ async function updateSelectWorkout() {
 
 async function removeSelectWorkout() {
   try {
-    await removeData(`workout/${selectUpdateWorkout.value!.exercisesId}/${selectUpdateWorkout.value!.id}`)
+    const selectedWorkoutId = selectUpdateWorkout.value?.id
+    const selectedExerciseId = selectUpdateWorkout.value?.exercisesId
+    if (!selectedWorkoutId || !selectedExerciseId) {
+      notifyError('Не выбрана тренировка для удаления')
+      return
+    }
+
+    await removeData(`workout/${selectedExerciseId}/${selectedWorkoutId}`)
+    removeWorkoutFromStore(selectedWorkoutId)
     removeConfirm.value = false
     reset()
     await router.push('/exercise-item')
@@ -190,7 +290,12 @@ function selectRubber(name:string) {
 }
 
 function addWeight(idx, e) {
-  if (e.data === ',') workout.value.weight[idx] = workout.value.weight[idx].replace(',', '.')
+  const inputEvent = e as InputEvent
+  if (!Array.isArray(workout.value.weight)) workout.value.weight = []
+  if (inputEvent.data === ',') {
+    const current = String(workout.value.weight[idx] ?? '')
+    workout.value.weight[idx] = current.replace(',', '.')
+  }
   saveNewWorkout()
 }
 
@@ -241,7 +346,9 @@ function resetInterval() {
   timer.value = '00:00'
 }
 
-function normalizeNumberArray(value: unknown[]): number[] {
+function normalizeNumberArray(value: unknown): number[] {
+  if (!Array.isArray(value)) return []
+
   return value.map((item) => {
     const normalized = String(item ?? '').replace(',', '.').trim()
     return normalized === '' ? NaN : Number(normalized)
@@ -260,7 +367,12 @@ function normalizeWorkoutDate(value: unknown): number {
 }
 
 function validateWorkout(): boolean {
-  const approachValues = normalizeNumberArray(workout.value.approach as unknown[])
+  if (!workout.value.exercisesId) {
+    notifyError('Не выбрано упражнение. Вернитесь назад и откройте упражнение заново.')
+    return false
+  }
+
+  const approachValues = normalizeNumberArray(workout.value.approach)
 
   if (!approachValues.length || approachValues.some((item) => !Number.isFinite(item) || item <= 0)) {
     error.value = true
@@ -276,7 +388,7 @@ function validateWorkout(): boolean {
   let weightValues:number[] = []
 
   if (workout.value.ease === EnumEase.weight) {
-    weightValues = normalizeNumberArray(workout.value.weight as unknown[])
+    weightValues = normalizeNumberArray(workout.value.weight)
 
     if (weightValues.length !== approachValues.length || weightValues.some((item) => !Number.isFinite(item) || item < 0)) {
       notifyError('Заполните вес для каждого подхода')
@@ -297,8 +409,8 @@ function validateWorkout(): boolean {
 watch(
   () => workout.value.approach,
   (approach) => {
-    if (!approach.length) return
-    const hasInvalidValues = normalizeNumberArray(approach as unknown[]).some((item) => !Number.isFinite(item) || item <= 0)
+    if (!Array.isArray(approach) || !approach.length) return
+    const hasInvalidValues = normalizeNumberArray(approach).some((item) => !Number.isFinite(item) || item <= 0)
     if (!hasInvalidValues) error.value = false
   },
   { deep: true }

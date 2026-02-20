@@ -90,10 +90,16 @@ async function update() {
   if (!validateExercise()) return
 
   try {
+    const selectedExerciseId = selectUpdateExercise.value?.id
+    if (!selectedExerciseId) {
+      notifyError('Не выбрано упражнение для изменения')
+      return
+    }
+
     if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
     if (exercise.value.isComplex === undefined) exercise.value.isComplex = false
     if (exercise.value.complexDesc === undefined) exercise.value.complexDesc = ''
-    await updateData(`exercises/${selectUpdateExercise.value!.id}`, exercise.value)
+    await updateData(`exercises/${selectedExerciseId}`, exercise.value)
     reset()
     await router.push('/')
   } catch (error) {
@@ -104,8 +110,14 @@ async function update() {
 
 async function remove() {
   try {
-    await removeData(`workout/${selectUpdateExercise.value!.id}`)
-    await removeData(`exercises/${selectUpdateExercise.value!.id}`)
+    const selectedExerciseId = selectUpdateExercise.value?.id
+    if (!selectedExerciseId) {
+      notifyError('Не выбрано упражнение для удаления')
+      return
+    }
+
+    await removeData(`workout/${selectedExerciseId}`)
+    await removeData(`exercises/${selectedExerciseId}`)
     removeConfirm.value = false
     await router.push('/')
     reset()

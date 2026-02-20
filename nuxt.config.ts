@@ -75,10 +75,26 @@ export default defineNuxtConfig({
       ]
     },
     workbox: {
-      enabled: true
+      cleanupOutdatedCaches: true,
+      cacheId: 'power-progress-v4',
+      runtimeCaching: [
+        {
+          urlPattern: /\/_nuxt\/.*/i,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'nuxt-assets',
+            expiration: {
+              maxEntries: 200,
+              maxAgeSeconds: 60 * 60 * 24 * 7
+            }
+          }
+        }
+      ]
     },
     devOptions: {
-      enabled: false
+      enabled: true,
+      suppressWarnings: true,
+      type: 'module'
     }
   },
 
