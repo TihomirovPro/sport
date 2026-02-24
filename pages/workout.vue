@@ -86,19 +86,22 @@ function toDateInputValue(value: unknown): string {
 
 const nowDate = new Date().getTime()
 const error = ref(false)
-const approaches = ref(5)
 const removeConfirm = ref(false)
 const complexTime = ref('')
 
 const isComplex = computed(() => Boolean(activeExercise.value?.isComplex))
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
+const complexExercises = computed({
+  get: () => workout.value.complexExercises || [],
+  set: (value) => { workout.value.complexExercises = value }
+})
 const workoutDateInputRef = ref<HTMLInputElement | null>(null)
 const workoutDateModel = computed<string>({
   get() {
     return toDateInputValue(workout.value.date)
   },
   set(value) {
-    workout.value.date = value
+    workout.value.date = normalizeWorkoutDate(value)
     saveNewWorkout()
   }
 })
@@ -121,19 +124,30 @@ function openDatePicker(event?: MouseEvent) {
   input.click()
 }
 
-const workout = ref<TypeWorkoutCreate>({
-  date: nowDate,
-  interval: '2.5',
-  ease: activeExercise.value?.ease?.[0] ?? EnumEase.noWeight,
-  rubber: '',
-  approach: [],
-  weight: [],
-  complexExercises: [],
-  desc: '',
-  exercisesId: activeExercise.value?.id ?? '',
-  res: 0,
-  resWeigth: 0
-})
+function getNewWorkoutDefaults() {
+  const defaults = workoutStore.resolveFormDefaults(activeExercise.value?.ease ?? [])
+
+  return {
+    approaches: defaults.approaches,
+    workout: {
+      exercisesId: activeExercise.value?.id ?? '',
+      date: nowDate,
+      interval: defaults.interval,
+      ease: defaults.ease,
+      rubber: '',
+      approach: [],
+      weight: [],
+      complexExercises: [],
+      desc: '',
+      res: 0,
+      resWeigth: 0
+    } satisfies TypeWorkoutCreate
+  }
+}
+
+const defaultNewWorkout = getNewWorkoutDefaults()
+const approaches = ref(defaultNewWorkout.approaches)
+const workout = ref<TypeWorkoutCreate>(defaultNewWorkout.workout)
 
 type WorkoutStoreItem = {
   id: string
@@ -170,22 +184,12 @@ function removeWorkoutFromStore(id: string) {
 }
 
 function reset () {
+  const defaults = getNewWorkoutDefaults()
   selectUpdateWorkout.value = null
   error.value = false
   complexTime.value = ''
-  workout.value = {
-    exercisesId: activeExercise.value?.id ?? '',
-    date: nowDate,
-    interval: '2.5',
-    ease: activeExercise.value?.ease?.[0] ?? EnumEase.noWeight,
-    rubber: '',
-    approach: [],
-    weight: [],
-    complexExercises: [],
-    desc: '',
-    res: 0,
-    resWeigth: 0
-  }
+  approaches.value = defaults.approaches
+  workout.value = defaults.workout
 }
 
 watchEffect(() => {
@@ -346,17 +350,20 @@ if (!selectUpdateWorkout.value) {
   const approachesRaw = localStorage.getItem('approaches')
 
   if (newWorkoutRaw) {
+    const fallbackDefaults = workoutStore.resolveFormDefaults(activeExercise.value?.ease ?? [])
     const newWorkout = safeParseJson<Partial<TypeWorkoutCreate> & { resWeidth?: number }>(newWorkoutRaw, {})
-    const parsedApproachesRaw = approachesRaw ? safeParseJson<unknown>(approachesRaw, 5) : 5
+    const parsedApproachesRaw = approachesRaw
+      ? safeParseJson<unknown>(approachesRaw, fallbackDefaults.approaches)
+      : fallbackDefaults.approaches
     const parsedApproaches = Number(parsedApproachesRaw)
-    approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : 5
+    approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : fallbackDefaults.approaches
 
     workout.value = {
       exercisesId: activeExercise.value?.id ?? '',
       date: newWorkout.date ?? nowDate,
-      interval: newWorkout.interval ?? '2.5',
+      interval: newWorkout.interval ?? fallbackDefaults.interval,
       approach: Array.isArray(newWorkout.approach) ? newWorkout.approach : [],
-      ease: newWorkout.ease ?? EnumEase.noWeight,
+      ease: newWorkout.ease ?? fallbackDefaults.ease,
       rubber: newWorkout.rubber || '',
       weight: Array.isArray(newWorkout.weight) ? newWorkout.weight : [],
       complexExercises: Array.isArray(newWorkout.complexExercises) ? newWorkout.complexExercises : [],
@@ -547,11 +554,11 @@ watch(
     .grid.gap-2
       .text-sm.opacity-70 Упражнения в этой тренировке
       .flex.items-center.gap-2(
-        v-for="(item, idx) in workout.complexExercises"
+        v-for="(item, idx) in complexExercises"
         :key="`complex-exercise-${idx}`"
       )
         BaseInput(
-          v-model="workout.complexExercises[idx]"
+          v-model="complexExercises[idx]"
           type="text"
           placeholder="Упражнение"
           @input="saveNewWorkout"

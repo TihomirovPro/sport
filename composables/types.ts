@@ -47,3 +47,15 @@ export interface Filter {
   changeInterval: (interval:number) => void
   changeApproach: (approach:number) => void
 }
+
+export interface WorkoutActiveFilters {
+  ease: '' | EnumEase
+  interval: number
+  approach: number
+}
+
+export interface WorkoutFormDefaults {
+  interval: string
+  approaches: number
+  ease: EnumEase
+}
