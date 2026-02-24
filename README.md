@@ -50,3 +50,9 @@ npm run build
 ```bash
 npm run preview
 ```
+
+## Безопасность статуса пользователя
+
+- Поле `users/{uid}/user/status` защищено правилами Realtime Database:
+  - обычный пользователь не может его изменять;
+  - изменять может только пользователь с custom claim `admin: true`.

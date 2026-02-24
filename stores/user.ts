@@ -3,14 +3,18 @@ interface ActiveUser {
   name: string
   email: string
   photoURL: string
+  status: string
 }
+
+const defaultStatus = 'user'
 
 export const useUserStore = defineStore('user', () => {
   const activeUser = ref<ActiveUser>({
     uid: '',
     name: '',
     email: '',
-    photoURL: ''
+    photoURL: '',
+    status: defaultStatus,
   })
 
   return {
