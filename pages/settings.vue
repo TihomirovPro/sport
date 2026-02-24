@@ -9,8 +9,10 @@ useHead({
 
 const appStore = useAppStore()
 const catalogStore = useCatalogStore()
+const userStore = useUserStore()
 const { hideFilterTitles } = storeToRefs(appStore)
 const { rubbersColor } = storeToRefs(catalogStore)
+const { activeUser } = storeToRefs(userStore)
 const colorMode = useColorMode()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
@@ -70,6 +72,10 @@ async function signOutUser() {
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
     p Набор резин
     p {{ rubbersColor.length }} шт
+
+  .flex.items-center.justify-between.border-b.border-faint.py-2
+    p Статус пользователя
+    p {{ activeUser.status || 'Пользователь' }}
 
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOutUser")
     p Выход

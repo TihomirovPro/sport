@@ -28,6 +28,7 @@ export interface TypeWorkout {
   ease: EnumEase
   rubber?: string
   desc?: string
+  complexExercises?: string[]
   approach: number[]
   weight?: number[]
   res: number
