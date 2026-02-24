@@ -34,7 +34,7 @@ ChartJS.register(
 const appStore = useAppStore()
 const workoutStore = useWorkoutStore()
 const { hideFilterTitles } = storeToRefs(appStore)
-const { workouts, filteredWorkouts } = storeToRefs(workoutStore)
+const { workouts, filteredWorkouts, activeFilters } = storeToRefs(workoutStore)
 const chartKey = ref(0)
 
 const forceChartUpdate = () => {
@@ -89,10 +89,46 @@ const filterElements = computed(() => {
   };
 });
 
+function getInitialEase(): '' | EnumEase {
+  if (activeFilters.value.ease && filterElements.value.eases.includes(activeFilters.value.ease)) {
+    return activeFilters.value.ease
+  }
+
+  if (filterElements.value.eases.length === 1) {
+    return filterElements.value.eases[0] ?? ''
+  }
+
+  return ''
+}
+
+function getInitialInterval(): number {
+  if (activeFilters.value.interval && filterElements.value.intervals.includes(activeFilters.value.interval)) {
+    return activeFilters.value.interval
+  }
+
+  return 0
+}
+
+function getInitialApproach(): number {
+  if (activeFilters.value.approach && filterElements.value.approaches.includes(activeFilters.value.approach)) {
+    return activeFilters.value.approach
+  }
+
+  return 0
+}
+
+function syncActiveFilters() {
+  activeFilters.value = {
+    ease: filter.value.ease,
+    interval: filter.value.interval,
+    approach: filter.value.approach
+  }
+}
+
 const filter = ref<Filter>({
-  ease: filterElements.value.eases.length === 1 ? (filterElements.value.eases[0] ?? '') : '',
-  interval: 0,
-  approach: 0,
+  ease: getInitialEase(),
+  interval: getInitialInterval(),
+  approach: getInitialApproach(),
 
   changeEase: (ease: '' | EnumEase) => {
     if (ease === filter.value.ease) filter.value.ease = ''
@@ -102,18 +138,21 @@ const filter = ref<Filter>({
     else optionsLines.scales.y1.display = false
     
     forceChartUpdate()
+    syncActiveFilters()
     useFilter()
   },
 
   changeInterval: (interval: number) => {
     if (interval === filter.value.interval) filter.value.interval = 0
     else filter.value.interval = interval
+    syncActiveFilters()
     useFilter()
   },
 
   changeApproach: (approach: number) => {
     if (approach === filter.value.approach) filter.value.approach = 0
     else filter.value.approach = approach
+    syncActiveFilters()
     useFilter()
   },
 })
@@ -213,6 +252,19 @@ function useFilter() {
     filterWorkouts(item.ease, +item.interval, item.approach.length)
   );
 }
+
+watch(
+  filterElements,
+  () => {
+    if (filter.value.ease && !filterElements.value.eases.includes(filter.value.ease)) filter.value.ease = ''
+    if (filter.value.interval && !filterElements.value.intervals.includes(filter.value.interval)) filter.value.interval = 0
+    if (filter.value.approach && !filterElements.value.approaches.includes(filter.value.approach)) filter.value.approach = 0
+
+    syncActiveFilters()
+    useFilter()
+  },
+  { immediate: true }
+)
 
 function showChart() {
   if (filter.value.ease && (filter.value.interval || filter.value.approach)) return true
