@@ -8,8 +8,11 @@ type UserData = {
   name?: string
   email?: string
   photoURL?: string
+  status?: string
   rubbersColor?: unknown
 }
+
+const defaultStatus = 'user'
 
 function resetActiveUserState() {
   const userStore = useUserStore()
@@ -18,6 +21,7 @@ function resetActiveUserState() {
   userStore.activeUser.name = ''
   userStore.activeUser.email = ''
   userStore.activeUser.photoURL = ''
+  userStore.activeUser.status = defaultStatus
   catalogStore.setRubbersFromUser(null)
 }
 
@@ -89,9 +93,12 @@ export const getUserData = () => {
 
     userUnsubscribe = onData('user', (snapshot) => {
       const data = snapshot.val() as UserData | null
+      const status = String(data?.status ?? '').trim()
+
       userStore.activeUser.name = data?.name || ''
       userStore.activeUser.email = data?.email || ''
       userStore.activeUser.photoURL = data?.photoURL || ''
+      userStore.activeUser.status = status || defaultStatus
       catalogStore.setRubbersFromUser(data?.rubbersColor)
     })
   } catch (error) {

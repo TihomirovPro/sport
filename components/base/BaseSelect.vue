@@ -16,13 +16,12 @@ function updateValue(e:Event) {
 
 <template lang="pug">
 select.input(
-  :value="modelValue"
+  :value="modelValue || ''"
   @change="updateValue"
 )
   option(
-    selected
     disabled
-    :value="placeholder"
+    value=""
   ) {{ placeholder }}
 
   option(
