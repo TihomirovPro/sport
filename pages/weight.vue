@@ -184,11 +184,15 @@ async function submitWeight() {
 async function onRemoveWeight(id: string) {
   if (!id || deletingId.value) return
 
+  const prevEntries = [...entries.value]
+  weightStore.setWeightEntries(prevEntries.filter((entry) => entry.id !== id))
+
   deletingId.value = id
   try {
     await removeWeight(id)
   } catch (error) {
     console.error('[weight:removeWeight]', error)
+    weightStore.setWeightEntries(prevEntries)
     notifyError('Не удалось удалить запись. Попробуйте снова.')
   } finally {
     deletingId.value = null
