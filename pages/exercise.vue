@@ -13,8 +13,10 @@ appStore.headerTitle = 'Добавить упражнение'
 
 const workoutStore = useWorkoutStore()
 const exerciseStore = useExerciseStore()
+const userStore = useUserStore()
 const { workouts } = storeToRefs(workoutStore)
 const { allExercises, selectUpdateExercise } = storeToRefs(exerciseStore)
+const { activeUser } = storeToRefs(userStore)
 const router = useRouter()
 
 const showModalColor = ref<boolean>(false)
@@ -26,6 +28,7 @@ const text = ref<string>('')
 const { notifyError } = useNotifications()
 
 const constEases = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
+const canManageComplexes = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
 
 const exercise = ref<TypeExerciseCreate>({
   name: '',
@@ -151,6 +154,19 @@ function selectEase(ease:EnumEase) {
   else exercise.value.ease.push(ease)
 }
 
+function toggleComplex() {
+  if (!canManageComplexes.value) {
+    notifyError('Только пользователь со статусом admin может создавать комплексы')
+    return
+  }
+
+  exercise.value.isComplex = !exercise.value.isComplex
+
+  if (!exercise.value.isComplex) {
+    exercise.value.complexDesc = ''
+  }
+}
+
 function validateExercise(): boolean {
   const name = exercise.value.name.trim()
 
@@ -165,6 +181,17 @@ function validateExercise(): boolean {
   if (!Array.isArray(exercise.value.ease) || exercise.value.ease.length === 0) {
     notifyError('Выберите хотя бы один тип сложности')
     return false
+  }
+
+  if (exercise.value.isComplex && !canManageComplexes.value) {
+    notifyError('Только пользователь со статусом admin может создавать комплексы')
+    return false
+  }
+
+  if (exercise.value.isComplex) {
+    exercise.value.complexDesc = exercise.value.complexDesc?.trim() || ''
+  } else {
+    exercise.value.complexDesc = ''
   }
 
   error.value = false
@@ -217,19 +244,20 @@ watch(
     @selectEase="selectEase"
   )
 
-  //- TabsItem(
-  //-   title="Комплекс"
-  //-   :active="exercise.isComplex"
-  //-   @click="exercise.isComplex = !exercise.isComplex"
-  //- )
+  TabsItem(
+    v-if="canManageComplexes"
+    title="Комплекс"
+    :active="exercise.isComplex"
+    @click="toggleComplex"
+  )
 
-  //- .grid.gap-5(v-if="exercise.isComplex")
-  //-   BaseInput(
-  //-     v-model="exercise.complexDesc"
-  //-     type="textarea"
-  //-     placeholder="Описание комплекса"
-  //-     class="min-h-[120px]"
-  //-   )
+  .grid.gap-5(v-if="exercise.isComplex && canManageComplexes")
+    BaseInput(
+      v-model="exercise.complexDesc"
+      type="textarea"
+      placeholder="Описание комплекса"
+      class="min-h-[120px]"
+    )
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
     BaseButton(

@@ -46,8 +46,7 @@ function addItem() {
   }
 
   if (routeName.value === 'exercise-item') {
-    if (activeExercise.value?.isComplex) router.push('/complex')
-    else router.push('/workout')
+    router.push('/workout')
   }
 }
 

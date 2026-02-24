@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import type { TypeWorkoutPage } from '~/composables/types'
 
-const props = defineProps<TypeWorkoutPage>()
+const props = defineProps<TypeWorkoutPage & { isComplex?: boolean }>()
 
 const router = useRouter()
 const workoutStore = useWorkoutStore()
@@ -24,6 +24,13 @@ const cols = computed(()=> {
   return res += ' 1fr'
 })
 
+const formattedComplexTime = computed(() => {
+  const totalSeconds = Number(props.res) || 0
+  const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')
+  const secs = (totalSeconds % 60).toString().padStart(2, '0')
+  return `${mins}:${secs}`
+})
+
 function selectUpdate() {
   selectUpdateWorkout.value = workouts.value.find(item => item.id === props.id) || null
   router.push('/workout')
@@ -34,10 +41,11 @@ function selectUpdate() {
 .grid.w-full.py-4.px-3.text-xs.border.border-faint.rounded-xl.shadow-md(class="bg-faint/20")
   .flex.items-center.justify-between.text-accent.pb-6
     p {{ formatDate }}
-    p {{ approach.length }} x {{ interval }}
-    p {{ ease === EnumEase.rubber ? rubber : ease }}
+    p(v-if="isComplex") На время
+    p(v-else) {{ approach.length }} x {{ interval }}
+    p(v-if="!isComplex") {{ ease === EnumEase.rubber ? rubber : ease }}
 
-  .grid(:style="cols")
+  .grid(:style="cols" v-if="!isComplex")
     .text-left.py-1.pr-1(class="text-[rgb(var(--colorIcon))]/40") пвт
     .text-center.border-l.border-faint.py-1(v-for="item in approach") {{ item }}
     .text-error.text-right.border-l.border-faint.py-1.pl-1 {{ res }}
@@ -45,6 +53,15 @@ function selectUpdate() {
       .text-left.pr-1.py-1.border-t.border-faint(class="text-[rgb(var(--colorIcon))]/40") кг
       .text-center.border-l.border-faint.border-t.py-1(v-for="item in weight") {{ item }}
       .text-error.text-right.border-l.border-faint.border-t.py-1.pl-1 {{ resWeigth }}
+
+  .grid.items-center.gap-3(v-else class="grid-cols-[1fr_auto]")
+    .text(class="text-[rgb(var(--colorIcon))]/50") Время
+    .text-error.text-base {{ formattedComplexTime }}
+
+  .border-t.border-faint.p-2.mt-2(v-if="isComplex && Array.isArray(complexExercises) && complexExercises.length")
+    .text.pb-2(class="text-[rgb(var(--colorIcon))]/50") Упражнения
+    ul.list-disc.pl-5.grid.gap-1
+      li(v-for="(item, idx) in complexExercises" :key="`${id}-complex-${idx}`") {{ item }}
 
   .border-t.border-faint.p-2.mt-2(v-if="desc") {{ desc }}
 

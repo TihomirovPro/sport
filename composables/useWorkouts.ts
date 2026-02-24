@@ -61,6 +61,11 @@ export const getWorkouts = (exercisesId:string) => {
           interval: workout.interval,
           ease: workout.ease,
           rubber: workout.rubber,
+          complexExercises: Array.isArray(workout.complexExercises)
+            ? workout.complexExercises
+              .map((item) => String(item ?? '').trim())
+              .filter(Boolean)
+            : [],
           approach: workout.approach,
           weight: workout.weight,
           desc: workout.desc,
