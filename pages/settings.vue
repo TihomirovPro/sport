@@ -2,6 +2,7 @@
 import { signOut } from 'firebase/auth'
 import { storeToRefs } from 'pinia'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
+import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 
 useHead({
   title: 'Настройки',
@@ -10,9 +11,12 @@ useHead({
 const appStore = useAppStore()
 const catalogStore = useCatalogStore()
 const userStore = useUserStore()
+const weightStore = useWeightStore()
 const { hideFilterTitles } = storeToRefs(appStore)
 const { rubbersColor } = storeToRefs(catalogStore)
 const { activeUser } = storeToRefs(userStore)
+const { lastWeight } = storeToRefs(weightStore)
+const router = useRouter()
 const colorMode = useColorMode()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
@@ -22,6 +26,19 @@ const storedBaseColor = localStorage.getItem('baseColor')
 if (storedBaseColor) baseColor.value = storedBaseColor
 
 appStore.headerTitle = 'Настройки'
+
+onMounted(() => {
+  subscribeWeights()
+})
+
+onUnmounted(() => {
+  stopWeightSubscription()
+})
+
+const lastWeightText = computed(() => {
+  if (!lastWeight.value) return 'Нет данных'
+  return `${lastWeight.value.value.toFixed(1).replace('.', ',')} кг`
+})
 
 function selectColor(color: string) {
   showModalColor.value = false
@@ -41,6 +58,10 @@ function selectColor(color: string) {
 function changeTheme() {
   if (colorMode.preference === 'dark') colorMode.preference = 'light'
   else colorMode.preference = 'dark'
+}
+
+function toWeightPage() {
+  void router.push('/weight')
 }
 
 async function signOutUser() {
@@ -72,6 +93,10 @@ async function signOutUser() {
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="showModalRubbers = true")
     p Набор резин
     p {{ rubbersColor.length }} шт
+
+  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="toWeightPage")
+    p Мой вес
+    p {{ lastWeightText }}
 
   .flex.items-center.justify-between.border-b.border-faint.py-2
     p Статус пользователя

@@ -17,12 +17,14 @@ const defaultStatus = 'user'
 function resetActiveUserState() {
   const userStore = useUserStore()
   const catalogStore = useCatalogStore()
+  const weightStore = useWeightStore()
   userStore.activeUser.uid = ''
   userStore.activeUser.name = ''
   userStore.activeUser.email = ''
   userStore.activeUser.photoURL = ''
   userStore.activeUser.status = defaultStatus
   catalogStore.setRubbersFromUser(null)
+  weightStore.setWeightEntries([])
 }
 
 function stopUserDataSubscription() {

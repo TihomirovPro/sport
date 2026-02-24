@@ -16,6 +16,11 @@ const { selectUpdateExercise, activeExercise } = storeToRefs(exerciseStore)
 const { selectUpdateWorkout } = storeToRefs(workoutStore)
 
 function back() {
+  if (routeName.value === 'weight') {
+    router.push('/settings')
+    return
+  }
+
   if (routeName.value === 'workout') {
     selectUpdateWorkout.value = null
     localStorage.removeItem('newWorkout')
