@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { createData, updateData, removeData } from '~/composables/firebaseInit'
+import { buildProfileKey, computeProgressionSuggestion, type ProgressionSession } from '~/composables/useProgressionTest'
 import type { TypeWorkoutCreate } from '~/composables/types'
 import type { TypeExercise } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
@@ -10,10 +11,12 @@ const exerciseStore = useExerciseStore()
 const workoutStore = useWorkoutStore()
 const catalogStore = useCatalogStore()
 const appStore = useAppStore()
+const userStore = useUserStore()
 const { activeExercise } = storeToRefs(exerciseStore)
 const { selectUpdateWorkout } = storeToRefs(workoutStore)
 const { rubbersColor } = storeToRefs(catalogStore)
 const { headerTitle } = storeToRefs(appStore)
+const { activeUser } = storeToRefs(userStore)
 const { notifyError } = useNotifications()
 headerTitle.value = 'Добавить тренировку'
 
@@ -88,6 +91,10 @@ const nowDate = new Date().getTime()
 const error = ref(false)
 const removeConfirm = ref(false)
 const complexTime = ref('')
+const progressionRepMin = ref(6)
+const progressionRepMax = ref(8)
+const progressionIncrementKg = ref(2.5)
+const progressionSettingsStorageKey = 'workout-progression-settings-v1'
 
 const isComplex = computed(() => Boolean(activeExercise.value?.isComplex))
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
@@ -345,6 +352,113 @@ function parseDurationToSeconds(value: string): number {
   return Math.floor(onlySeconds)
 }
 
+function parseIntervalMinutes(value: unknown): number {
+  const normalized = String(value ?? '').replace(',', '.').trim()
+  const parsed = Number(normalized)
+  if (!Number.isFinite(parsed) || parsed < 0) return 0
+  return Math.round(parsed * 10) / 10
+}
+
+function loadProgressionSettings() {
+  const raw = localStorage.getItem(progressionSettingsStorageKey)
+  if (!raw) return
+
+  const parsed = safeParseJson<{ repMin?: number, repMax?: number, incrementKg?: number }>(raw, {})
+  if (Number.isFinite(parsed.repMin)) progressionRepMin.value = Number(parsed.repMin)
+  if (Number.isFinite(parsed.repMax)) progressionRepMax.value = Number(parsed.repMax)
+  if (Number.isFinite(parsed.incrementKg)) progressionIncrementKg.value = Number(parsed.incrementKg)
+}
+
+function saveProgressionSettings() {
+  localStorage.setItem(progressionSettingsStorageKey, JSON.stringify({
+    repMin: progressionRepMin.value,
+    repMax: progressionRepMax.value,
+    incrementKg: progressionIncrementKg.value
+  }))
+}
+
+const progressionProfile = computed(() => {
+  const repMin = Math.max(1, Math.round(progressionRepMin.value || 1))
+  const repMax = Math.max(repMin, Math.round(progressionRepMax.value || repMin))
+  const incrementKg = Math.max(0.25, Math.round((progressionIncrementKg.value || 0.25) * 100) / 100)
+
+  return {
+    sets: Math.max(1, Math.round(approaches.value || 1)),
+    intervalMinutes: parseIntervalMinutes(workout.value.interval),
+    repMin,
+    repMax,
+    incrementKg
+  }
+})
+
+const progressionProfileKey = computed(() => buildProfileKey(progressionProfile.value))
+
+const progressionSessions = computed<ProgressionSession[]>(() => {
+  const exerciseId = activeExercise.value?.id ?? ''
+
+  return workoutStore.workouts
+    .filter((item) => item.exercisesId === exerciseId)
+    .filter((item) => item.ease === EnumEase.weight)
+    .filter((item) => Array.isArray(item.weight) && item.weight.length === item.approach.length && item.approach.length > 0)
+    .map((item) => ({
+      id: item.id,
+      exerciseId: item.exercisesId,
+      date: item.date,
+      profileKey: buildProfileKey({
+        sets: item.approach.length,
+        intervalMinutes: parseIntervalMinutes(item.interval),
+        repMin: progressionProfile.value.repMin,
+        repMax: progressionProfile.value.repMax,
+        incrementKg: progressionProfile.value.incrementKg
+      }),
+      reps: [...item.approach],
+      weights: [...(item.weight || [])],
+      rpe: 8
+    }))
+})
+
+const progressionSuggestion = computed(() => {
+  return computeProgressionSuggestion(
+    progressionSessions.value,
+    activeExercise.value?.id ?? '',
+    progressionProfile.value
+  )
+})
+
+const canManageProgression = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
+const canShowProgression = computed(() => canManageProgression.value && !isComplex.value && workout.value.ease === EnumEase.weight)
+
+function suggestionModeLabel(mode: string): string {
+  if (mode === 'increase') return 'Добавить вес'
+  if (mode === 'hold') return 'Оставить вес'
+  if (mode === 'decrease') return 'Снизить вес'
+  return 'Стартовый режим'
+}
+
+function applyProgressionSuggestion() {
+  if (!canShowProgression.value) {
+    notifyError('Автопрогрессия доступна только пользователю со статусом admin')
+    return
+  }
+
+  const suggestedWeights = progressionSuggestion.value.nextWeights
+  if (!suggestedWeights.length) return
+
+  workout.value.weight = [...suggestedWeights]
+
+  const currentApproach = normalizeNumberArray(workout.value.approach)
+  const hasValidApproach = currentApproach.length === approaches.value
+    && currentApproach.every((item) => Number.isFinite(item) && item > 0)
+
+  if (!hasValidApproach) {
+    workout.value.approach = new Array(approaches.value).fill(progressionSuggestion.value.targetReps)
+  }
+
+  saveNewWorkout()
+}
+
+loadProgressionSettings()
+
 if (!selectUpdateWorkout.value) {
   const newWorkoutRaw = localStorage.getItem('newWorkout')
   const approachesRaw = localStorage.getItem('approaches')
@@ -529,6 +643,16 @@ watch(
   },
   { deep: true }
 )
+
+watch(
+  [progressionRepMin, progressionRepMax, progressionIncrementKg],
+  () => {
+    progressionRepMin.value = Math.max(1, Math.round(progressionRepMin.value || 1))
+    progressionRepMax.value = Math.max(progressionRepMin.value, Math.round(progressionRepMax.value || progressionRepMin.value))
+    progressionIncrementKg.value = Math.max(0.25, Math.round((progressionIncrementKg.value || 0.25) * 100) / 100)
+    saveProgressionSettings()
+  }
+)
 </script>
 
 <template lang="pug">
@@ -586,6 +710,28 @@ watch(
       :class="{ active: workout.rubber === item.name }"
       @click="selectRubber(item.name)"
     ) {{ item.name.replace(' резина', '') }}
+
+  .progression-panel(v-if="canShowProgression")
+    .progression-title Рекомендация по прогрессии
+    .progression-grid
+      label.progression-field
+        span Повторы min
+        input.progression-input(v-model.number="progressionRepMin" type="number" min="1")
+      label.progression-field
+        span Повторы max
+        input.progression-input(v-model.number="progressionRepMax" type="number" min="1")
+      label.progression-field
+        span Шаг (кг)
+        input.progression-input(v-model.number="progressionIncrementKg" type="number" min="0.25" step="0.25")
+    p.progression-meta Учтено тренировок: {{ progressionSuggestion.basedOnSessions }}
+    p.progression-meta Режим: {{ suggestionModeLabel(progressionSuggestion.mode) }}
+    p.progression-meta Рекомендация по весам: {{ progressionSuggestion.nextWeights.join(' / ') || 'нет' }}
+    p.progression-meta Целевые повторы: {{ progressionSuggestion.targetReps }}
+    p.progression-reason {{ progressionSuggestion.reason }}
+    BaseButton(
+      text="Применить рекомендацию"
+      @click="applyProgressionSuggestion"
+    )
 
   .approaches(v-if="!isComplex")
     .approach(
@@ -680,4 +826,42 @@ watch(
     &.active
       border 2px solid #fff
       outline 2px solid #5182dc
+
+.progression-panel
+  display grid
+  gap 8px
+  border 1px solid unquote('rgba(var(--colorIcon), 0.25)')
+  border-radius 12px
+  padding 12px
+  background unquote('rgba(var(--colorAccent), 0.08)')
+
+.progression-title
+  font-size 14px
+  font-weight 600
+
+.progression-grid
+  display grid
+  grid-template-columns repeat(3, minmax(0, 1fr))
+  gap 8px
+
+.progression-field
+  display grid
+  gap 4px
+  font-size 12px
+  opacity 0.8
+
+.progression-input
+  width 100%
+  border 1px solid unquote('rgba(var(--colorIcon), 0.25)')
+  border-radius 8px
+  padding 6px 8px
+  background transparent
+  color inherit
+
+.progression-meta
+  font-size 12px
+  opacity 0.75
+
+.progression-reason
+  font-size 12px
 </style>
