@@ -60,6 +60,7 @@ export const getWorkouts = (exercisesId:string) => {
           date: normalizeWorkoutDate(workout.date),
           interval: workout.interval,
           ease: workout.ease,
+          rpe: Number.isFinite(Number(workout.rpe)) ? Number(workout.rpe) : undefined,
           rubber: workout.rubber,
           complexExercises: Array.isArray(workout.complexExercises)
             ? workout.complexExercises

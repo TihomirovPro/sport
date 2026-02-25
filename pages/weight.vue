@@ -115,6 +115,18 @@ const chartOptions = reactive({
     legend: {
       display: false,
     },
+    tooltip: {
+      callbacks: {
+        title: () => '',
+      },
+    },
+  },
+  scales: {
+    x: {
+      ticks: {
+        display: false,
+      },
+    },
   },
 })
 

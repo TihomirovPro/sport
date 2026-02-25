@@ -26,6 +26,7 @@ export interface TypeWorkout {
   date: number
   interval: string
   ease: EnumEase
+  rpe?: number
   rubber?: string
   desc?: string
   complexExercises?: string[]

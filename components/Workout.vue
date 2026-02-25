@@ -31,6 +31,12 @@ const formattedComplexTime = computed(() => {
   return `${mins}:${secs}`
 })
 
+const formattedRpe = computed(() => {
+  const normalized = Number(props.rpe)
+  if (!Number.isFinite(normalized) || normalized <= 0) return ''
+  return `${normalized.toFixed(1).replace(/\.0$/, '')}`
+})
+
 function selectUpdate() {
   selectUpdateWorkout.value = workouts.value.find(item => item.id === props.id) || null
   router.push('/workout')
@@ -44,6 +50,8 @@ function selectUpdate() {
     p(v-if="isComplex") На время
     p(v-else) {{ approach.length }} x {{ interval }}
     p(v-if="!isComplex") {{ ease === EnumEase.rubber ? rubber : ease }}
+
+  .text-xs.pb-3(v-if="!isComplex && formattedRpe") RPE: {{ formattedRpe }}
 
   .grid(:style="cols" v-if="!isComplex")
     .text-left.py-1.pr-1(class="text-[rgb(var(--colorIcon))]/40") пвт

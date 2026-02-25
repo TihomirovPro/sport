@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { createData, updateData, removeData } from '~/composables/firebaseInit'
-import { buildProfileKey, computeProgressionSuggestion, type ProgressionSession } from '~/composables/useProgressionTest'
+import { createData, updateData, removeData, onData } from '~/composables/firebaseInit'
+import { buildProfileKey, computeBodyweightRepsSuggestion, computeProgressionSuggestion, type ProgressionSession } from '~/composables/useProgressionTest'
 import type { TypeWorkoutCreate } from '~/composables/types'
 import type { TypeExercise } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
@@ -95,6 +95,8 @@ const progressionRepMin = ref(6)
 const progressionRepMax = ref(8)
 const progressionIncrementKg = ref(2.5)
 const progressionSettingsStorageKey = 'workout-progression-settings-v1'
+const isApplyingRemoteProgressionSettings = ref(false)
+const progressionSettingsUnsubscribe = ref<(() => void) | null>(null)
 
 const isComplex = computed(() => Boolean(activeExercise.value?.isComplex))
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
@@ -162,6 +164,7 @@ type WorkoutStoreItem = {
   date: number
   interval: string
   ease: EnumEase
+  rpe?: number
   rubber?: string
   complexExercises?: string[]
   approach: number[]
@@ -209,6 +212,7 @@ watchEffect(() => {
       interval: selectUpdateWorkout.value.interval,
       approach: selectUpdateWorkout.value.approach,
       ease: selectUpdateWorkout.value.ease,
+      rpe: selectUpdateWorkout.value.rpe,
       rubber: selectUpdateWorkout.value.rubber || '',
       weight: selectUpdateWorkout.value.weight || [],
       complexExercises: Array.isArray(selectUpdateWorkout.value.complexExercises)
@@ -239,6 +243,7 @@ async function add() {
       date: workout.value.date as number,
       interval: workout.value.interval,
       ease: workout.value.ease,
+      rpe: workout.value.rpe,
       rubber: workout.value.rubber,
       complexExercises: Array.isArray(workout.value.complexExercises) ? [...workout.value.complexExercises] : [],
       approach: [...workout.value.approach],
@@ -276,6 +281,7 @@ async function updateSelectWorkout() {
       date: workout.value.date as number,
       interval: workout.value.interval,
       ease: workout.value.ease,
+      rpe: workout.value.rpe,
       rubber: workout.value.rubber,
       complexExercises: Array.isArray(workout.value.complexExercises) ? [...workout.value.complexExercises] : [],
       approach: [...workout.value.approach],
@@ -359,8 +365,27 @@ function parseIntervalMinutes(value: unknown): number {
   return Math.round(parsed * 10) / 10
 }
 
+function progressionSettingsKey(): string {
+  const exerciseId = String(activeExercise.value?.id || 'default').trim() || 'default'
+  return `${progressionSettingsStorageKey}:${exerciseId}`
+}
+
+function progressionSettingsPathFor(exerciseId: string): string {
+  return `progression/settings/${exerciseId}`
+}
+
+function normalizeRpe(value: unknown): number | undefined {
+  const normalized = String(value ?? '').replace(',', '.').trim()
+  if (!normalized) return undefined
+
+  const parsed = Number(normalized)
+  if (!Number.isFinite(parsed)) return undefined
+
+  return Math.round(parsed * 10) / 10
+}
+
 function loadProgressionSettings() {
-  const raw = localStorage.getItem(progressionSettingsStorageKey)
+  const raw = localStorage.getItem(progressionSettingsKey())
   if (!raw) return
 
   const parsed = safeParseJson<{ repMin?: number, repMax?: number, incrementKg?: number }>(raw, {})
@@ -370,11 +395,36 @@ function loadProgressionSettings() {
 }
 
 function saveProgressionSettings() {
-  localStorage.setItem(progressionSettingsStorageKey, JSON.stringify({
+  localStorage.setItem(progressionSettingsKey(), JSON.stringify({
     repMin: progressionRepMin.value,
     repMax: progressionRepMax.value,
     incrementKg: progressionIncrementKg.value
   }))
+}
+
+function stopProgressionSettingsSubscription() {
+  if (!progressionSettingsUnsubscribe.value) return
+  progressionSettingsUnsubscribe.value()
+  progressionSettingsUnsubscribe.value = null
+}
+
+function subscribeProgressionSettings() {
+  const exerciseId = String(activeExercise.value?.id || '').trim()
+  if (!exerciseId) return
+
+  stopProgressionSettingsSubscription()
+
+  progressionSettingsUnsubscribe.value = onData(progressionSettingsPathFor(exerciseId), (snapshot) => {
+    const data = snapshot.val() as { repMin?: number, repMax?: number, incrementKg?: number } | null
+    if (!data) return
+
+    isApplyingRemoteProgressionSettings.value = true
+    if (Number.isFinite(Number(data.repMin))) progressionRepMin.value = Number(data.repMin)
+    if (Number.isFinite(Number(data.repMax))) progressionRepMax.value = Number(data.repMax)
+    if (Number.isFinite(Number(data.incrementKg))) progressionIncrementKg.value = Number(data.incrementKg)
+    isApplyingRemoteProgressionSettings.value = false
+    saveProgressionSettings()
+  })
 }
 
 const progressionProfile = computed(() => {
@@ -392,8 +442,10 @@ const progressionProfile = computed(() => {
 })
 
 const progressionProfileKey = computed(() => buildProfileKey(progressionProfile.value))
+const isWeightMode = computed(() => workout.value.ease === EnumEase.weight)
+const isBodyweightMode = computed(() => workout.value.ease === EnumEase.noWeight)
 
-const progressionSessions = computed<ProgressionSession[]>(() => {
+const progressionWeightSessions = computed<ProgressionSession[]>(() => {
   const exerciseId = activeExercise.value?.id ?? ''
 
   return workoutStore.workouts
@@ -413,27 +465,86 @@ const progressionSessions = computed<ProgressionSession[]>(() => {
       }),
       reps: [...item.approach],
       weights: [...(item.weight || [])],
-      rpe: 8
+      rpe: Number.isFinite(Number(item.rpe)) ? Number(item.rpe) : 8
+    }))
+})
+
+const progressionBodyweightSessions = computed<ProgressionSession[]>(() => {
+  const exerciseId = activeExercise.value?.id ?? ''
+
+  return workoutStore.workouts
+    .filter((item) => item.exercisesId === exerciseId)
+    .filter((item) => item.ease === EnumEase.noWeight)
+    .filter((item) => Array.isArray(item.approach) && item.approach.length > 0)
+    .map((item) => ({
+      id: item.id,
+      exerciseId: item.exercisesId,
+      date: item.date,
+      profileKey: buildProfileKey({
+        sets: item.approach.length,
+        intervalMinutes: parseIntervalMinutes(item.interval),
+        repMin: progressionProfile.value.repMin,
+        repMax: progressionProfile.value.repMax,
+        incrementKg: progressionProfile.value.incrementKg
+      }),
+      reps: [...item.approach],
+      weights: new Array(item.approach.length).fill(0),
+      rpe: Number.isFinite(Number(item.rpe)) ? Number(item.rpe) : 8
     }))
 })
 
 const progressionSuggestion = computed(() => {
   return computeProgressionSuggestion(
-    progressionSessions.value,
+    progressionWeightSessions.value,
+    activeExercise.value?.id ?? '',
+    progressionProfile.value
+  )
+})
+
+const bodyweightSuggestion = computed(() => {
+  return computeBodyweightRepsSuggestion(
+    progressionBodyweightSessions.value,
     activeExercise.value?.id ?? '',
     progressionProfile.value
   )
 })
 
 const canManageProgression = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
-const canShowProgression = computed(() => canManageProgression.value && !isComplex.value && workout.value.ease === EnumEase.weight)
+const canShowProgression = computed(() => canManageProgression.value && !isComplex.value && (isWeightMode.value || isBodyweightMode.value))
 
-function suggestionModeLabel(mode: string): string {
-  if (mode === 'increase') return 'Добавить вес'
-  if (mode === 'hold') return 'Оставить вес'
-  if (mode === 'decrease') return 'Снизить вес'
-  return 'Стартовый режим'
+function suggestionActionText(mode: string): string {
+  if (mode === 'increase') return 'Повышаем рабочий вес'
+  if (mode === 'decrease') return 'Снижаем рабочий вес'
+  if (mode === 'hold') return 'Оставляем текущий вес'
+  return 'Собираем базовую историю'
 }
+
+function suggestionSummaryText(mode: string, reason: string): string {
+  const action = suggestionActionText(mode)
+  const normalizedReason = String(reason || '').trim()
+  if (!normalizedReason) return action
+  return `${action}. ${normalizedReason}`
+}
+
+const activeSuggestionMode = computed(() => {
+  if (isWeightMode.value) return progressionSuggestion.value.mode
+  return bodyweightSuggestion.value.mode
+})
+
+const activeSuggestionReason = computed(() => {
+  if (isWeightMode.value) return progressionSuggestion.value.reason
+  return bodyweightSuggestion.value.reason
+})
+
+const recommendationLabel = computed(() => {
+  if (isWeightMode.value) return 'Рекомендуемые веса'
+  return 'Рекомендуемые повторы'
+})
+
+const recommendationLine = computed(() => {
+  if (isWeightMode.value) return progressionSuggestion.value.nextWeights.join(' / ')
+  return bodyweightSuggestion.value.nextReps.join(' / ')
+})
 
 function applyProgressionSuggestion() {
   if (!canShowProgression.value) {
@@ -441,23 +552,51 @@ function applyProgressionSuggestion() {
     return
   }
 
-  const suggestedWeights = progressionSuggestion.value.nextWeights
-  if (!suggestedWeights.length) return
+  if (isWeightMode.value) {
+    const suggestedWeights = progressionSuggestion.value.nextWeights
+    if (!suggestedWeights.length) return
 
-  workout.value.weight = [...suggestedWeights]
+    workout.value.weight = [...suggestedWeights]
 
-  const currentApproach = normalizeNumberArray(workout.value.approach)
-  const hasValidApproach = currentApproach.length === approaches.value
-    && currentApproach.every((item) => Number.isFinite(item) && item > 0)
+    const currentApproach = normalizeNumberArray(workout.value.approach)
+    const hasValidApproach = currentApproach.length === approaches.value
+      && currentApproach.every((item) => Number.isFinite(item) && item > 0)
 
-  if (!hasValidApproach) {
-    workout.value.approach = new Array(approaches.value).fill(progressionSuggestion.value.targetReps)
+    if (!hasValidApproach) {
+      workout.value.approach = new Array(approaches.value).fill(progressionSuggestion.value.targetReps)
+    }
+  } else {
+    const suggestedReps = bodyweightSuggestion.value.nextReps
+    if (!suggestedReps.length) return
+    workout.value.approach = [...suggestedReps]
   }
 
   saveNewWorkout()
+
+  const exerciseId = String(activeExercise.value?.id || '').trim()
+  if (!exerciseId) return
+
+  const payload = {
+    exerciseId,
+    profileKey: isWeightMode.value ? progressionSuggestion.value.profileKey : bodyweightSuggestion.value.profileKey,
+    mode: activeSuggestionMode.value,
+    adaptiveState: isWeightMode.value ? progressionSuggestion.value.adaptiveState : null,
+    adaptiveIncrementKg: isWeightMode.value ? progressionSuggestion.value.adaptiveIncrementKg : null,
+    targetReps: isWeightMode.value ? progressionSuggestion.value.targetReps : null,
+    nextWeights: isWeightMode.value ? progressionSuggestion.value.nextWeights : null,
+    nextReps: isBodyweightMode.value ? bodyweightSuggestion.value.nextReps : null,
+    basedOnSessions: isWeightMode.value ? progressionSuggestion.value.basedOnSessions : bodyweightSuggestion.value.basedOnSessions,
+    lastWorkoutRpe: Number.isFinite(Number(workout.value.rpe)) ? Number(workout.value.rpe) : null,
+    appliedAt: Date.now()
+  }
+
+  void createData('progression/appliedSuggestions', payload).catch((error) => {
+    console.error('[firebase:progressionAppliedSuggestion]', error)
+  })
 }
 
 loadProgressionSettings()
+subscribeProgressionSettings()
 
 if (!selectUpdateWorkout.value) {
   const newWorkoutRaw = localStorage.getItem('newWorkout')
@@ -478,6 +617,7 @@ if (!selectUpdateWorkout.value) {
       interval: newWorkout.interval ?? fallbackDefaults.interval,
       approach: Array.isArray(newWorkout.approach) ? newWorkout.approach : [],
       ease: newWorkout.ease ?? fallbackDefaults.ease,
+      rpe: normalizeRpe(newWorkout.rpe),
       rubber: newWorkout.rubber || '',
       weight: Array.isArray(newWorkout.weight) ? newWorkout.weight : [],
       complexExercises: Array.isArray(newWorkout.complexExercises) ? newWorkout.complexExercises : [],
@@ -524,6 +664,16 @@ function updateWeight(idx: number, value: string | number | undefined) {
 }
 
 function changeInterval() {
+  saveNewWorkout()
+}
+
+function updateRpe(value: string | number | undefined) {
+  const normalized = normalizeRpe(value)
+  if (normalized === undefined) {
+    workout.value.rpe = undefined
+  } else {
+    workout.value.rpe = Math.min(Math.max(normalized, 1), 10)
+  }
   saveNewWorkout()
 }
 
@@ -592,6 +742,7 @@ function validateWorkout(): boolean {
     workout.value.rubber = ''
     workout.value.res = durationSeconds
     workout.value.resWeigth = 0
+    workout.value.rpe = undefined
     workout.value.date = normalizeWorkoutDate(workout.value.date)
     error.value = false
     return true
@@ -628,6 +779,12 @@ function validateWorkout(): boolean {
   workout.value.complexExercises = []
   workout.value.res = approachValues.reduce((sum:number, current:number):number => +sum + +current, 0)
   workout.value.resWeigth = weightValues.reduce((acc:number, item:number, index:number):number => acc + (+item * +(approachValues[index] ?? 0)), 0)
+  const normalizedRpe = normalizeRpe(workout.value.rpe)
+  if (normalizedRpe !== undefined && (normalizedRpe < 1 || normalizedRpe > 10)) {
+    notifyError('RPE должен быть в диапазоне от 1 до 10')
+    return false
+  }
+  workout.value.rpe = normalizedRpe
   workout.value.date = normalizeWorkoutDate(workout.value.date)
   error.value = false
 
@@ -651,8 +808,35 @@ watch(
     progressionRepMax.value = Math.max(progressionRepMin.value, Math.round(progressionRepMax.value || progressionRepMin.value))
     progressionIncrementKg.value = Math.max(0.25, Math.round((progressionIncrementKg.value || 0.25) * 100) / 100)
     saveProgressionSettings()
+
+    if (isApplyingRemoteProgressionSettings.value) return
+    if (!canManageProgression.value) return
+
+    const exerciseId = String(activeExercise.value?.id || '').trim()
+    if (!exerciseId) return
+
+    void updateData(progressionSettingsPathFor(exerciseId), {
+      repMin: progressionRepMin.value,
+      repMax: progressionRepMax.value,
+      incrementKg: progressionIncrementKg.value,
+      updatedAt: Date.now()
+    }).catch((error) => {
+      console.error('[firebase:saveProgressionSettings]', error)
+    })
   }
 )
+
+watch(
+  () => activeExercise.value?.id,
+  () => {
+    loadProgressionSettings()
+    subscribeProgressionSettings()
+  }
+)
+
+onUnmounted(() => {
+  stopProgressionSettingsSubscription()
+})
 </script>
 
 <template lang="pug">
@@ -713,6 +897,9 @@ watch(
 
   .progression-panel(v-if="canShowProgression")
     .progression-title Рекомендация по прогрессии
+
+    p.progression-summary {{ suggestionSummaryText(activeSuggestionMode, activeSuggestionReason) }}
+
     .progression-grid
       label.progression-field
         span Повторы min
@@ -720,14 +907,14 @@ watch(
       label.progression-field
         span Повторы max
         input.progression-input(v-model.number="progressionRepMax" type="number" min="1")
-      label.progression-field
+      label.progression-field(v-if="isWeightMode")
         span Шаг (кг)
         input.progression-input(v-model.number="progressionIncrementKg" type="number" min="0.25" step="0.25")
-    p.progression-meta Учтено тренировок: {{ progressionSuggestion.basedOnSessions }}
-    p.progression-meta Режим: {{ suggestionModeLabel(progressionSuggestion.mode) }}
-    p.progression-meta Рекомендация по весам: {{ progressionSuggestion.nextWeights.join(' / ') || 'нет' }}
-    p.progression-meta Целевые повторы: {{ progressionSuggestion.targetReps }}
-    p.progression-reason {{ progressionSuggestion.reason }}
+
+    .progression-weights
+      span.recommended-label {{ recommendationLabel }}
+      span.recommended-values {{ recommendationLine }}
+
     BaseButton(
       text="Применить рекомендацию"
       @click="applyProgressionSuggestion"
@@ -757,6 +944,16 @@ watch(
         inputmode="decimal"
         :placeholder="`Вес ${index}`"
       )  
+
+  BaseInput(
+    v-if="!isComplex"
+    :model-value="workout.rpe ?? ''"
+    @update:model-value="updateRpe"
+    type="text"
+    inputmode="decimal"
+    placeholder="RPE (1-10)"
+  )
+  p.text-xs.opacity-70(v-if="!isComplex") RPE оценивается по последнему рабочему подходу.
 
   BaseInput(
     v-model="workout.desc"
@@ -829,7 +1026,7 @@ watch(
 
 .progression-panel
   display grid
-  gap 8px
+  gap 12px
   border 1px solid unquote('rgba(var(--colorIcon), 0.25)')
   border-radius 12px
   padding 12px
@@ -841,7 +1038,7 @@ watch(
 
 .progression-grid
   display grid
-  grid-template-columns repeat(3, minmax(0, 1fr))
+  grid-template-columns repeat(auto-fit, minmax(120px, 1fr))
   gap 8px
 
 .progression-field
@@ -858,10 +1055,26 @@ watch(
   background transparent
   color inherit
 
-.progression-meta
-  font-size 12px
-  opacity 0.75
+.progression-weights
+  border 1px solid unquote('rgba(var(--colorIcon), 0.16)')
+  border-radius 10px
+  padding 10px 12px
+  display grid
+  gap 4px
+  background unquote('rgba(var(--colorIcon), 0.06)')
 
-.progression-reason
-  font-size 12px
+.recommended-label
+  font-size 11px
+  opacity 0.7
+
+.recommended-values
+  font-size 13px
+  font-weight 600
+
+.progression-summary
+  font-size 14px
+  line-height 1.45
+  font-weight 500
+  opacity 0.95
+
 </style>
