@@ -1,7 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { readFileSync } from 'node:fs'
 import tailwindcss from '@tailwindcss/vite'
 
 const isDev = process.env.NODE_ENV !== 'production'
+const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')) as { version?: string }
+const appVersion = packageJson.version ?? '0.0.0'
+const appVersionCachePart = appVersion.replace(/\./g, '-')
 
 const cspDirectives = [
   "default-src 'self'",
@@ -107,7 +111,7 @@ export default defineNuxtConfig({
     },
     workbox: {
       cleanupOutdatedCaches: true,
-      cacheId: 'power-progress-v5',
+      cacheId: `power-progress-v${appVersionCachePart}`,
       navigateFallback: '/',
       runtimeCaching: [
         {
@@ -152,6 +156,7 @@ export default defineNuxtConfig({
     APP_ID: process.env.APP_ID,
 
     public: {
+      APP_VERSION: appVersion,
       FIREBASE_API_KEY: process.env.FIREBASE_API_KEY,
       AUTH_DOMAIN: process.env.AUTH_DOMAIN,
       DATABASE_URL: process.env.DATABASE_URL,
