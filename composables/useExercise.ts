@@ -53,15 +53,18 @@ export const sortExercises = (exercises:TypeExercise[]) => {
   const newExercises:{ [key:string]:TypeExerciseCreate } = {}
 
   exercises.forEach((el, i) => {
-    newExercises[`${el.id}`] = {
-      color: el.color,
-      ease: el.ease,
-      icon: el.icon,
+    const payload: TypeExerciseCreate = {
       name: el.name,
-      isComplex: el.isComplex,
-      complexDesc: el.complexDesc,
+      ease: el.ease,
       order: i
     }
+
+    if (el.color !== undefined) payload.color = el.color
+    if (el.icon !== undefined) payload.icon = el.icon
+    if (el.isComplex !== undefined) payload.isComplex = el.isComplex
+    if (el.complexDesc !== undefined) payload.complexDesc = el.complexDesc
+
+    newExercises[`${el.id}`] = payload
   })
 
   void updateData('exercises', newExercises).catch((error) => {
