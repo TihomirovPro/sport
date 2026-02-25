@@ -18,9 +18,11 @@ const { activeUser } = storeToRefs(userStore)
 const { lastWeight } = storeToRefs(weightStore)
 const router = useRouter()
 const colorMode = useColorMode()
+const runtimeConfig = useRuntimeConfig()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
 const showModalRubbers = ref(false)
+const appVersion = runtimeConfig.public.APP_VERSION || 'dev'
 
 const storedBaseColor = localStorage.getItem('baseColor')
 if (storedBaseColor) baseColor.value = storedBaseColor
@@ -101,6 +103,10 @@ async function signOutUser() {
   .flex.items-center.justify-between.border-b.border-faint.py-2
     p Статус пользователя
     p {{ activeUser.status || 'Пользователь' }}
+
+  .flex.items-center.justify-between.border-b.border-faint.py-2
+    p Версия приложения
+    p v{{ appVersion }}
 
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOutUser")
     p Выход

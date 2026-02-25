@@ -51,6 +51,14 @@ npm run build
 npm run preview
 ```
 
+## Версионирование
+
+- Используется SemVer (`MAJOR.MINOR.PATCH`) в `package.json`.
+- `PATCH` - исправления без изменения поведения API/UX.
+- `MINOR` - новые возможности без ломающих изменений.
+- `MAJOR` - ломающие изменения.
+- Текущая версия: `5.1.0`.
+
 ## Безопасность статуса пользователя
 
 - Поле `users/{uid}/user/status` защищено правилами Realtime Database:
