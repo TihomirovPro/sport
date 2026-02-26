@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { createData, updateData, removeData, onData } from '~/composables/firebaseInit'
+import { createData, updateData, removeData } from '~/composables/firebaseInit'
 import { buildProfileKey, computeBodyweightRepsSuggestion, computeProgressionSuggestion, type ProgressionSession } from '~/composables/useProgressionTest'
 import type { TypeWorkoutCreate } from '~/composables/types'
 import type { TypeExercise } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
+import {
+  safeParseJson,
+  formatWorkoutDate,
+  toDateInputValue,
+  parseDurationToSeconds,
+  parseIntervalMinutes,
+  normalizeRpe,
+  normalizeNumberArray,
+  normalizeWorkoutDate
+} from '~/composables/useWorkoutHelpers'
+import { useWorkoutProgressionSettings } from '~/composables/useWorkoutProgressionSettings'
 
 const router = useRouter()
 const exerciseStore = useExerciseStore()
@@ -37,14 +48,6 @@ function readStoredActiveExercise() {
   }
 }
 
-function safeParseJson<T>(value: string, fallback: T): T {
-  try {
-    return JSON.parse(value) as T
-  } catch {
-    return fallback
-  }
-}
-
 if (!activeExercise.value) {
   const storedActiveExercise = readStoredActiveExercise()
   if (storedActiveExercise?.id) {
@@ -70,33 +73,21 @@ if (activeExercise.value?.id) {
   void router.push('/')
 }
 
-function formatDate(date:number | string):string {
-  return new Intl.DateTimeFormat('ru-RU', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  }).format(new Date(date)).slice(0, -3)
-}
-
-function toDateInputValue(value: unknown): string {
-  const timestamp = normalizeWorkoutDate(value)
-  const date = new Date(timestamp)
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${year}-${month}-${day}`
-}
+const formatDate = formatWorkoutDate
 
 const nowDate = new Date().getTime()
 const error = ref(false)
 const removeConfirm = ref(false)
 const complexTime = ref('')
-const progressionRepMin = ref(6)
-const progressionRepMax = ref(8)
-const progressionIncrementKg = ref(2.5)
-const progressionSettingsStorageKey = 'workout-progression-settings-v1'
-const isApplyingRemoteProgressionSettings = ref(false)
-const progressionSettingsUnsubscribe = ref<(() => void) | null>(null)
+const canManageProgression = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
+const {
+  progressionRepMin,
+  progressionRepMax,
+  progressionIncrementKg
+} = useWorkoutProgressionSettings({
+  activeExerciseId: computed(() => String(activeExercise.value?.id || '').trim()),
+  canManageProgression
+})
 
 const isComplex = computed(() => Boolean(activeExercise.value?.isComplex))
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
@@ -337,100 +328,10 @@ function formatTimer(totalSeconds:number): string {
   return `${mins}:${secs}`
 }
 
-function parseDurationToSeconds(value: string): number {
-  const raw = value.trim()
-  if (!raw) return 0
-
-  if (raw.includes(':')) {
-    const [minsRaw, secsRaw] = raw.split(':')
-    const mins = Number(minsRaw)
-    const secs = Number(secsRaw)
-
-    if (!Number.isFinite(mins) || !Number.isFinite(secs) || mins < 0 || secs < 0 || secs > 59) {
-      return NaN
-    }
-
-    return mins * 60 + secs
-  }
-
-  const onlySeconds = Number(raw.replace(',', '.'))
-  if (!Number.isFinite(onlySeconds) || onlySeconds < 0) return NaN
-  return Math.floor(onlySeconds)
-}
-
-function parseIntervalMinutes(value: unknown): number {
-  const normalized = String(value ?? '').replace(',', '.').trim()
-  const parsed = Number(normalized)
-  if (!Number.isFinite(parsed) || parsed < 0) return 0
-  return Math.round(parsed * 10) / 10
-}
-
-function progressionSettingsKey(): string {
-  const exerciseId = String(activeExercise.value?.id || 'default').trim() || 'default'
-  return `${progressionSettingsStorageKey}:${exerciseId}`
-}
-
-function progressionSettingsPathFor(exerciseId: string): string {
-  return `progression/settings/${exerciseId}`
-}
-
-function normalizeRpe(value: unknown): number | undefined {
-  const normalized = String(value ?? '').replace(',', '.').trim()
-  if (!normalized) return undefined
-
-  const parsed = Number(normalized)
-  if (!Number.isFinite(parsed)) return undefined
-
-  return Math.round(parsed * 10) / 10
-}
-
-function loadProgressionSettings() {
-  const raw = localStorage.getItem(progressionSettingsKey())
-  if (!raw) return
-
-  const parsed = safeParseJson<{ repMin?: number, repMax?: number, incrementKg?: number }>(raw, {})
-  if (Number.isFinite(parsed.repMin)) progressionRepMin.value = Number(parsed.repMin)
-  if (Number.isFinite(parsed.repMax)) progressionRepMax.value = Number(parsed.repMax)
-  if (Number.isFinite(parsed.incrementKg)) progressionIncrementKg.value = Number(parsed.incrementKg)
-}
-
-function saveProgressionSettings() {
-  localStorage.setItem(progressionSettingsKey(), JSON.stringify({
-    repMin: progressionRepMin.value,
-    repMax: progressionRepMax.value,
-    incrementKg: progressionIncrementKg.value
-  }))
-}
-
-function stopProgressionSettingsSubscription() {
-  if (!progressionSettingsUnsubscribe.value) return
-  progressionSettingsUnsubscribe.value()
-  progressionSettingsUnsubscribe.value = null
-}
-
-function subscribeProgressionSettings() {
-  const exerciseId = String(activeExercise.value?.id || '').trim()
-  if (!exerciseId) return
-
-  stopProgressionSettingsSubscription()
-
-  progressionSettingsUnsubscribe.value = onData(progressionSettingsPathFor(exerciseId), (snapshot) => {
-    const data = snapshot.val() as { repMin?: number, repMax?: number, incrementKg?: number } | null
-    if (!data) return
-
-    isApplyingRemoteProgressionSettings.value = true
-    if (Number.isFinite(Number(data.repMin))) progressionRepMin.value = Number(data.repMin)
-    if (Number.isFinite(Number(data.repMax))) progressionRepMax.value = Number(data.repMax)
-    if (Number.isFinite(Number(data.incrementKg))) progressionIncrementKg.value = Number(data.incrementKg)
-    isApplyingRemoteProgressionSettings.value = false
-    saveProgressionSettings()
-  })
-}
-
 const progressionProfile = computed(() => {
   const repMin = Math.max(1, Math.round(progressionRepMin.value || 1))
   const repMax = Math.max(repMin, Math.round(progressionRepMax.value || repMin))
-  const incrementKg = Math.max(0.25, Math.round((progressionIncrementKg.value || 0.25) * 100) / 100)
+  const incrementKg = Math.max(1, Math.round(progressionIncrementKg.value || 2))
 
   return {
     sets: Math.max(1, Math.round(approaches.value || 1)),
@@ -508,8 +409,6 @@ const bodyweightSuggestion = computed(() => {
     progressionProfile.value
   )
 })
-
-const canManageProgression = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
 const canShowProgression = computed(() => canManageProgression.value && !isComplex.value && (isWeightMode.value || isBodyweightMode.value))
 
 function suggestionActionText(mode: string): string {
@@ -594,9 +493,6 @@ function applyProgressionSuggestion() {
     console.error('[firebase:progressionAppliedSuggestion]', error)
   })
 }
-
-loadProgressionSettings()
-subscribeProgressionSettings()
 
 if (!selectUpdateWorkout.value) {
   const newWorkoutRaw = localStorage.getItem('newWorkout')
@@ -687,26 +583,6 @@ function removeComplexExercise(index:number) {
   if (!Array.isArray(workout.value.complexExercises)) return
   workout.value.complexExercises.splice(index, 1)
   saveNewWorkout()
-}
-
-function normalizeNumberArray(value: unknown): number[] {
-  if (!Array.isArray(value)) return []
-
-  return value.map((item) => {
-    const normalized = String(item ?? '').replace(',', '.').trim()
-    return normalized === '' ? NaN : Number(normalized)
-  })
-}
-
-function normalizeWorkoutDate(value: unknown): number {
-  if (typeof value === 'number' && Number.isFinite(value)) return value
-
-  if (typeof value === 'string' && value.trim()) {
-    const parsed = Date.parse(value)
-    if (Number.isFinite(parsed)) return parsed
-  }
-
-  return Date.now()
 }
 
 function validateWorkout(): boolean {
@@ -800,49 +676,15 @@ watch(
   },
   { deep: true }
 )
-
-watch(
-  [progressionRepMin, progressionRepMax, progressionIncrementKg],
-  () => {
-    progressionRepMin.value = Math.max(1, Math.round(progressionRepMin.value || 1))
-    progressionRepMax.value = Math.max(progressionRepMin.value, Math.round(progressionRepMax.value || progressionRepMin.value))
-    progressionIncrementKg.value = Math.max(0.25, Math.round((progressionIncrementKg.value || 0.25) * 100) / 100)
-    saveProgressionSettings()
-
-    if (isApplyingRemoteProgressionSettings.value) return
-    if (!canManageProgression.value) return
-
-    const exerciseId = String(activeExercise.value?.id || '').trim()
-    if (!exerciseId) return
-
-    void updateData(progressionSettingsPathFor(exerciseId), {
-      repMin: progressionRepMin.value,
-      repMax: progressionRepMax.value,
-      incrementKg: progressionIncrementKg.value,
-      updatedAt: Date.now()
-    }).catch((error) => {
-      console.error('[firebase:saveProgressionSettings]', error)
-    })
-  }
-)
-
-watch(
-  () => activeExercise.value?.id,
-  () => {
-    loadProgressionSettings()
-    subscribeProgressionSettings()
-  }
-)
-
-onUnmounted(() => {
-  stopProgressionSettingsSubscription()
-})
 </script>
 
 <template lang="pug">
 .flex.flex-col.gap-3.min-h-full
-  label.date-label(@click="openDatePicker")
-    input.date-input(
+  label.grid.gap-1.py-3.text-center.rounded-xl.border-2.cursor-pointer(
+    class="min-h-[52px] bg-[rgba(var(--colorAccent),0.3)] border-[rgb(var(--colorAccent))]"
+    @click="openDatePicker"
+  )
+    input.w-px.h-px.absolute.-z-10(
       ref="workoutDateInputRef"
       v-model="workoutDateModel"
       type="date"
@@ -887,33 +729,51 @@ onUnmounted(() => {
     @selectEase="selectEase"
   )
 
-  .rubbers(v-if="!isComplex && workout.ease === EnumEase.rubber")
-    .text-white.text-xs.text-center.flex-center.cursor-pointer(
+  .grid.grid-cols-4.gap-3(v-if="!isComplex && workout.ease === EnumEase.rubber")
+    .text-white.text-xs.text-center.flex-center.cursor-pointer.rounded.h-10(
       v-for="item in rubbersColor"
       :style="`background: ${item.color}`"
-      :class="{ active: workout.rubber === item.name }"
+      :class="{ 'border-2 border-white outline outline-2 outline-[#5182dc]': workout.rubber === item.name }"
       @click="selectRubber(item.name)"
     ) {{ item.name.replace(' резина', '') }}
 
-  .progression-panel(v-if="canShowProgression")
-    .progression-title Рекомендация по прогрессии
+  .grid.gap-3.border.border-faint.rounded-xl.p-3(class="bg-[rgba(var(--colorAccent),0.08)]" v-if="canShowProgression")
+    .text-sm.font-semibold Рекомендация по прогрессии
 
-    p.progression-summary {{ suggestionSummaryText(activeSuggestionMode, activeSuggestionReason) }}
+    p.text-sm.leading-relaxed.font-medium.opacity-95 {{ suggestionSummaryText(activeSuggestionMode, activeSuggestionReason) }}
 
-    .progression-grid
-      label.progression-field
+    .grid.gap-2.grid-cols-3
+      label.grid.gap-1.text-xs.opacity-80
         span Повторы min
-        input.progression-input(v-model.number="progressionRepMin" type="number" min="1")
-      label.progression-field
+        input.w-full.border.rounded-lg.px-2.py-1.bg-transparent(
+          class="border-[rgba(var(--colorIcon),0.25)]"
+          v-model.number="progressionRepMin"
+          type="number"
+          min="1"
+        )
+      label.grid.gap-1.text-xs.opacity-80
         span Повторы max
-        input.progression-input(v-model.number="progressionRepMax" type="number" min="1")
-      label.progression-field(v-if="isWeightMode")
+        input.w-full.border.rounded-lg.px-2.py-1.bg-transparent(
+          class="border-[rgba(var(--colorIcon),0.25)]"
+          v-model.number="progressionRepMax"
+          type="number"
+          min="1"
+        )
+      label.grid.gap-1.text-xs.opacity-80(v-if="isWeightMode")
         span Шаг (кг)
-        input.progression-input(v-model.number="progressionIncrementKg" type="number" min="0.25" step="0.25")
+        input.w-full.border.rounded-lg.px-2.py-1.bg-transparent(
+          class="border-[rgba(var(--colorIcon),0.25)]"
+          v-model.number="progressionIncrementKg"
+          type="number"
+          min="1"
+          step="1"
+        )
 
-    .progression-weights
-      span.recommended-label {{ recommendationLabel }}
-      span.recommended-values {{ recommendationLine }}
+    .border.rounded-lg.px-3.py-2.grid.gap-1(
+      class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
+    )
+      span.opacity-70(class="text-[11px]") {{ recommendationLabel }}
+      span.font-semibold(class="text-[13px]") {{ recommendationLine }}
 
     BaseButton(
       text="Применить рекомендацию"
@@ -921,11 +781,10 @@ onUnmounted(() => {
     )
 
   .approaches(v-if="!isComplex")
-    .approach(
+    .flex.items-center.gap-3.mb-3(
       v-for="index in +approaches"
       :key="index"
     )
-      //- template(v-if="index === 1 || workout.approach[index-2]")
       .text-sm {{ timerApproach(index-1) }}
       BaseInput(
         v-model="workout.approach[index-1]"
@@ -987,94 +846,3 @@ onUnmounted(() => {
     @remove="removeSelectWorkout"
   )
 </template>
-
-<style lang="stylus" scoped>
-.date-label
-  display grid
-  gap 6px
-  padding: 12px 0
-  text-align center
-  min-height: 52px
-  border-radius 12px
-  background-color unquote('rgba(var(--colorAccent), 0.3)')
-  border solid 2px unquote('rgb(var(--colorAccent))')
-
-  .date-input
-    width 1px
-    height 1px
-    position absolute
-    z-index -1
-
-.approach
-  display flex
-  align-items center
-  gap 12px
-  margin-bottom 12px
-
-.rubbers
-  gap 12px
-  display grid
-  grid-template-columns 1fr 1fr 1fr 1fr
-
-  div
-    border-radius 4px
-    height 40px
-
-    &.active
-      border 2px solid #fff
-      outline 2px solid #5182dc
-
-.progression-panel
-  display grid
-  gap 12px
-  border 1px solid unquote('rgba(var(--colorIcon), 0.25)')
-  border-radius 12px
-  padding 12px
-  background unquote('rgba(var(--colorAccent), 0.08)')
-
-.progression-title
-  font-size 14px
-  font-weight 600
-
-.progression-grid
-  display grid
-  grid-template-columns repeat(auto-fit, minmax(120px, 1fr))
-  gap 8px
-
-.progression-field
-  display grid
-  gap 4px
-  font-size 12px
-  opacity 0.8
-
-.progression-input
-  width 100%
-  border 1px solid unquote('rgba(var(--colorIcon), 0.25)')
-  border-radius 8px
-  padding 6px 8px
-  background transparent
-  color inherit
-
-.progression-weights
-  border 1px solid unquote('rgba(var(--colorIcon), 0.16)')
-  border-radius 10px
-  padding 10px 12px
-  display grid
-  gap 4px
-  background unquote('rgba(var(--colorIcon), 0.06)')
-
-.recommended-label
-  font-size 11px
-  opacity 0.7
-
-.recommended-values
-  font-size 13px
-  font-weight 600
-
-.progression-summary
-  font-size 14px
-  line-height 1.45
-  font-weight 500
-  opacity 0.95
-
-</style>

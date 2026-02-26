@@ -1,20 +1,10 @@
 import { onData } from './firebaseInit'
 import type { TypeWorkout } from "./types"
+import { normalizeWorkoutDate } from './useWorkoutHelpers'
 
 let workoutsUnsubscribe: (() => void) | null = null
 let activeWorkoutExerciseId = ''
 type TypeWorkoutDb = Omit<TypeWorkout, 'id' | 'date'> & { date: number | string }
-
-function normalizeWorkoutDate(value: unknown): number {
-  if (typeof value === 'number' && Number.isFinite(value)) return value
-
-  if (typeof value === 'string' && value.trim()) {
-    const parsed = Date.parse(value)
-    if (Number.isFinite(parsed)) return parsed
-  }
-
-  return Date.now()
-}
 
 export const stopWorkoutsSubscription = () => {
   if (workoutsUnsubscribe) {
@@ -72,7 +62,16 @@ export const getWorkouts = (exercisesId:string) => {
           desc: workout.desc,
           res: workout.res,
           resWeigth: Array.isArray(workout.weight)
-            ? workout.weight.reduce((acc:number, item:number):number => acc + Number(item), 0)
+            ? workout.weight.reduce((acc:number, item:number, index:number):number => {
+              const normalizedWeight = Number(item)
+              const normalizedApproach = Number(workout.approach?.[index] ?? 0)
+
+              if (!Number.isFinite(normalizedWeight) || !Number.isFinite(normalizedApproach)) {
+                return acc
+              }
+
+              return acc + (normalizedWeight * normalizedApproach)
+            }, 0)
             : 0
         })
       })

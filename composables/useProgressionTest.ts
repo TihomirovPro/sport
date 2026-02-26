@@ -49,11 +49,6 @@ function roundToIncrement(value: number, increment: number): number {
   return Math.round(rounded * 100) / 100
 }
 
-function roundToQuarter(value: number): number {
-  const normalized = Math.round((value / 0.25)) * 0.25
-  return Math.round(normalized * 100) / 100
-}
-
 function computeAdaptiveIncrement(
   baseIncrement: number,
   successRate: number,
@@ -67,14 +62,14 @@ function computeAdaptiveIncrement(
 
   if (overloadRate >= 0.35 || avgRpe >= 9) {
     return {
-      incrementKg: Math.max(0.25, roundToQuarter(baseIncrement * 0.5)),
+      incrementKg: Math.max(1, Math.round(baseIncrement * 0.5)),
       state: 'conservative'
     }
   }
 
   if (successRate >= 0.55 && overloadRate <= 0.15 && avgRpe <= 8.2) {
     return {
-      incrementKg: Math.min(5, roundToQuarter(baseIncrement * 1.5)),
+      incrementKg: Math.min(5, Math.max(1, Math.round(baseIncrement * 1.5))),
       state: 'aggressive'
     }
   }
@@ -93,7 +88,7 @@ function normalizeProfile(profile: ProgressionProfile): ProgressionProfile {
   const intervalMinutes = Math.max(0, Math.round((profile.intervalMinutes || 0) * 10) / 10)
   const repMin = clamp(Math.round(profile.repMin || 0), 1, 100)
   const repMax = clamp(Math.round(profile.repMax || 0), repMin, 100)
-  const incrementKg = Math.max(0.25, Math.round((profile.incrementKg || 0.25) * 100) / 100)
+  const incrementKg = Math.max(1, Math.round(profile.incrementKg || 2))
 
   return { sets, intervalMinutes, repMin, repMax, incrementKg }
 }

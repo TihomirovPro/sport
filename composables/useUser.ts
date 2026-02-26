@@ -1,5 +1,5 @@
 import { onAuthStateChanged } from 'firebase/auth'
-import { getFirebaseAuth, createDataWithoutKey, clearOfflineUserData } from './firebaseInit'
+import { getFirebaseAuth, updateData, clearOfflineUserData } from './firebaseInit'
 
 let authUnsubscribe: (() => void) | null = null
 let userUnsubscribe: (() => void) | null = null
@@ -114,10 +114,10 @@ export const createUserData = async () => {
   const auth = getFirebaseAuth()
 
   try {
-    await createDataWithoutKey('user', {
-      name: auth.currentUser?.displayName,
-      email: auth.currentUser?.email,
-      photoURL: auth.currentUser?.photoURL
+    await updateData('user', {
+      name: auth.currentUser?.displayName ?? '',
+      email: auth.currentUser?.email ?? '',
+      photoURL: auth.currentUser?.photoURL ?? ''
     })
   } catch (error) {
     console.error('[firebase:createUserData]', error)

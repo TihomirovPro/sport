@@ -1,0 +1,126 @@
+import { onData, updateData } from '~/composables/firebaseInit'
+import { safeParseJson } from '~/composables/useWorkoutHelpers'
+import type { Ref } from 'vue'
+
+const PROGRESSION_SETTINGS_STORAGE_KEY = 'workout-progression-settings-v1'
+
+type ProgressionSettings = {
+  repMin?: number
+  repMax?: number
+  incrementKg?: number
+}
+
+type UseWorkoutProgressionSettingsParams = {
+  activeExerciseId: Readonly<Ref<string>>
+  canManageProgression: Readonly<Ref<boolean>>
+}
+
+function progressionSettingsKey(exerciseId: string): string {
+  const normalizedExerciseId = String(exerciseId || 'default').trim() || 'default'
+  return `${PROGRESSION_SETTINGS_STORAGE_KEY}:${normalizedExerciseId}`
+}
+
+function progressionSettingsPathFor(exerciseId: string): string {
+  return `progression/settings/${exerciseId}`
+}
+
+export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSettingsParams) {
+  const progressionRepMin = ref(6)
+  const progressionRepMax = ref(8)
+  const progressionIncrementKg = ref(2)
+  const isApplyingRemoteProgressionSettings = ref(false)
+  const progressionSettingsUnsubscribe = ref<(() => void) | null>(null)
+
+  function stopProgressionSettingsSubscription() {
+    if (!progressionSettingsUnsubscribe.value) return
+    progressionSettingsUnsubscribe.value()
+    progressionSettingsUnsubscribe.value = null
+  }
+
+  function loadProgressionSettings(exerciseId: string) {
+    if (!process.client) return
+
+    const raw = localStorage.getItem(progressionSettingsKey(exerciseId))
+    if (!raw) return
+
+    const parsed = safeParseJson<ProgressionSettings>(raw, {})
+    if (Number.isFinite(parsed.repMin)) progressionRepMin.value = Number(parsed.repMin)
+    if (Number.isFinite(parsed.repMax)) progressionRepMax.value = Number(parsed.repMax)
+    if (Number.isFinite(parsed.incrementKg)) progressionIncrementKg.value = Math.max(1, Math.round(Number(parsed.incrementKg)))
+  }
+
+  function saveProgressionSettings(exerciseId: string) {
+    if (!process.client) return
+
+    localStorage.setItem(progressionSettingsKey(exerciseId), JSON.stringify({
+      repMin: progressionRepMin.value,
+      repMax: progressionRepMax.value,
+      incrementKg: progressionIncrementKg.value
+    }))
+  }
+
+  function subscribeProgressionSettings(exerciseId: string) {
+    if (!exerciseId) return
+
+    stopProgressionSettingsSubscription()
+
+    progressionSettingsUnsubscribe.value = onData(progressionSettingsPathFor(exerciseId), (snapshot) => {
+      const data = snapshot.val() as ProgressionSettings | null
+      if (!data) return
+
+      isApplyingRemoteProgressionSettings.value = true
+      if (Number.isFinite(Number(data.repMin))) progressionRepMin.value = Number(data.repMin)
+      if (Number.isFinite(Number(data.repMax))) progressionRepMax.value = Number(data.repMax)
+      if (Number.isFinite(Number(data.incrementKg))) progressionIncrementKg.value = Math.max(1, Math.round(Number(data.incrementKg)))
+      isApplyingRemoteProgressionSettings.value = false
+      saveProgressionSettings(exerciseId)
+    })
+  }
+
+  const initialExerciseId = params.activeExerciseId.value
+  loadProgressionSettings(initialExerciseId)
+  subscribeProgressionSettings(initialExerciseId)
+
+  watch(
+    [progressionRepMin, progressionRepMax, progressionIncrementKg],
+    () => {
+      progressionRepMin.value = Math.max(1, Math.round(progressionRepMin.value || 1))
+      progressionRepMax.value = Math.max(progressionRepMin.value, Math.round(progressionRepMax.value || progressionRepMin.value))
+      progressionIncrementKg.value = Math.max(1, Math.round(progressionIncrementKg.value || 2))
+
+      const exerciseId = params.activeExerciseId.value
+      saveProgressionSettings(exerciseId)
+
+      if (isApplyingRemoteProgressionSettings.value) return
+      if (!params.canManageProgression.value) return
+      if (!exerciseId) return
+
+      void updateData(progressionSettingsPathFor(exerciseId), {
+        repMin: progressionRepMin.value,
+        repMax: progressionRepMax.value,
+        incrementKg: progressionIncrementKg.value,
+        updatedAt: Date.now()
+      }).catch((error) => {
+        console.error('[firebase:saveProgressionSettings]', error)
+      })
+    }
+  )
+
+  watch(
+    () => params.activeExerciseId.value,
+    (exerciseId) => {
+      loadProgressionSettings(exerciseId)
+      subscribeProgressionSettings(exerciseId)
+    }
+  )
+
+  onUnmounted(() => {
+    stopProgressionSettingsSubscription()
+  })
+
+  return {
+    progressionRepMin,
+    progressionRepMax,
+    progressionIncrementKg
+  }
+}
