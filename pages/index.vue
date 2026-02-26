@@ -23,7 +23,7 @@ draggable(
 )
   template(#item="{element}")
     Exercise(
-      :key="element.name"
+      :key="element.id"
       :name="element.name"
       :color="element.color"
       :icon="element.icon"

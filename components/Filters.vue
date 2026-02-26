@@ -169,7 +169,7 @@ type ChartDataset = {
   label: string
   borderColor: string
   backgroundColor: string
-  data: number[]
+  data: Array<number | null>
   yAxisID: 'y' | 'y1'
   pointRadius: number
   order: number
@@ -177,9 +177,9 @@ type ChartDataset = {
 }
 
 const data = computed(() => {
-  const approaches:number[] = [0];
-  const dates:string[] = [];
-  const weights:number[] = [];
+  const approaches: Array<number | null> = []
+  const dates:string[] = []
+  const weights: Array<number | null> = []
   const datasets: ChartDataset[] = [
     {
       label: 'Повторений',
@@ -205,21 +205,15 @@ const data = computed(() => {
       day: 'numeric'
     }).format(new Date(item.date))
 
-    if (!item.weight && approaches[0] === 0) {
-      approaches.shift()
-    } 
-
     dates.unshift(formatDate)
     approaches.unshift(item.approach.reduce((acc, currentValue) => acc + +currentValue, 0))
 
     const weight = item.weight?.reduce((acc, currentValue) => acc + +currentValue, 0) ?? 0
 
-    if (weight > 0) {
-      weights.unshift(weight)
-    }
+    weights.unshift(weight > 0 ? weight : null)
   })
   
-  if (weights.length > 0) {
+  if (weights.some((item) => item !== null)) {
     options.datasets.push({
       label: 'Вес',
       borderColor: secondColor,
