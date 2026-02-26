@@ -5,6 +5,7 @@ type BeforeInstallPromptEvent = Event & {
 }
 
 const shown = ref(false)
+const isInstalling = ref(false)
 const installEvent = ref<BeforeInstallPromptEvent | null>(null)
 
 function onBeforeInstallPrompt(event: Event) {
@@ -13,24 +14,44 @@ function onBeforeInstallPrompt(event: Event) {
   shown.value = true
 }
 
+function onAppInstalled() {
+  installEvent.value = null
+  shown.value = false
+}
+
 function dismissPrompt() {
   shown.value = false
 }
 
 async function installPWA() {
-  if (!installEvent.value) return
+  if (!installEvent.value || isInstalling.value) return
 
-  await installEvent.value.prompt()
-  await installEvent.value.userChoice
-  dismissPrompt()
+  isInstalling.value = true
+
+  try {
+    await installEvent.value.prompt()
+    const { outcome } = await installEvent.value.userChoice
+
+    if (outcome === 'accepted') {
+      shown.value = false
+    }
+  } catch (error) {
+    console.error('PWA install prompt failed:', error)
+  } finally {
+    installEvent.value = null
+    isInstalling.value = false
+    dismissPrompt()
+  }
 }
 
 onMounted(() => {
   window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+  window.addEventListener('appinstalled', onAppInstalled)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt)
+  window.removeEventListener('appinstalled', onAppInstalled)
 })
 </script>
 
@@ -53,11 +74,13 @@ onBeforeUnmount(() => {
         hover:bg-accent/80 text-sm  py-2.5 px-4 rounded
         text-white text-center cursor-pointer
       "
+      :disabled="isInstalling"
       @click="installPWA"
     >
-      Установить
+      {{ isInstalling ? 'Устанавливаем...' : 'Установить' }}
     </button>
     <button
+      :disabled="isInstalling"
       @click="dismissPrompt"
       class="
         transition bg-accent
