@@ -24,6 +24,7 @@ const showModalIcon = ref<boolean>(false)
 
 const error = ref<boolean>(false)
 const removeConfirm = ref<boolean>(false)
+const isSaving = ref<boolean>(false)
 const text = ref<string>('')
 const { notifyError } = useNotifications()
 
@@ -75,9 +76,15 @@ watchEffect(() => {
   }
 })
 
+onUnmounted(() => {
+  stopWorkoutsSubscription()
+})
+
 async function newExercise() {
+  if (isSaving.value) return
   if (!validateExercise()) return
 
+  isSaving.value = true
   try {
     exercise.value.order = allExercises.value.length
     await createData('exercises', exercise.value)
@@ -86,12 +93,16 @@ async function newExercise() {
   } catch (error) {
     console.error('[firebase:newExercise]', error)
     notifyError('Не удалось добавить упражнение. Попробуйте снова.')
+  } finally {
+    isSaving.value = false
   }
 }
 
 async function update() {
+  if (isSaving.value) return
   if (!validateExercise()) return
 
+  isSaving.value = true
   try {
     const selectedExerciseId = selectUpdateExercise.value?.id
     if (!selectedExerciseId) {
@@ -108,10 +119,14 @@ async function update() {
   } catch (error) {
     console.error('[firebase:updateExercise]', error)
     notifyError('Не удалось сохранить упражнение. Попробуйте снова.')
+  } finally {
+    isSaving.value = false
   }
 }
 
 async function remove() {
+  if (isSaving.value) return
+  isSaving.value = true
   try {
     const selectedExerciseId = selectUpdateExercise.value?.id
     if (!selectedExerciseId) {
@@ -127,10 +142,13 @@ async function remove() {
   } catch (error) {
     console.error('[firebase:removeExercise]', error)
     notifyError('Не удалось удалить упражнение. Попробуйте снова.')
+  } finally {
+    isSaving.value = false
   }
 }
 
 function deleted() {
+  if (isSaving.value) return
   if (workouts.value.length) {
     text.value = 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
   } else {
@@ -262,18 +280,21 @@ watch(
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
     BaseButton(
       v-if="!selectUpdateExercise"
-      text="Добавить"
+      :text="isSaving ? 'Сохранение...' : 'Добавить'"
+      :disabled="isSaving"
       @click="newExercise"
     ).mt-auto
 
     template(v-else)
       BaseButton(
         red
+        :disabled="isSaving"
         text="Удалить"
         @click="deleted"
       )
       BaseButton(
-        text="Сохранить"
+        :text="isSaving ? 'Сохранение...' : 'Сохранить'"
+        :disabled="isSaving"
         @click="update"
       )
 

@@ -2,6 +2,7 @@
 const props = defineProps<{
   text: string
   red?: boolean
+  disabled?: boolean
 }>()
 
 const classes = computed(() => {
@@ -13,6 +14,7 @@ const classes = computed(() => {
 
   if (props.red) cls.push('bg-error hover:bg-error/80')
   else cls.push('bg-accent hover:bg-accent/80')
+  if (props.disabled) cls.push('opacity-60 cursor-not-allowed pointer-events-none')
 
   return cls
 })
@@ -21,5 +23,6 @@ const classes = computed(() => {
 <template lang="pug">
 button(
   :class="classes"
+  :disabled="props.disabled"
 ) {{ text }}
 </template>

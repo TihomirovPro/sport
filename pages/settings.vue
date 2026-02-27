@@ -66,6 +66,12 @@ function toWeightPage() {
   void router.push('/weight')
 }
 
+function confirmSignOut() {
+  if (!process.client) return
+  if (!window.confirm('Выйти из аккаунта?')) return
+  void signOutUser()
+}
+
 async function signOutUser() {
   try {
     const auth = getFirebaseAuth()
@@ -108,7 +114,7 @@ async function signOutUser() {
     p Версия приложения
     p v{{ appVersion }}
 
-  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="signOutUser")
+  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="confirmSignOut")
     p Выход
 
   ModalColor(

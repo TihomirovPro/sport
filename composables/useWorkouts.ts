@@ -4,7 +4,10 @@ import { normalizeWorkoutDate } from './useWorkoutHelpers'
 
 let workoutsUnsubscribe: (() => void) | null = null
 let activeWorkoutExerciseId = ''
-type TypeWorkoutDb = Omit<TypeWorkout, 'id' | 'date'> & { date: number | string }
+type TypeWorkoutDb = Omit<TypeWorkout, 'id' | 'date' | 'rpe'> & {
+  date: number | string
+  rpe?: number | null
+}
 
 export const stopWorkoutsSubscription = () => {
   if (workoutsUnsubscribe) {

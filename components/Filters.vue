@@ -125,6 +125,26 @@ function syncActiveFilters() {
   }
 }
 
+function filterWorkouts(
+  itemEase: EnumEase,
+  itemInterval: number,
+  itemApproach: number
+): boolean {
+  return (
+    (!filter.value.interval || filter.value.interval === itemInterval) &&
+    (!filter.value.ease || filter.value.ease === itemEase) &&
+    (!filter.value.approach || filter.value.approach === itemApproach)
+  );
+}
+
+function useFilter() {
+  filteredWorkouts.value = workouts.value.filter(item =>
+    filterWorkouts(item.ease, +item.interval, item.approach.length)
+  );
+}
+
+const useFilterDebounced = useDebounceFn(useFilter, 140)
+
 const filter = ref<Filter>({
   ease: getInitialEase(),
   interval: getInitialInterval(),
@@ -139,21 +159,21 @@ const filter = ref<Filter>({
     
     forceChartUpdate()
     syncActiveFilters()
-    useFilter()
+    useFilterDebounced()
   },
 
   changeInterval: (interval: number) => {
     if (interval === filter.value.interval) filter.value.interval = 0
     else filter.value.interval = interval
     syncActiveFilters()
-    useFilter()
+    useFilterDebounced()
   },
 
   changeApproach: (approach: number) => {
     if (approach === filter.value.approach) filter.value.approach = 0
     else filter.value.approach = approach
     syncActiveFilters()
-    useFilter()
+    useFilterDebounced()
   },
 })
 
@@ -228,24 +248,6 @@ const data = computed(() => {
 
   return options
 })
-
-function filterWorkouts(
-  itemEase: EnumEase,
-  itemInterval: number,
-  itemApproach: number
-): boolean {
-  return (
-    (!filter.value.interval || filter.value.interval === itemInterval) &&
-    (!filter.value.ease || filter.value.ease === itemEase) &&
-    (!filter.value.approach || filter.value.approach === itemApproach)
-  );
-}
-
-function useFilter() {
-  filteredWorkouts.value = workouts.value.filter(item =>
-    filterWorkouts(item.ease, +item.interval, item.approach.length)
-  );
-}
 
 watch(
   filterElements,
