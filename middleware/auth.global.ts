@@ -42,8 +42,14 @@ function resolveAuthUser() {
 export default defineNuxtRouteMiddleware(async (to) => {
   const userStore = useUserStore()
   const routeName = String(to.name ?? '')
-  const user = await resolveAuthUser()
   const isPublicRoute = publicRouteNames.has(routeName)
+  const auth = getFirebaseAuth()
+
+  if (!isPublicRoute && userStore.activeUser.uid) return
+
+  if (isPublicRoute && !auth.currentUser && !userStore.activeUser.uid) return
+
+  const user = await resolveAuthUser()
 
   if (user) {
     userStore.activeUser.uid = user.uid

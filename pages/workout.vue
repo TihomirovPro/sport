@@ -3,7 +3,6 @@ import { storeToRefs } from 'pinia'
 import { createData, updateData, removeData } from '~/composables/firebaseInit'
 import { buildProfileKey, computeBodyweightRepsSuggestion, computeProgressionSuggestion, type ProgressionSession } from '~/composables/useProgressionTest'
 import type { TypeWorkoutCreate } from '~/composables/types'
-import type { TypeExercise } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 import {
   safeParseJson,
@@ -29,42 +28,16 @@ const { rubbersColor } = storeToRefs(catalogStore)
 const { headerTitle } = storeToRefs(appStore)
 const { activeUser } = storeToRefs(userStore)
 const { notifyError } = useNotifications()
+const { restoreActiveExerciseFromStorage } = useActiveExercise()
 headerTitle.value = 'Добавить тренировку'
 
 useHead({
   title: headerTitle.value
 })
 
-function readStoredActiveExercise() {
-  const raw = localStorage.getItem('activeExercise')
-  if (!raw) return null
-
-  try {
-    const parsed = JSON.parse(raw) as Partial<TypeExercise> | null
-    if (!parsed?.id) return null
-    return parsed
-  } catch {
-    return null
-  }
-}
-
-if (!activeExercise.value) {
-  const storedActiveExercise = readStoredActiveExercise()
-  if (storedActiveExercise?.id) {
-    activeExercise.value = {
-      id: storedActiveExercise.id,
-      name: storedActiveExercise.name ?? '',
-      ease: Array.isArray(storedActiveExercise.ease)
-        ? storedActiveExercise.ease
-        : [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber],
-      order: typeof storedActiveExercise.order === 'number' ? storedActiveExercise.order : 0,
-      color: storedActiveExercise.color,
-      icon: storedActiveExercise.icon,
-      isComplex: storedActiveExercise.isComplex,
-      complexDesc: storedActiveExercise.complexDesc,
-    }
-  }
-}
+restoreActiveExerciseFromStorage(activeExercise, {
+  fallbackEase: [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
+})
 
 if (activeExercise.value?.id) {
   getWorkouts(activeExercise.value.id)
@@ -73,11 +46,16 @@ if (activeExercise.value?.id) {
   void router.push('/')
 }
 
+onUnmounted(() => {
+  stopWorkoutsSubscription()
+})
+
 const formatDate = formatWorkoutDate
 
 const nowDate = new Date().getTime()
 const error = ref(false)
 const removeConfirm = ref(false)
+const isSaving = ref(false)
 const complexTime = ref('')
 const canManageProgression = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
 const {
@@ -102,7 +80,6 @@ const workoutDateModel = computed<string>({
   },
   set(value) {
     workout.value.date = normalizeWorkoutDate(value)
-    saveNewWorkout()
   }
 })
 
@@ -165,6 +142,36 @@ type WorkoutStoreItem = {
   resWeigth: number
 }
 
+type WorkoutWritePayload = Omit<TypeWorkoutCreate, 'rpe'> & { rpe?: number }
+
+function buildWorkoutWritePayload(source: TypeWorkoutCreate): WorkoutWritePayload {
+  const normalizedRpe = normalizeRpe(source.rpe)
+  const boundedRpe = normalizedRpe !== undefined && normalizedRpe >= 1 && normalizedRpe <= 10
+    ? normalizedRpe
+    : undefined
+
+  const payload: WorkoutWritePayload = {
+    exercisesId: source.exercisesId,
+    date: source.date,
+    interval: source.interval,
+    ease: source.ease,
+    approach: Array.isArray(source.approach) ? [...source.approach] : [],
+    weight: Array.isArray(source.weight) ? [...source.weight] : [],
+    complexExercises: Array.isArray(source.complexExercises) ? [...source.complexExercises] : [],
+    rubber: source.rubber,
+    desc: source.desc,
+    res: source.res,
+    resWeigth: source.resWeigth,
+    rpe: boundedRpe
+  }
+
+  if (boundedRpe === undefined) {
+    delete payload.rpe
+  }
+
+  return payload
+}
+
 function sortByDateDesc(list: WorkoutStoreItem[]): WorkoutStoreItem[] {
   return [...list].sort((a, b) => {
     if (new Date(a.date) < new Date(b.date)) return 1
@@ -223,25 +230,28 @@ watchEffect(() => {
 })
 
 async function add() {
+  if (isSaving.value) return
   if (!validateWorkout()) return
 
+  isSaving.value = true
   try {
-    const createdId = await createData(`workout/${workout.value.exercisesId}`, workout.value)
+    const workoutPayload = buildWorkoutWritePayload(workout.value)
+    const createdId = await createData(`workout/${workoutPayload.exercisesId}`, workoutPayload)
 
     upsertWorkoutInStore({
       id: createdId,
-      exercisesId: workout.value.exercisesId,
-      date: workout.value.date as number,
-      interval: workout.value.interval,
-      ease: workout.value.ease,
-      rpe: workout.value.rpe,
-      rubber: workout.value.rubber,
-      complexExercises: Array.isArray(workout.value.complexExercises) ? [...workout.value.complexExercises] : [],
-      approach: [...workout.value.approach],
-      weight: Array.isArray(workout.value.weight) ? [...workout.value.weight] : [],
-      desc: workout.value.desc,
-      res: workout.value.res,
-      resWeigth: workout.value.resWeigth
+      exercisesId: workoutPayload.exercisesId,
+      date: workoutPayload.date as number,
+      interval: workoutPayload.interval,
+      ease: workoutPayload.ease,
+      rpe: workoutPayload.rpe,
+      rubber: workoutPayload.rubber,
+      complexExercises: Array.isArray(workoutPayload.complexExercises) ? [...workoutPayload.complexExercises] : [],
+      approach: [...workoutPayload.approach],
+      weight: Array.isArray(workoutPayload.weight) ? [...workoutPayload.weight] : [],
+      desc: workoutPayload.desc,
+      res: workoutPayload.res,
+      resWeigth: workoutPayload.resWeigth
     })
 
     await router.push('/exercise-item')
@@ -251,12 +261,16 @@ async function add() {
   } catch (error) {
     console.error('[firebase:addWorkout]', error)
     notifyError('Не удалось добавить тренировку. Попробуйте снова.')
+  } finally {
+    isSaving.value = false
   }
 }
 
 async function updateSelectWorkout() {
+  if (isSaving.value) return
   if (!validateWorkout()) return
 
+  isSaving.value = true
   try {
     const selectedWorkoutId = selectUpdateWorkout.value?.id
     if (!selectedWorkoutId) {
@@ -264,22 +278,23 @@ async function updateSelectWorkout() {
       return
     }
 
-    await updateData(`workout/${workout.value.exercisesId}/${selectedWorkoutId}`, workout.value)
+    const workoutPayload = buildWorkoutWritePayload(workout.value)
+    await updateData(`workout/${workoutPayload.exercisesId}/${selectedWorkoutId}`, workoutPayload)
 
     upsertWorkoutInStore({
       id: selectedWorkoutId,
-      exercisesId: workout.value.exercisesId,
-      date: workout.value.date as number,
-      interval: workout.value.interval,
-      ease: workout.value.ease,
-      rpe: workout.value.rpe,
-      rubber: workout.value.rubber,
-      complexExercises: Array.isArray(workout.value.complexExercises) ? [...workout.value.complexExercises] : [],
-      approach: [...workout.value.approach],
-      weight: Array.isArray(workout.value.weight) ? [...workout.value.weight] : [],
-      desc: workout.value.desc,
-      res: workout.value.res,
-      resWeigth: workout.value.resWeigth
+      exercisesId: workoutPayload.exercisesId,
+      date: workoutPayload.date as number,
+      interval: workoutPayload.interval,
+      ease: workoutPayload.ease,
+      rpe: workoutPayload.rpe,
+      rubber: workoutPayload.rubber,
+      complexExercises: Array.isArray(workoutPayload.complexExercises) ? [...workoutPayload.complexExercises] : [],
+      approach: [...workoutPayload.approach],
+      weight: Array.isArray(workoutPayload.weight) ? [...workoutPayload.weight] : [],
+      desc: workoutPayload.desc,
+      res: workoutPayload.res,
+      resWeigth: workoutPayload.resWeigth
     })
 
     reset()
@@ -287,6 +302,8 @@ async function updateSelectWorkout() {
   } catch (error) {
     console.error('[firebase:updateWorkout]', error)
     notifyError('Не удалось сохранить тренировку. Попробуйте снова.')
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -470,8 +487,6 @@ function applyProgressionSuggestion() {
     workout.value.approach = [...suggestedReps]
   }
 
-  saveNewWorkout()
-
   const exerciseId = String(activeExercise.value?.id || '').trim()
   if (!exerciseId) return
 
@@ -528,39 +543,11 @@ if (!selectUpdateWorkout.value) {
   }
 }
 
-function saveNewWorkout() {
-  if (!selectUpdateWorkout.value) {
-    if (isComplex.value) {
-      const parsed = parseDurationToSeconds(complexTime.value)
-      workout.value.res = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
-    }
-
-    localStorage.setItem('newWorkout', JSON.stringify(workout.value))
-    localStorage.setItem('approaches', JSON.stringify(approaches.value))
-  }
-}
-
-function selectEase(ease:EnumEase) {
-  workout.value.ease = ease
-  saveNewWorkout()
-}
-
-function selectRubber(name:string) {
-  workout.value.rubber = name
-  saveNewWorkout()
-}
-
 function updateWeight(idx: number, value: string | number | undefined) {
   if (!Array.isArray(workout.value.weight)) workout.value.weight = []
 
   const normalized = String(value ?? '').replace(',', '.').trim()
   workout.value.weight[idx] = normalized === '' ? NaN : Number(normalized)
-
-  saveNewWorkout()
-}
-
-function changeInterval() {
-  saveNewWorkout()
 }
 
 function updateRpe(value: string | number | undefined) {
@@ -570,19 +557,16 @@ function updateRpe(value: string | number | undefined) {
   } else {
     workout.value.rpe = Math.min(Math.max(normalized, 1), 10)
   }
-  saveNewWorkout()
 }
 
 function addComplexExercise() {
   if (!Array.isArray(workout.value.complexExercises)) workout.value.complexExercises = []
   workout.value.complexExercises.push('')
-  saveNewWorkout()
 }
 
 function removeComplexExercise(index:number) {
   if (!Array.isArray(workout.value.complexExercises)) return
   workout.value.complexExercises.splice(index, 1)
-  saveNewWorkout()
 }
 
 function validateWorkout(): boolean {
@@ -676,6 +660,22 @@ watch(
   },
   { deep: true }
 )
+
+watch(complexTime, (value) => {
+  const parsed = parseDurationToSeconds(value)
+  workout.value.res = Number.isFinite(parsed) && parsed > 0 ? parsed : 0
+})
+
+watch(
+  [workout, approaches],
+  () => {
+    if (!selectUpdateWorkout.value) {
+      localStorage.setItem('newWorkout', JSON.stringify(workout.value))
+      localStorage.setItem('approaches', JSON.stringify(approaches.value))
+    }
+  },
+  { deep: true }
+)
 </script>
 
 <template lang="pug">
@@ -691,15 +691,14 @@ watch(
     )
     span {{ formatDate(workout.date) }}
   template(v-if="!isComplex")
-    BaseInputRange(v-model="workout.interval" @change="changeInterval")
-    BaseInputRange(v-model="approaches" max="10" step="1" view="approaches" @change="saveNewWorkout")
+    BaseInputRange(v-model="workout.interval")
+    BaseInputRange(v-model="approaches" max="10" step="1" view="approaches")
   template(v-else)
     BaseInput(
       v-model="complexTime"
       type="text"
       :error="error"
       placeholder="Время выполнения"
-      @input="saveNewWorkout"
     )
     .grid.gap-2
       .text-sm.opacity-70 Упражнения в этой тренировке
@@ -711,7 +710,6 @@ watch(
           v-model="complexExercises[idx]"
           type="text"
           placeholder="Упражнение"
-          @input="saveNewWorkout"
         )
         button.text-sm.text-error.px-2(
           type="button"
@@ -726,7 +724,7 @@ watch(
     v-if="!isComplex && eases.length > 1"
     :eases="eases"
     :selected="workout.ease"
-    @selectEase="selectEase"
+    @selectEase="e => workout.ease = e"
   )
 
   .grid.grid-cols-4.gap-3(v-if="!isComplex && workout.ease === EnumEase.rubber")
@@ -734,42 +732,32 @@ watch(
       v-for="item in rubbersColor"
       :style="`background: ${item.color}`"
       :class="{ 'border-2 border-white outline outline-2 outline-[#5182dc]': workout.rubber === item.name }"
-      @click="selectRubber(item.name)"
+      @click="workout.rubber = item.name"
     ) {{ item.name.replace(' резина', '') }}
 
-  .grid.gap-3.border.border-faint.rounded-xl.p-3(class="bg-[rgba(var(--colorAccent),0.08)]" v-if="canShowProgression")
-    .text-sm.font-semibold Рекомендация по прогрессии
-
+  .grid.gap-3.border.border-faint.rounded-xl.p-3(v-if="canShowProgression")
     p.text-sm.leading-relaxed.font-medium.opacity-95 {{ suggestionSummaryText(activeSuggestionMode, activeSuggestionReason) }}
 
     .grid.gap-2.grid-cols-3
-      label.grid.gap-1.text-xs.opacity-80
+      label.grid.gap-1.text-xs
         span Повторы min
-        input.w-full.border.rounded-lg.px-2.py-1.bg-transparent(
-          class="border-[rgba(var(--colorIcon),0.25)]"
+        BaseInput(
           v-model.number="progressionRepMin"
-          type="number"
-          min="1"
+          type="text"
         )
-      label.grid.gap-1.text-xs.opacity-80
+      label.grid.gap-1.text-xs
         span Повторы max
-        input.w-full.border.rounded-lg.px-2.py-1.bg-transparent(
-          class="border-[rgba(var(--colorIcon),0.25)]"
+        BaseInput(
           v-model.number="progressionRepMax"
-          type="number"
-          min="1"
+          type="text"
         )
-      label.grid.gap-1.text-xs.opacity-80(v-if="isWeightMode")
+      label.grid.gap-1.text-xs(v-if="isWeightMode")
         span Шаг (кг)
-        input.w-full.border.rounded-lg.px-2.py-1.bg-transparent(
-          class="border-[rgba(var(--colorIcon),0.25)]"
+        BaseInput(
           v-model.number="progressionIncrementKg"
-          type="number"
-          min="1"
-          step="1"
+          type="text"
         )
-
-    .border.rounded-lg.px-3.py-2.grid.gap-1(
+    .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
       class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
     )
       span.opacity-70(class="text-[11px]") {{ recommendationLabel }}
@@ -792,7 +780,6 @@ watch(
         :error="error"
         inputmode="numeric"
         :placeholder="`Подход ${index}`"
-        @input="saveNewWorkout"
       )
 
       BaseInput(
@@ -818,24 +805,26 @@ watch(
     v-model="workout.desc"
     type="textarea"
     placeholder="Заметка"
-    @input="saveNewWorkout"
   )
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
     BaseButton(
       v-if="!selectUpdateWorkout"
+      :disabled="isSaving"
       @click="add"
-      text="Добавить"
+      :text="isSaving ? 'Сохранение...' : 'Добавить'"
     )
     template(v-else)
       BaseButton(
         red
+        :disabled="isSaving"
         @click="removeConfirm = true"
         text="Удалить"
       )
       BaseButton(
+        :disabled="isSaving"
         @click="updateSelectWorkout"
-        text="Сохранить"
+        :text="isSaving ? 'Сохранение...' : 'Сохранить'"
       )
   
   ModalRemoveConfirm(

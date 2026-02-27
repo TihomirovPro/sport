@@ -20,6 +20,10 @@ let db: Database | null = null
 let auth: Auth | null = null
 let offlineSyncInitialized = false
 let isFlushingQueue = false
+let offlineCacheMemory: OfflineCache | null = null
+let pendingOperationsMemory: PendingOperation[] | null = null
+let offlineCachePersistTimer: ReturnType<typeof setTimeout> | null = null
+let pendingOpsPersistTimer: ReturnType<typeof setTimeout> | null = null
 
 const OFFLINE_CACHE_KEY = 'pp-offline-cache-v1'
 const OFFLINE_QUEUE_KEY = 'pp-offline-queue-v1'
@@ -35,6 +39,7 @@ type PendingOperation = {
 }
 
 type OfflineCache = Record<string, Record<string, unknown>>
+const PERSIST_DELAY_MS = 120
 
 function getFirebaseConfig(): firebaseConfig {
   const config = useRuntimeConfig()
@@ -113,6 +118,34 @@ function writeJson(key: string, value: unknown) {
   storage.setItem(key, JSON.stringify(value))
 }
 
+function schedulePersist(
+  key: string,
+  valueGetter: () => unknown,
+  timerRef: 'offlineCachePersistTimer' | 'pendingOpsPersistTimer'
+) {
+  if (!process.client) return
+
+  if (timerRef === 'offlineCachePersistTimer' && offlineCachePersistTimer) {
+    clearTimeout(offlineCachePersistTimer)
+  }
+
+  if (timerRef === 'pendingOpsPersistTimer' && pendingOpsPersistTimer) {
+    clearTimeout(pendingOpsPersistTimer)
+  }
+
+  const timer = setTimeout(() => {
+    try {
+      writeJson(key, valueGetter())
+    } finally {
+      if (timerRef === 'offlineCachePersistTimer') offlineCachePersistTimer = null
+      else pendingOpsPersistTimer = null
+    }
+  }, PERSIST_DELAY_MS)
+
+  if (timerRef === 'offlineCachePersistTimer') offlineCachePersistTimer = timer
+  else pendingOpsPersistTimer = timer
+}
+
 function splitPath(path: string): string[] {
   return path.split('/').filter(Boolean)
 }
@@ -179,19 +212,27 @@ function getCurrentUid(): string | null {
 }
 
 function readOfflineCache(): OfflineCache {
-  return readJson<OfflineCache>(OFFLINE_CACHE_KEY, {})
+  if (!offlineCacheMemory) {
+    offlineCacheMemory = readJson<OfflineCache>(OFFLINE_CACHE_KEY, {})
+  }
+  return offlineCacheMemory
 }
 
 function writeOfflineCache(cache: OfflineCache) {
-  writeJson(OFFLINE_CACHE_KEY, cache)
+  offlineCacheMemory = cache
+  schedulePersist(OFFLINE_CACHE_KEY, () => offlineCacheMemory ?? {}, 'offlineCachePersistTimer')
 }
 
 function readPendingOperations(): PendingOperation[] {
-  return readJson<PendingOperation[]>(OFFLINE_QUEUE_KEY, [])
+  if (!pendingOperationsMemory) {
+    pendingOperationsMemory = readJson<PendingOperation[]>(OFFLINE_QUEUE_KEY, [])
+  }
+  return pendingOperationsMemory
 }
 
 function writePendingOperations(operations: PendingOperation[]) {
-  writeJson(OFFLINE_QUEUE_KEY, operations)
+  pendingOperationsMemory = operations
+  schedulePersist(OFFLINE_QUEUE_KEY, () => pendingOperationsMemory ?? [], 'pendingOpsPersistTimer')
 }
 
 function prunePendingOperationsToUid(uid: string): PendingOperation[] {
