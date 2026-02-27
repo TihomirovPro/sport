@@ -14,7 +14,6 @@ import {
   normalizeNumberArray,
   normalizeWorkoutDate
 } from '~/composables/useWorkoutHelpers'
-import { useWorkoutProgressionSettings } from '~/composables/useWorkoutProgressionSettings'
 
 const router = useRouter()
 const exerciseStore = useExerciseStore()
@@ -58,14 +57,6 @@ const removeConfirm = ref(false)
 const isSaving = ref(false)
 const complexTime = ref('')
 const canManageProgression = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
-const {
-  progressionRepMin,
-  progressionRepMax,
-  progressionIncrementKg
-} = useWorkoutProgressionSettings({
-  activeExerciseId: computed(() => String(activeExercise.value?.id || '').trim()),
-  canManageProgression
-})
 
 const isComplex = computed(() => Boolean(activeExercise.value?.isComplex))
 const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
@@ -346,16 +337,9 @@ function formatTimer(totalSeconds:number): string {
 }
 
 const progressionProfile = computed(() => {
-  const repMin = Math.max(1, Math.round(progressionRepMin.value || 1))
-  const repMax = Math.max(repMin, Math.round(progressionRepMax.value || repMin))
-  const incrementKg = Math.max(1, Math.round(progressionIncrementKg.value || 2))
-
   return {
     sets: Math.max(1, Math.round(approaches.value || 1)),
-    intervalMinutes: parseIntervalMinutes(workout.value.interval),
-    repMin,
-    repMax,
-    incrementKg
+    intervalMinutes: parseIntervalMinutes(workout.value.interval)
   }
 })
 
@@ -376,10 +360,7 @@ const progressionWeightSessions = computed<ProgressionSession[]>(() => {
       date: item.date,
       profileKey: buildProfileKey({
         sets: item.approach.length,
-        intervalMinutes: parseIntervalMinutes(item.interval),
-        repMin: progressionProfile.value.repMin,
-        repMax: progressionProfile.value.repMax,
-        incrementKg: progressionProfile.value.incrementKg
+        intervalMinutes: parseIntervalMinutes(item.interval)
       }),
       reps: [...item.approach],
       weights: [...(item.weight || [])],
@@ -400,10 +381,7 @@ const progressionBodyweightSessions = computed<ProgressionSession[]>(() => {
       date: item.date,
       profileKey: buildProfileKey({
         sets: item.approach.length,
-        intervalMinutes: parseIntervalMinutes(item.interval),
-        repMin: progressionProfile.value.repMin,
-        repMax: progressionProfile.value.repMax,
-        incrementKg: progressionProfile.value.incrementKg
+        intervalMinutes: parseIntervalMinutes(item.interval)
       }),
       reps: [...item.approach],
       weights: new Array(item.approach.length).fill(0),
@@ -452,13 +430,14 @@ const activeSuggestionReason = computed(() => {
   return bodyweightSuggestion.value.reason
 })
 
-const recommendationLabel = computed(() => {
-  if (isWeightMode.value) return 'Рекомендуемые веса'
-  return 'Рекомендуемые повторы'
-})
+const recommendationWeightsLine = computed(() => progressionSuggestion.value.nextWeights.join(' / '))
 
-const recommendationLine = computed(() => {
-  if (isWeightMode.value) return progressionSuggestion.value.nextWeights.join(' / ')
+const recommendationRepsLine = computed(() => {
+  if (isWeightMode.value) {
+    const sets = Math.max(1, Math.round(approaches.value || 1))
+    return new Array(sets).fill(progressionSuggestion.value.targetReps).join(' / ')
+  }
+
   return bodyweightSuggestion.value.nextReps.join(' / ')
 })
 
@@ -738,30 +717,19 @@ watch(
   .grid.gap-3.border.border-faint.rounded-xl.p-3(v-if="canShowProgression")
     p.text-sm.leading-relaxed.font-medium.opacity-95 {{ suggestionSummaryText(activeSuggestionMode, activeSuggestionReason) }}
 
-    .grid.gap-2.grid-cols-3
-      label.grid.gap-1.text-xs
-        span Повторы min
-        BaseInput(
-          v-model.number="progressionRepMin"
-          type="text"
-        )
-      label.grid.gap-1.text-xs
-        span Повторы max
-        BaseInput(
-          v-model.number="progressionRepMax"
-          type="text"
-        )
-      label.grid.gap-1.text-xs(v-if="isWeightMode")
-        span Шаг (кг)
-        BaseInput(
-          v-model.number="progressionIncrementKg"
-          type="text"
-        )
-    .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
-      class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
-    )
-      span.opacity-70(class="text-[11px]") {{ recommendationLabel }}
-      span.font-semibold(class="text-[13px]") {{ recommendationLine }}
+    .grid.grid-cols-2.gap-3
+      .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
+        class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
+      )
+        span.opacity-70(class="text-[11px]") Рекомендуемые повторы
+        span.font-semibold(class="text-[13px]") {{ recommendationRepsLine }}
+  
+      .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
+        v-if="isWeightMode"
+        class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
+      )
+        span.opacity-70(class="text-[11px]") Рекомендуемые веса
+        span.font-semibold(class="text-[13px]") {{ recommendationWeightsLine }}
 
     BaseButton(
       text="Применить рекомендацию"

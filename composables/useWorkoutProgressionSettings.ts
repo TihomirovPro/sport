@@ -7,7 +7,6 @@ const PROGRESSION_SETTINGS_STORAGE_KEY = 'workout-progression-settings-v1'
 type ProgressionSettings = {
   repMin?: number
   repMax?: number
-  incrementKg?: number
 }
 
 type UseWorkoutProgressionSettingsParams = {
@@ -27,7 +26,6 @@ function progressionSettingsPathFor(exerciseId: string): string {
 export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSettingsParams) {
   const progressionRepMin = ref(6)
   const progressionRepMax = ref(8)
-  const progressionIncrementKg = ref(2)
   const isApplyingRemoteProgressionSettings = ref(false)
   const progressionSettingsUnsubscribe = ref<(() => void) | null>(null)
 
@@ -46,7 +44,6 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
     const parsed = safeParseJson<ProgressionSettings>(raw, {})
     if (Number.isFinite(parsed.repMin)) progressionRepMin.value = Number(parsed.repMin)
     if (Number.isFinite(parsed.repMax)) progressionRepMax.value = Number(parsed.repMax)
-    if (Number.isFinite(parsed.incrementKg)) progressionIncrementKg.value = Math.max(1, Math.round(Number(parsed.incrementKg)))
   }
 
   function saveProgressionSettings(exerciseId: string) {
@@ -54,8 +51,7 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
 
     localStorage.setItem(progressionSettingsKey(exerciseId), JSON.stringify({
       repMin: progressionRepMin.value,
-      repMax: progressionRepMax.value,
-      incrementKg: progressionIncrementKg.value
+      repMax: progressionRepMax.value
     }))
   }
 
@@ -71,7 +67,6 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
       isApplyingRemoteProgressionSettings.value = true
       if (Number.isFinite(Number(data.repMin))) progressionRepMin.value = Number(data.repMin)
       if (Number.isFinite(Number(data.repMax))) progressionRepMax.value = Number(data.repMax)
-      if (Number.isFinite(Number(data.incrementKg))) progressionIncrementKg.value = Math.max(1, Math.round(Number(data.incrementKg)))
       isApplyingRemoteProgressionSettings.value = false
       saveProgressionSettings(exerciseId)
     })
@@ -82,11 +77,10 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
   subscribeProgressionSettings(initialExerciseId)
 
   watch(
-    [progressionRepMin, progressionRepMax, progressionIncrementKg],
+    [progressionRepMin, progressionRepMax],
     () => {
       progressionRepMin.value = Math.max(1, Math.round(progressionRepMin.value || 1))
       progressionRepMax.value = Math.max(progressionRepMin.value, Math.round(progressionRepMax.value || progressionRepMin.value))
-      progressionIncrementKg.value = Math.max(1, Math.round(progressionIncrementKg.value || 2))
 
       const exerciseId = params.activeExerciseId.value
       saveProgressionSettings(exerciseId)
@@ -98,7 +92,6 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
       void updateData(progressionSettingsPathFor(exerciseId), {
         repMin: progressionRepMin.value,
         repMax: progressionRepMax.value,
-        incrementKg: progressionIncrementKg.value,
         updatedAt: Date.now()
       }).catch((error) => {
         console.error('[firebase:saveProgressionSettings]', error)
@@ -120,7 +113,6 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
 
   return {
     progressionRepMin,
-    progressionRepMax,
-    progressionIncrementKg
+    progressionRepMax
   }
 }

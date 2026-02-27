@@ -1,9 +1,6 @@
 export interface ProgressionProfile {
   sets: number
   intervalMinutes: number
-  repMin: number
-  repMax: number
-  incrementKg: number
 }
 
 export interface ProgressionSession {
@@ -49,6 +46,97 @@ function roundToIncrement(value: number, increment: number): number {
   return Math.round(rounded * 100) / 100
 }
 
+function roundToHalfStep(value: number): number {
+  return Math.round(value * 2) / 2
+}
+
+function median(values: number[]): number {
+  if (!values.length) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const middle = Math.floor(sorted.length / 2)
+  if (sorted.length % 2 === 0) return (sorted[middle - 1] + sorted[middle]) / 2
+  return sorted[middle]
+}
+
+function sanitizeForAutoIncrement(session: ProgressionSession): ProgressionSession | null {
+  if (!Array.isArray(session.weights) || !session.weights.length) return null
+  const weights = session.weights.map((item) => Number(item))
+  const hasInvalidWeights = weights.some((item) => !Number.isFinite(item) || item < 0)
+  if (hasInvalidWeights) return null
+  return {
+    ...session,
+    weights
+  }
+}
+
+function computeAutoBaseIncrement(history: ProgressionSession[]): number {
+  if (!history.length) return 1
+
+  const normalized = history
+    .map((session) => sanitizeForAutoIncrement(session))
+    .filter((session): session is ProgressionSession => Boolean(session))
+    .sort((a, b) => a.date - b.date)
+
+  if (!normalized.length) return 1
+
+  const sessionAverages = normalized
+    .map((session) => session.weights.reduce((sum, weight) => sum + weight, 0) / session.weights.length)
+    .filter((value) => Number.isFinite(value) && value > 0)
+
+  if (!sessionAverages.length) return 1
+
+  const deltas: number[] = []
+  for (let index = 1; index < sessionAverages.length; index += 1) {
+    const delta = Math.abs(sessionAverages[index] - sessionAverages[index - 1])
+    if (delta > 0) deltas.push(delta)
+  }
+
+  const base = deltas.length
+    ? median(deltas)
+    : sessionAverages[sessionAverages.length - 1] * 0.025
+
+  return clamp(roundToHalfStep(base), 0.5, 5)
+}
+
+function sanitizeForAutoRepRange(session: ProgressionSession): ProgressionSession | null {
+  if (!Array.isArray(session.reps) || !session.reps.length) return null
+  const reps = session.reps.map((item) => Number(item))
+  const hasInvalidReps = reps.some((item) => !Number.isFinite(item) || item <= 0)
+  if (hasInvalidReps) return null
+  return {
+    ...session,
+    reps
+  }
+}
+
+function computeAutoRepRange(history: ProgressionSession[]): { repMin: number, repMax: number } {
+  const fallback = { repMin: 6, repMax: 8 }
+  if (!history.length) return fallback
+
+  const normalized = history
+    .map((session) => sanitizeForAutoRepRange(session))
+    .filter((session): session is ProgressionSession => Boolean(session))
+    .sort((a, b) => b.date - a.date)
+
+  if (!normalized.length) return fallback
+
+  const minRepsHistory = normalized.map((session) => Math.min(...session.reps))
+  const maxRepsHistory = normalized.map((session) => Math.max(...session.reps))
+  const latestMin = minRepsHistory[0]
+  const latestMax = maxRepsHistory[0]
+
+  const rawMin = normalized.length < 3 ? latestMin : median(minRepsHistory)
+  const rawMax = normalized.length < 3 ? latestMax : median(maxRepsHistory)
+
+  const repMin = clamp(Math.round(rawMin), 1, 99)
+  let repMax = clamp(Math.round(rawMax), repMin + 1, 100)
+
+  if (repMax - repMin < 1) repMax = Math.min(100, repMin + 1)
+  if (repMax - repMin > 6) repMax = repMin + 6
+
+  return { repMin, repMax }
+}
+
 function computeAdaptiveIncrement(
   baseIncrement: number,
   successRate: number,
@@ -62,14 +150,14 @@ function computeAdaptiveIncrement(
 
   if (overloadRate >= 0.35 || avgRpe >= 9) {
     return {
-      incrementKg: Math.max(1, Math.round(baseIncrement * 0.5)),
+      incrementKg: clamp(roundToHalfStep(baseIncrement * 0.5), 0.5, 5),
       state: 'conservative'
     }
   }
 
   if (successRate >= 0.55 && overloadRate <= 0.15 && avgRpe <= 8.2) {
     return {
-      incrementKg: Math.min(5, Math.max(1, Math.round(baseIncrement * 1.5))),
+      incrementKg: clamp(roundToHalfStep(baseIncrement * 1.5), 0.5, 5),
       state: 'aggressive'
     }
   }
@@ -86,11 +174,8 @@ export function buildProfileKey(profile: ProgressionProfile): string {
 function normalizeProfile(profile: ProgressionProfile): ProgressionProfile {
   const sets = clamp(Math.round(profile.sets || 0), 1, 12)
   const intervalMinutes = Math.max(0, Math.round((profile.intervalMinutes || 0) * 10) / 10)
-  const repMin = clamp(Math.round(profile.repMin || 0), 1, 100)
-  const repMax = clamp(Math.round(profile.repMax || 0), repMin, 100)
-  const incrementKg = Math.max(1, Math.round(profile.incrementKg || 2))
 
-  return { sets, intervalMinutes, repMin, repMax, incrementKg }
+  return { sets, intervalMinutes }
 }
 
 function sanitizeSession(session: ProgressionSession, expectedSets: number): ProgressionSession | null {
@@ -120,9 +205,14 @@ export function computeProgressionSuggestion(
 ): ProgressionSuggestion {
   const profile = normalizeProfile(profileInput)
   const profileKey = buildProfileKey(profile)
+  const exerciseHistory = sessions.filter((session) => session.exerciseId === exerciseId)
+  const autoBaseIncrementKg = computeAutoBaseIncrement(exerciseHistory)
+  const autoRepRange = computeAutoRepRange(exerciseHistory)
+  const repMin = autoRepRange.repMin
+  const repMax = autoRepRange.repMax
 
-  const history = sessions
-    .filter((session) => session.exerciseId === exerciseId && session.profileKey === profileKey)
+  const history = exerciseHistory
+    .filter((session) => session.profileKey === profileKey)
     .map((session) => sanitizeSession(session, profile.sets))
     .filter((session): session is ProgressionSession => Boolean(session))
     .sort((a, b) => b.date - a.date)
@@ -133,18 +223,18 @@ export function computeProgressionSuggestion(
       profileKey,
       basedOnSessions: 0,
       adaptiveWindow: 0,
-      adaptiveIncrementKg: profile.incrementKg,
+      adaptiveIncrementKg: autoBaseIncrementKg,
       adaptiveState: 'neutral',
       nextWeights: new Array(profile.sets).fill(0),
-      targetReps: profile.repMin,
+      targetReps: repMin,
       reason: 'Нет истории по этому профилю. Начни с комфортного стартового веса.'
     }
   }
 
   const latest = history[0]
   const minReps = Math.min(...latest.reps)
-  const latestWeights = latest.weights.map((item) => roundToIncrement(item, profile.incrementKg))
-  const baseTargetReps = clamp(minReps, profile.repMin, profile.repMax)
+  const latestWeights = latest.weights.map((item) => roundToIncrement(item, autoBaseIncrementKg))
+  const baseTargetReps = clamp(minReps, repMin, repMax)
   const basedOnSessions = history.length
 
   if (history.length < 2) {
@@ -153,7 +243,7 @@ export function computeProgressionSuggestion(
       profileKey,
       basedOnSessions,
       adaptiveWindow: basedOnSessions,
-      adaptiveIncrementKg: profile.incrementKg,
+      adaptiveIncrementKg: autoBaseIncrementKg,
       adaptiveState: 'neutral',
       nextWeights: latestWeights,
       targetReps: baseTargetReps,
@@ -165,8 +255,8 @@ export function computeProgressionSuggestion(
     const sessionMinReps = Math.min(...item.reps)
     return {
       minReps: sessionMinReps,
-      success: sessionMinReps >= profile.repMax && item.rpe <= 8,
-      overload: sessionMinReps < profile.repMin || item.rpe >= 9.5
+      success: sessionMinReps >= repMax && item.rpe <= 8,
+      overload: sessionMinReps < repMin || item.rpe >= 9.5
     }
   })
 
@@ -175,11 +265,11 @@ export function computeProgressionSuggestion(
   const successRate = successCount / basedOnSessions
   const overloadRate = overloadCount / basedOnSessions
   const avgRpe = history.reduce((sum, item) => sum + item.rpe, 0) / basedOnSessions
-  const adaptive = computeAdaptiveIncrement(profile.incrementKg, successRate, overloadRate, avgRpe, basedOnSessions)
+  const adaptive = computeAdaptiveIncrement(autoBaseIncrementKg, successRate, overloadRate, avgRpe, basedOnSessions)
   const stepKg = adaptive.incrementKg
   const stagnation = overloadRate >= 0.5 && avgRpe >= 9
 
-  if (stagnation || minReps < profile.repMin || latest.rpe >= 9.5) {
+  if (stagnation || minReps < repMin || latest.rpe >= 9.5) {
     return {
       mode: 'decrease',
       profileKey,
@@ -187,15 +277,15 @@ export function computeProgressionSuggestion(
       adaptiveWindow: basedOnSessions,
       adaptiveIncrementKg: stepKg,
       adaptiveState: adaptive.state,
-      nextWeights: latestWeights.map((weight) => roundToIncrement(weight - stepKg, profile.incrementKg)),
-      targetReps: profile.repMin,
+      nextWeights: latestWeights.map((weight) => roundToIncrement(weight - stepKg, autoBaseIncrementKg)),
+      targetReps: repMin,
       reason: stagnation
         ? 'По истории много перегруза. Рекомендуется шаг назад.'
         : 'Высокий RPE или недобор повторов. Лучше снизить вес.'
     }
   }
 
-  if (minReps >= profile.repMax && latest.rpe <= 8 && successRate >= 0.4) {
+  if (minReps >= repMax && latest.rpe <= 8 && successRate >= 0.4) {
     return {
       mode: 'increase',
       profileKey,
@@ -203,8 +293,8 @@ export function computeProgressionSuggestion(
       adaptiveWindow: basedOnSessions,
       adaptiveIncrementKg: stepKg,
       adaptiveState: adaptive.state,
-      nextWeights: latestWeights.map((weight) => roundToIncrement(weight + stepKg, profile.incrementKg)),
-      targetReps: profile.repMin,
+      nextWeights: latestWeights.map((weight) => roundToIncrement(weight + stepKg, autoBaseIncrementKg)),
+      targetReps: repMin,
       reason: 'Верх диапазона достигнут при комфортном RPE. Можно добавить вес.'
     }
   }
@@ -217,7 +307,7 @@ export function computeProgressionSuggestion(
     adaptiveIncrementKg: stepKg,
     adaptiveState: adaptive.state,
     nextWeights: latestWeights,
-    targetReps: clamp(baseTargetReps + 1, profile.repMin, profile.repMax),
+    targetReps: clamp(baseTargetReps + 1, repMin, repMax),
     reason: 'Оставь вес, попробуй добавить 1 повтор в подходе.'
   }
 }
@@ -229,9 +319,13 @@ export function computeBodyweightRepsSuggestion(
 ): ProgressionRepsSuggestion {
   const profile = normalizeProfile(profileInput)
   const profileKey = buildProfileKey(profile)
+  const exerciseHistory = sessions.filter((session) => session.exerciseId === exerciseId)
+  const autoRepRange = computeAutoRepRange(exerciseHistory)
+  const repMin = autoRepRange.repMin
+  const repMax = autoRepRange.repMax
 
-  const history = sessions
-    .filter((session) => session.exerciseId === exerciseId && session.profileKey === profileKey)
+  const history = exerciseHistory
+    .filter((session) => session.profileKey === profileKey)
     .map((session) => sanitizeSession(session, profile.sets))
     .filter((session): session is ProgressionSession => Boolean(session))
     .sort((a, b) => b.date - a.date)
@@ -241,7 +335,7 @@ export function computeBodyweightRepsSuggestion(
       mode: 'bootstrap',
       profileKey,
       basedOnSessions: 0,
-      nextReps: new Array(profile.sets).fill(profile.repMin),
+      nextReps: new Array(profile.sets).fill(repMin),
       reason: 'Нет истории по этому профилю. Начни с нижней границы диапазона.'
     }
   }
@@ -250,7 +344,7 @@ export function computeBodyweightRepsSuggestion(
   const basedOnSessions = history.length
   const minReps = Math.min(...latest.reps)
   const maxReps = Math.max(...latest.reps)
-  const latestReps = latest.reps.map((item) => clamp(Math.round(item), profile.repMin, profile.repMax))
+  const latestReps = latest.reps.map((item) => clamp(Math.round(item), repMin, repMax))
 
   if (basedOnSessions < 2) {
     return {
@@ -262,25 +356,25 @@ export function computeBodyweightRepsSuggestion(
     }
   }
 
-  const overloadRate = history.filter((item) => Math.min(...item.reps) < profile.repMin || item.rpe >= 9.5).length / basedOnSessions
-  const successRate = history.filter((item) => Math.min(...item.reps) >= profile.repMax && item.rpe <= 8.5).length / basedOnSessions
+  const overloadRate = history.filter((item) => Math.min(...item.reps) < repMin || item.rpe >= 9.5).length / basedOnSessions
+  const successRate = history.filter((item) => Math.min(...item.reps) >= repMax && item.rpe <= 8.5).length / basedOnSessions
 
-  if (minReps < profile.repMin || latest.rpe >= 9.5 || overloadRate >= 0.45) {
+  if (minReps < repMin || latest.rpe >= 9.5 || overloadRate >= 0.45) {
     return {
       mode: 'decrease',
       profileKey,
       basedOnSessions,
-      nextReps: latestReps.map((item) => clamp(item - 1, profile.repMin, profile.repMax)),
+      nextReps: latestReps.map((item) => clamp(item - 1, repMin, repMax)),
       reason: 'Подходы тяжёлые по RPE/повторам. Лучше немного снизить объем.'
     }
   }
 
-  if (maxReps >= profile.repMax && latest.rpe <= 8.5 && successRate >= 0.4) {
+  if (maxReps >= repMax && latest.rpe <= 8.5 && successRate >= 0.4) {
     return {
       mode: 'increase',
       profileKey,
       basedOnSessions,
-      nextReps: latestReps.map((item) => clamp(item + 1, profile.repMin, profile.repMax)),
+      nextReps: latestReps.map((item) => clamp(item + 1, repMin, repMax)),
       reason: 'Диапазон стабильно закрыт. Добавляем по 1 повтору.'
     }
   }
