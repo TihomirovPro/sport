@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'Замеры'
+  title: 'Замеры',
+  backTo: '/settings'
 })
 </script>
 

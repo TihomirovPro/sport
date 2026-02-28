@@ -4,6 +4,11 @@ import { updateData, removeData, createData } from '~/composables/firebaseInit'
 import type { TypeExerciseCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types';
 
+definePageMeta({
+  backTo: '/',
+  clearSelectUpdateExercise: true
+})
+
 useHead({
   title: 'Добавить упражнение'
 })

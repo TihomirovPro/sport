@@ -14,6 +14,10 @@ import {
   LineController
 } from 'chart.js'
 
+definePageMeta({
+  backTo: '/settings'
+})
+
 ChartJS.register(
   CategoryScale,
   LinearScale,

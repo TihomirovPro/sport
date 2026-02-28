@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
+definePageMeta({
+  backTo: '/',
+  clearActiveExercise: true,
+  removeStorageKeys: ['activeExercise']
+})
+
 const workoutStore = useWorkoutStore()
 const exerciseStore = useExerciseStore()
 const appStore = useAppStore()
@@ -10,14 +16,16 @@ const router = useRouter()
 const { notifyError } = useNotifications()
 const { restoreActiveExerciseFromStorage } = useActiveExercise()
 
-restoreActiveExerciseFromStorage(activeExercise)
+onMounted(() => {
+  restoreActiveExerciseFromStorage(activeExercise)
 
-if (activeExercise.value?.id) {
-  getWorkouts(activeExercise.value.id)
-} else {
-  notifyError('Нет данных упражнения в оффлайн-кэше. Откройте упражнение из списка.')
-  void router.push('/')
-}
+  if (activeExercise.value?.id) {
+    getWorkouts(activeExercise.value.id)
+  } else {
+    notifyError('Нет данных упражнения в оффлайн-кэше. Откройте упражнение из списка.')
+    void router.push('/')
+  }
+})
 
 watch(
   () => activeExercise.value?.id,
