@@ -5,7 +5,7 @@ import type { TypeExercise } from '~/composables/types'
 const props = defineProps<TypeExercise>()
 
 const exerciseStore = useExerciseStore()
-const { selectUpdateExercise, activeExercise } = storeToRefs(exerciseStore)
+const { selectUpdateExercise } = storeToRefs(exerciseStore)
 const router = useRouter()
 
 function update() {
@@ -14,8 +14,7 @@ function update() {
 }
 
 function active() {
-  activeExercise.value = props
-  localStorage.setItem('activeExercise', JSON.stringify(props))
+  exerciseStore.setActiveExercise(props)
   getWorkouts(props.id)
 
   if (!props.isComplex) router.push('/exercise-item')

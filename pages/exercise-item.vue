@@ -3,8 +3,7 @@ import { storeToRefs } from 'pinia'
 
 definePageMeta({
   backTo: '/',
-  clearActiveExercise: true,
-  removeStorageKeys: ['activeExercise']
+  clearActiveExercise: true
 })
 
 const workoutStore = useWorkoutStore()

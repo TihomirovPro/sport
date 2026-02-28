@@ -41,7 +41,7 @@ function back() {
   }
 
   if (meta.clearActiveExercise && activeExercise.value) {
-    activeExercise.value = null
+    exerciseStore.setActiveExercise(null)
   }
 
   if (meta.clearSelectUpdateExercise) {

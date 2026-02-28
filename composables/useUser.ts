@@ -72,7 +72,7 @@ export const initUser = () => {
         stopWorkoutsSubscription()
         resetActiveUserState()
         exerciseStore.allExercises = []
-        exerciseStore.activeExercise = null
+        exerciseStore.setActiveExercise(null)
         exerciseStore.selectUpdateExercise = null
         workoutStore.workouts = []
         workoutStore.filteredWorkouts = []
