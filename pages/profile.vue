@@ -4,6 +4,7 @@ import { getFirebaseAuth } from '~/composables/firebaseInit'
 
 definePageMeta({
   title: 'Профиль',
+  backTo: '/settings'
 })
 
 async function signOutUser() {

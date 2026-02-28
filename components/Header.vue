@@ -15,33 +15,44 @@ const { headerTitle } = storeToRefs(appStore)
 const { selectUpdateExercise, activeExercise } = storeToRefs(exerciseStore)
 const { selectUpdateWorkout } = storeToRefs(workoutStore)
 
+type BackToResolver = string | ((routeName: string) => string)
+
+type BackMeta = {
+  backTo?: BackToResolver
+  clearActiveExercise?: boolean
+  clearSelectUpdateExercise?: boolean
+  clearSelectUpdateWorkout?: boolean
+  removeStorageKeys?: string[]
+}
+
+const backMeta = computed(() => (route.meta ?? {}) as BackMeta)
+
+function resolveBackTarget(meta: BackMeta): string {
+  if (typeof meta.backTo === 'function') return meta.backTo(routeName.value)
+  if (typeof meta.backTo === 'string' && meta.backTo.length) return meta.backTo
+  return '/'
+}
+
 function back() {
-  if (routeName.value === 'weight') {
-    router.push('/settings')
-    return
-  }
+  const meta = backMeta.value
 
-  if (routeName.value === 'workout') {
+  if (meta.clearSelectUpdateWorkout) {
     selectUpdateWorkout.value = null
-    localStorage.removeItem('newWorkout')
-    localStorage.removeItem('approaches')
-    router.push('/exercise-item')
-    return
   }
 
-  if (activeExercise.value && routeName.value === 'settings') {
-    router.push('/exercise-item')
-    return
-  }
-
-  if (activeExercise.value && routeName.value === 'exercise-item') {
+  if (meta.clearActiveExercise && activeExercise.value) {
     activeExercise.value = null
-    localStorage.removeItem('activeExercise')
   }
 
-  if (selectUpdateExercise.value) selectUpdateExercise.value = null
+  if (meta.clearSelectUpdateExercise) {
+    selectUpdateExercise.value = null
+  }
 
-  router.push('/')
+  for (const key of meta.removeStorageKeys ?? []) {
+    localStorage.removeItem(key)
+  }
+
+  router.push(resolveBackTarget(meta))
 }
 
 function addItem() {

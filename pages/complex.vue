@@ -3,6 +3,10 @@ import { storeToRefs } from 'pinia'
 import { updateData } from '~/composables/firebaseInit'
 import type { TypeExercise } from '~/composables/types'
 
+definePageMeta({
+  backTo: '/exercise-item'
+})
+
 const appStore = useAppStore()
 const exerciseStore = useExerciseStore()
 const userStore = useUserStore()

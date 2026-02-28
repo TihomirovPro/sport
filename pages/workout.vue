@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { createData, updateData, removeData } from '~/composables/firebaseInit'
 import { buildProfileKey, computeBodyweightRepsSuggestion, computeProgressionSuggestion, type ProgressionSession } from '~/composables/useProgressionTest'
-import type { TypeWorkoutCreate } from '~/composables/types'
+import type { TypeWorkout, TypeWorkoutCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
 import {
   safeParseJson,
@@ -14,6 +14,12 @@ import {
   normalizeNumberArray,
   normalizeWorkoutDate
 } from '~/composables/useWorkoutHelpers'
+
+definePageMeta({
+  backTo: '/exercise-item',
+  clearSelectUpdateWorkout: true,
+  removeStorageKeys: ['newWorkout', 'approaches']
+})
 
 const router = useRouter()
 const exerciseStore = useExerciseStore()
@@ -34,16 +40,19 @@ useHead({
   title: headerTitle.value
 })
 
-restoreActiveExerciseFromStorage(activeExercise, {
-  fallbackEase: [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
-})
+onMounted(() => {
+  restoreActiveExerciseFromStorage(activeExercise, {
+    fallbackEase: [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
+  })
 
-if (activeExercise.value?.id) {
-  getWorkouts(activeExercise.value.id)
-} else {
-  notifyError('Нет данных упражнения в оффлайн-кэше. Сначала откройте его онлайн.')
-  void router.push('/')
-}
+  if (activeExercise.value?.id) {
+    getWorkouts(activeExercise.value.id)
+    workout.value.exercisesId = activeExercise.value.id
+  } else {
+    notifyError('Нет данных упражнения в оффлайн-кэше. Сначала откройте его онлайн.')
+    void router.push('/')
+  }
+})
 
 onUnmounted(() => {
   stopWorkoutsSubscription()
@@ -117,22 +126,6 @@ const defaultNewWorkout = getNewWorkoutDefaults()
 const approaches = ref(defaultNewWorkout.approaches)
 const workout = ref<TypeWorkoutCreate>(defaultNewWorkout.workout)
 
-type WorkoutStoreItem = {
-  id: string
-  exercisesId: string
-  date: number
-  interval: string
-  ease: EnumEase
-  rpe?: number
-  rubber?: string
-  complexExercises?: string[]
-  approach: number[]
-  weight?: number[]
-  desc?: string
-  res: number
-  resWeigth: number
-}
-
 type WorkoutWritePayload = Omit<TypeWorkoutCreate, 'rpe'> & { rpe?: number }
 
 function buildWorkoutWritePayload(source: TypeWorkoutCreate): WorkoutWritePayload {
@@ -163,7 +156,7 @@ function buildWorkoutWritePayload(source: TypeWorkoutCreate): WorkoutWritePayloa
   return payload
 }
 
-function sortByDateDesc(list: WorkoutStoreItem[]): WorkoutStoreItem[] {
+function sortByDateDesc(list: TypeWorkout[]): TypeWorkout[] {
   return [...list].sort((a, b) => {
     if (new Date(a.date) < new Date(b.date)) return 1
     if (new Date(a.date) > new Date(b.date)) return -1
@@ -171,13 +164,16 @@ function sortByDateDesc(list: WorkoutStoreItem[]): WorkoutStoreItem[] {
   })
 }
 
-function upsertWorkoutInStore(item: WorkoutStoreItem) {
+function upsertWorkoutInStore(item: TypeWorkout) {
+  // Оптимистично обновляем список до прихода снапшота подписки,
+  // затем useWorkouts.ts синхронизирует и при необходимости выравнивает состояние.
   const withoutCurrent = workoutStore.workouts.filter((workoutItem) => workoutItem.id !== item.id)
   workoutStore.workouts = sortByDateDesc([item, ...withoutCurrent])
   workoutStore.filteredWorkouts = [...workoutStore.workouts]
 }
 
 function removeWorkoutFromStore(id: string) {
+  // Локально убираем запись для мгновенного отклика UI, финальное состояние задаёт подписка.
   workoutStore.workouts = workoutStore.workouts.filter((workoutItem) => workoutItem.id !== id)
   workoutStore.filteredWorkouts = workoutStore.filteredWorkouts.filter((workoutItem) => workoutItem.id !== id)
 }
@@ -343,7 +339,6 @@ const progressionProfile = computed(() => {
   }
 })
 
-const progressionProfileKey = computed(() => buildProfileKey(progressionProfile.value))
 const isWeightMode = computed(() => workout.value.ease === EnumEase.weight)
 const isBodyweightMode = computed(() => workout.value.ease === EnumEase.noWeight)
 
@@ -351,9 +346,13 @@ const progressionWeightSessions = computed<ProgressionSession[]>(() => {
   const exerciseId = activeExercise.value?.id ?? ''
 
   return workoutStore.workouts
-    .filter((item) => item.exercisesId === exerciseId)
-    .filter((item) => item.ease === EnumEase.weight)
-    .filter((item) => Array.isArray(item.weight) && item.weight.length === item.approach.length && item.approach.length > 0)
+    .filter((item) =>
+      item.exercisesId === exerciseId &&
+      item.ease === EnumEase.weight &&
+      Array.isArray(item.weight) &&
+      item.weight.length === item.approach.length &&
+      item.approach.length > 0
+    )
     .map((item) => ({
       id: item.id,
       exerciseId: item.exercisesId,
@@ -372,9 +371,12 @@ const progressionBodyweightSessions = computed<ProgressionSession[]>(() => {
   const exerciseId = activeExercise.value?.id ?? ''
 
   return workoutStore.workouts
-    .filter((item) => item.exercisesId === exerciseId)
-    .filter((item) => item.ease === EnumEase.noWeight)
-    .filter((item) => Array.isArray(item.approach) && item.approach.length > 0)
+    .filter((item) =>
+      item.exercisesId === exerciseId &&
+      item.ease === EnumEase.noWeight &&
+      Array.isArray(item.approach) &&
+      item.approach.length > 0
+    )
     .map((item) => ({
       id: item.id,
       exerciseId: item.exercisesId,

@@ -4,6 +4,10 @@ import { storeToRefs } from 'pinia'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
 import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 
+definePageMeta({
+  backTo: '/'
+})
+
 useHead({
   title: 'Настройки',
 })
