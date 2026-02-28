@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { updateData } from '~/composables/firebaseInit'
-import type { TypeExercise } from '~/composables/types'
 
 definePageMeta({
   backTo: '/exercise-item'
@@ -62,12 +61,10 @@ async function saveComplex() {
     })
 
     if (activeExercise.value?.id === exerciseId) {
-      activeExercise.value = {
-        ...activeExercise.value,
+      exerciseStore.patchActiveExercise({
         isComplex: true,
         complexDesc,
-      } as TypeExercise
-      localStorage.setItem('activeExercise', JSON.stringify(activeExercise.value))
+      })
     }
 
     const idx = allExercises.value.findIndex((item) => item.id === exerciseId)
