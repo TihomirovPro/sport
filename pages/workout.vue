@@ -408,15 +408,22 @@ const bodyweightSuggestion = computed(() => {
 })
 const canShowProgression = computed(() => canManageProgression.value && !isComplex.value && (isWeightMode.value || isBodyweightMode.value))
 
-function suggestionActionText(mode: string): string {
-  if (mode === 'increase') return 'Повышаем рабочий вес'
-  if (mode === 'decrease') return 'Снижаем рабочий вес'
-  if (mode === 'hold') return 'Оставляем текущий вес'
+function suggestionActionText(mode: string, type: 'weight' | 'bodyweight'): string {
+  if (type === 'weight') {
+    if (mode === 'increase') return 'Повышаем рабочий вес'
+    if (mode === 'decrease') return 'Снижаем рабочий вес'
+    if (mode === 'hold') return 'Оставляем текущий вес'
+    return 'Собираем базовую историю'
+  }
+
+  if (mode === 'increase') return 'Повышаем рабочий объем'
+  if (mode === 'decrease') return 'Снижаем рабочий объем'
+  if (mode === 'hold') return 'Оставляем текущий объем'
   return 'Собираем базовую историю'
 }
 
-function suggestionSummaryText(mode: string, reason: string): string {
-  const action = suggestionActionText(mode)
+function suggestionSummaryText(mode: string, reason: string, type: 'weight' | 'bodyweight'): string {
+  const action = suggestionActionText(mode, type)
   const normalizedReason = String(reason || '').trim()
   if (!normalizedReason) return action
   return `${action}. ${normalizedReason}`
@@ -432,12 +439,45 @@ const activeSuggestionReason = computed(() => {
   return bodyweightSuggestion.value.reason
 })
 
+const activeSuggestionConfidenceLevel = computed(() => {
+  if (isWeightMode.value) return progressionSuggestion.value.confidenceLevel
+  return bodyweightSuggestion.value.confidenceLevel
+})
+
+const activeSuggestionConfidenceScore = computed(() => {
+  if (isWeightMode.value) return progressionSuggestion.value.confidenceScore
+  return bodyweightSuggestion.value.confidenceScore
+})
+
+const activeSuggestionDroppedSessions = computed(() => {
+  if (isWeightMode.value) return progressionSuggestion.value.validationDroppedSessions
+  return bodyweightSuggestion.value.validationDroppedSessions
+})
+
+function confidenceLabel(level: 'low' | 'medium' | 'high'): string {
+  if (level === 'high') return 'высокая'
+  if (level === 'medium') return 'средняя'
+  return 'низкая'
+}
+
+const activeSuggestionConfidenceLine = computed(() => {
+  const scorePercent = Math.round((activeSuggestionConfidenceScore.value || 0) * 100)
+  const dropped = Math.max(0, Math.round(activeSuggestionDroppedSessions.value || 0))
+  const droppedPart = dropped > 0 ? `, исключено сессий: ${dropped}` : ''
+  return `Надёжность: ${confidenceLabel(activeSuggestionConfidenceLevel.value)} (${scorePercent}%)${droppedPart}`
+})
+
+const activeSuggestionSummaryText = computed(() => suggestionSummaryText(
+  activeSuggestionMode.value,
+  activeSuggestionReason.value,
+  isWeightMode.value ? 'weight' : 'bodyweight'
+))
+
 const recommendationWeightsLine = computed(() => progressionSuggestion.value.nextWeights.join(' / '))
 
 const recommendationRepsLine = computed(() => {
   if (isWeightMode.value) {
-    const sets = Math.max(1, Math.round(approaches.value || 1))
-    return new Array(sets).fill(progressionSuggestion.value.targetReps).join(' / ')
+    return progressionSuggestion.value.nextReps.join(' / ')
   }
 
   return bodyweightSuggestion.value.nextReps.join(' / ')
@@ -451,16 +491,12 @@ function applyProgressionSuggestion() {
 
   if (isWeightMode.value) {
     const suggestedWeights = progressionSuggestion.value.nextWeights
+    const suggestedReps = progressionSuggestion.value.nextReps
     if (!suggestedWeights.length) return
 
     workout.value.weight = [...suggestedWeights]
-
-    const currentApproach = normalizeNumberArray(workout.value.approach)
-    const hasValidApproach = currentApproach.length === approaches.value
-      && currentApproach.every((item) => Number.isFinite(item) && item > 0)
-
-    if (!hasValidApproach) {
-      workout.value.approach = new Array(approaches.value).fill(progressionSuggestion.value.targetReps)
+    if (suggestedReps.length === approaches.value) {
+      workout.value.approach = [...suggestedReps]
     }
   } else {
     const suggestedReps = bodyweightSuggestion.value.nextReps
@@ -479,8 +515,11 @@ function applyProgressionSuggestion() {
     adaptiveIncrementKg: isWeightMode.value ? progressionSuggestion.value.adaptiveIncrementKg : null,
     targetReps: isWeightMode.value ? progressionSuggestion.value.targetReps : null,
     nextWeights: isWeightMode.value ? progressionSuggestion.value.nextWeights : null,
-    nextReps: isBodyweightMode.value ? bodyweightSuggestion.value.nextReps : null,
+    nextReps: isWeightMode.value ? progressionSuggestion.value.nextReps : bodyweightSuggestion.value.nextReps,
     basedOnSessions: isWeightMode.value ? progressionSuggestion.value.basedOnSessions : bodyweightSuggestion.value.basedOnSessions,
+    confidenceLevel: activeSuggestionConfidenceLevel.value,
+    confidenceScore: activeSuggestionConfidenceScore.value,
+    validationDroppedSessions: activeSuggestionDroppedSessions.value,
     lastWorkoutRpe: Number.isFinite(Number(workout.value.rpe)) ? Number(workout.value.rpe) : null,
     appliedAt: Date.now()
   }
@@ -717,7 +756,8 @@ watch(
     ) {{ item.name.replace(' резина', '') }}
 
   .grid.gap-3.border.border-faint.rounded-xl.p-3(v-if="canShowProgression")
-    p.text-sm.leading-relaxed.font-medium.opacity-95 {{ suggestionSummaryText(activeSuggestionMode, activeSuggestionReason) }}
+    p.text-sm.leading-relaxed.font-medium.opacity-95 {{ activeSuggestionSummaryText }}
+    p.text-xs.opacity-70 {{ activeSuggestionConfidenceLine }}
 
     .grid.grid-cols-2.gap-3
       .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
