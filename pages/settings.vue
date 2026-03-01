@@ -3,6 +3,7 @@ import { signOut } from 'firebase/auth'
 import { storeToRefs } from 'pinia'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
 import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
+import packageJson from '~/package.json'
 
 definePageMeta({
   backTo: '/'
@@ -22,11 +23,10 @@ const { activeUser } = storeToRefs(userStore)
 const { lastWeight } = storeToRefs(weightStore)
 const router = useRouter()
 const colorMode = useColorMode()
-const runtimeConfig = useRuntimeConfig()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
 const showModalRubbers = ref(false)
-const appVersion = runtimeConfig.public.APP_VERSION || 'dev'
+const appVersion = packageJson.version || 'dev'
 
 const storedBaseColor = localStorage.getItem('baseColor')
 if (storedBaseColor) baseColor.value = storedBaseColor
@@ -88,7 +88,7 @@ async function signOutUser() {
 </script>
 
 <template lang="pug">
-.grid.gap-3
+.flex.flex-col.gap-3.h-full
   .flex.items-center.justify-between.border-b.border-faint.py-2(@click="changeTheme")
     p Тема
     p {{ colorMode.preference }}
@@ -111,15 +111,12 @@ async function signOutUser() {
     p {{ lastWeightText }}
 
   .flex.items-center.justify-between.border-b.border-faint.py-2
-    p Статус пользователя
+    p Статус
     p {{ activeUser.status || 'Пользователь' }}
 
-  .flex.items-center.justify-between.border-b.border-faint.py-2
-    p Версия приложения
-    p v{{ appVersion }}
-
-  .flex.items-center.justify-between.border-b.border-faint.py-2(@click="confirmSignOut")
-    p Выход
+  .flex.justify-between.mt-auto
+    .py-2(@click="confirmSignOut") Выход
+    .py-2 v {{ appVersion }}
 
   ModalColor(
     :isShow="showModalColor"

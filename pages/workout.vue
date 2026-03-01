@@ -64,6 +64,7 @@ const {
 } = useWorkoutProgressionUI({
   activeUser,
   activeExercise,
+  selectUpdateWorkout,
   workouts,
   workout,
   approaches,
