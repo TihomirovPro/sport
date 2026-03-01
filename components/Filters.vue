@@ -67,7 +67,7 @@ const optionsLines = reactive({
   }
 })
 
-const filterElements = computed(() => {
+const allFilterElements = computed(() => {
   const easeOrder: Record<EnumEase, number> = {
     [EnumEase.noWeight]: 0,
     [EnumEase.weight]: 1,
@@ -89,20 +89,74 @@ const filterElements = computed(() => {
   };
 });
 
+function isWorkoutMatchedByFilters(
+  itemEase: EnumEase,
+  itemInterval: number,
+  itemApproach: number,
+  options: { useEase?: boolean; useInterval?: boolean; useApproach?: boolean } = {}
+): boolean {
+  const useEase = options.useEase ?? true
+  const useInterval = options.useInterval ?? true
+  const useApproach = options.useApproach ?? true
+
+  return (
+    (!useInterval || !filter.value.interval || filter.value.interval === itemInterval) &&
+    (!useEase || !filter.value.ease || filter.value.ease === itemEase) &&
+    (!useApproach || !filter.value.approach || filter.value.approach === itemApproach)
+  )
+}
+
+const availableFilterElements = computed(() => {
+  const easeOrder: Record<EnumEase, number> = {
+    [EnumEase.noWeight]: 0,
+    [EnumEase.weight]: 1,
+    [EnumEase.rubber]: 2,
+  }
+
+  const result = {
+    eases: new Set<EnumEase>(),
+    intervals: new Set<number>(),
+    approaches: new Set<number>()
+  }
+
+  workouts.value.forEach((item) => {
+    const itemInterval = +item.interval
+    const itemApproach = item.approach.length
+
+    if (isWorkoutMatchedByFilters(item.ease, itemInterval, itemApproach, { useInterval: false })) {
+      result.intervals.add(itemInterval)
+    }
+
+    if (isWorkoutMatchedByFilters(item.ease, itemInterval, itemApproach, { useApproach: false })) {
+      result.approaches.add(itemApproach)
+    }
+
+    if (isWorkoutMatchedByFilters(item.ease, itemInterval, itemApproach, { useEase: false })) {
+      result.eases.add(item.ease)
+    }
+  })
+
+  return {
+    eases: allFilterElements.value.eases,
+    intervals: [...result.intervals].sort((a, b) => a - b),
+    approaches: [...result.approaches].sort((a, b) => a - b)
+  }
+})
+
 function getInitialEase(): '' | EnumEase {
-  if (activeFilters.value.ease && filterElements.value.eases.includes(activeFilters.value.ease)) {
+  if (activeFilters.value.ease && allFilterElements.value.eases.includes(activeFilters.value.ease)) {
     return activeFilters.value.ease
   }
 
-  if (filterElements.value.eases.length === 1) {
-    return filterElements.value.eases[0] ?? ''
+  if (allFilterElements.value.eases.length === 1) {
+    return allFilterElements.value.eases[0] ?? ''
   }
 
   return ''
 }
 
 function getInitialInterval(): number {
-  if (activeFilters.value.interval && filterElements.value.intervals.includes(activeFilters.value.interval)) {
+  if (activeFilters.value.interval && allFilterElements.value.intervals.includes(activeFilters.value.interval)) {
     return activeFilters.value.interval
   }
 
@@ -110,7 +164,7 @@ function getInitialInterval(): number {
 }
 
 function getInitialApproach(): number {
-  if (activeFilters.value.approach && filterElements.value.approaches.includes(activeFilters.value.approach)) {
+  if (activeFilters.value.approach && allFilterElements.value.approaches.includes(activeFilters.value.approach)) {
     return activeFilters.value.approach
   }
 
@@ -130,11 +184,7 @@ function filterWorkouts(
   itemInterval: number,
   itemApproach: number
 ): boolean {
-  return (
-    (!filter.value.interval || filter.value.interval === itemInterval) &&
-    (!filter.value.ease || filter.value.ease === itemEase) &&
-    (!filter.value.approach || filter.value.approach === itemApproach)
-  );
+  return isWorkoutMatchedByFilters(itemEase, itemInterval, itemApproach)
 }
 
 function useFilter() {
@@ -250,11 +300,11 @@ const data = computed(() => {
 })
 
 watch(
-  filterElements,
+  availableFilterElements,
   () => {
-    if (filter.value.ease && !filterElements.value.eases.includes(filter.value.ease)) filter.value.ease = ''
-    if (filter.value.interval && !filterElements.value.intervals.includes(filter.value.interval)) filter.value.interval = 0
-    if (filter.value.approach && !filterElements.value.approaches.includes(filter.value.approach)) filter.value.approach = 0
+    if (filter.value.ease && !allFilterElements.value.eases.includes(filter.value.ease)) filter.value.ease = ''
+    if (filter.value.interval && !availableFilterElements.value.intervals.includes(filter.value.interval)) filter.value.interval = 0
+    if (filter.value.approach && !availableFilterElements.value.approaches.includes(filter.value.approach)) filter.value.approach = 0
 
     syncActiveFilters()
     useFilter()
@@ -270,33 +320,33 @@ function showChart() {
 
 <template lang="pug">
 .filters
-  template(v-if="filterElements.intervals.length > 1")
+  template(v-if="availableFilterElements.intervals.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Интервал
     TabsWrap.pb-1
       TabsItem(
-        v-for="interval in filterElements.intervals"
+        v-for="interval in availableFilterElements.intervals"
         :key="interval"
         :active="filter.interval === interval"
         @click="filter.changeInterval(interval)"
         :title="interval"
       ).text-xs
   
-  template(v-if="filterElements.approaches.length > 1")
+  template(v-if="availableFilterElements.approaches.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Пoдходы
     TabsWrap.pb-1
       TabsItem(
-        v-for="approach in filterElements.approaches"
+        v-for="approach in availableFilterElements.approaches"
         :key="approach"
         :active="filter.approach === approach"
         @click="filter.changeApproach(approach)"
         :title="approach"
       ).text-xs
   
-  template(v-if="filterElements.eases.length > 1")
+  template(v-if="allFilterElements.eases.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Сложность
     TabsWrap(v-if="workouts")
       TabsItem(
-        v-for="ease in filterElements.eases"
+        v-for="ease in allFilterElements.eases"
         :key="ease"
         :active="filter.ease === ease"
         @click="filter.changeEase(ease)"
