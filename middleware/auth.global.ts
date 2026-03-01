@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
+import { readLastAuthUid } from '~/composables/firebase/authSession'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
 
 const publicRouteNames = new Set(['login'])
@@ -44,15 +45,32 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const routeName = String(to.name ?? '')
   const isPublicRoute = publicRouteNames.has(routeName)
   const auth = getFirebaseAuth()
+  const rememberedUid = readLastAuthUid()
+  const offlineRememberedUser = process.client && !navigator.onLine && !auth.currentUser && !!rememberedUid
 
   if (!isPublicRoute && userStore.activeUser.uid) return
 
-  if (isPublicRoute && !auth.currentUser && !userStore.activeUser.uid) return
+  if (isPublicRoute && offlineRememberedUser) {
+    userStore.activeUser.uid = rememberedUid
+    return navigateTo('/')
+  }
+
+  if (isPublicRoute && !auth.currentUser && !userStore.activeUser.uid && !offlineRememberedUser) return
 
   const user = await resolveAuthUser()
 
   if (user) {
     userStore.activeUser.uid = user.uid
+
+    if (isPublicRoute) {
+      return navigateTo('/')
+    }
+
+    return
+  }
+
+  if (offlineRememberedUser) {
+    userStore.activeUser.uid = rememberedUid
 
     if (isPublicRoute) {
       return navigateTo('/')
