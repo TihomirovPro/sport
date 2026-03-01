@@ -5,7 +5,6 @@ import tailwindcss from '@tailwindcss/vite'
 const isDev = process.env.NODE_ENV !== 'production'
 const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')) as { version?: string }
 const appVersion = packageJson.version ?? '0.0.0'
-const appVersionCachePart = appVersion.replace(/\./g, '-')
 
 const cspDirectives = [
   "default-src 'self'",
@@ -84,8 +83,11 @@ export default defineNuxtConfig({
 
   pwa: {
     registerType: 'autoUpdate',
+    client: {
+      installPrompt: true
+    },
     manifest: {
-      display: "fullscreen",
+      display: "standalone",
       name: 'Power Progress',
       short_name: 'Power Progress',
       description: 'Дневник для записи тренировок и отслеживания прогресса',
@@ -111,8 +113,11 @@ export default defineNuxtConfig({
     },
     workbox: {
       cleanupOutdatedCaches: true,
-      cacheId: `power-progress-v${appVersionCachePart}`,
+      cacheId: 'power-progress',
+      clientsClaim: true,
+      skipWaiting: true,
       navigateFallback: '/index.html',
+      navigateFallbackDenylist: [/^\/__\//, /^\/api\//],
       additionalManifestEntries: [
         {
           url: '/',

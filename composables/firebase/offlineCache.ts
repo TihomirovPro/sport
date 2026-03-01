@@ -121,7 +121,10 @@ function deepSet(
 
 function readOfflineCache(): OfflineCache {
   if (!offlineCacheMemory) {
-    offlineCacheMemory = readJson<OfflineCache>(OFFLINE_CACHE_KEY, {})
+    const raw = readJson<unknown>(OFFLINE_CACHE_KEY, {})
+    offlineCacheMemory = (raw && typeof raw === 'object' && !Array.isArray(raw))
+      ? raw as OfflineCache
+      : {}
   }
   return offlineCacheMemory
 }
