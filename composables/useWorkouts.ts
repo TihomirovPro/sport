@@ -23,6 +23,7 @@ export const getWorkouts = (exercisesId:string) => {
     stopWorkoutsSubscription()
     workoutStore.workouts = []
     workoutStore.filteredWorkouts = []
+    workoutStore.workoutsLoaded = false
     return () => {}
   }
 
@@ -32,6 +33,7 @@ export const getWorkouts = (exercisesId:string) => {
 
   // Prevent showing stale workouts from previously selected exercise,
   // especially when offline cache for the new exercise is empty.
+  workoutStore.workoutsLoaded = false
   workoutStore.workouts = []
   workoutStore.filteredWorkouts = []
 
@@ -86,9 +88,11 @@ export const getWorkouts = (exercisesId:string) => {
       })
 
       workoutStore.filteredWorkouts = [...workoutStore.workouts]
+      workoutStore.workoutsLoaded = true
     } else {
       workoutStore.workouts = []
       workoutStore.filteredWorkouts = []
+      workoutStore.workoutsLoaded = true
     }
   })
 

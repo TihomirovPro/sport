@@ -9,11 +9,15 @@ definePageMeta({
 const workoutStore = useWorkoutStore()
 const exerciseStore = useExerciseStore()
 const appStore = useAppStore()
-const { filteredWorkouts } = storeToRefs(workoutStore)
+const { filteredWorkouts, workoutsLoaded } = storeToRefs(workoutStore)
 const { activeExercise } = storeToRefs(exerciseStore)
 const router = useRouter()
 const { notifyError } = useNotifications()
 const { restoreActiveExerciseFromStorage } = useActiveExercise()
+
+function toCreateWorkout() {
+  void router.push('/workout')
+}
 
 onMounted(() => {
   restoreActiveExerciseFromStorage(activeExercise)
@@ -48,7 +52,7 @@ useHead({
 <template lang="pug">
 div
   Filters
-  .grid.gap-4.pt-4
+  .grid.gap-4.pt-4(v-if="filteredWorkouts.length")
     template(v-for="item in filteredWorkouts" :key="item.id")
       Workout(
         :id="item.id"
@@ -64,4 +68,14 @@ div
         :res="item.res"
         :resWeigth="item.resWeigth"
       )
+  .grid.gap-3.p-4.rounded-xl.border.border-faint.text-center.mt-4(
+    v-else-if="workoutsLoaded"
+    class="bg-faint/20"
+  )
+    p.text-sm.opacity-75 У вас пока нет тренировок
+    p.text-xs.opacity-60 Нажмите на плюс в правом верхнем углу или добавьте первую тренировку кнопкой ниже
+    BaseButton(
+      text="Добавить тренировку"
+      @click="toCreateWorkout"
+    )
 </template>

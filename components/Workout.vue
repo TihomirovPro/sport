@@ -57,7 +57,7 @@ function selectUpdate() {
     .text-left.py-1.pr-1(class="text-[rgb(var(--colorIcon))]/40") пвт
     .text-center.border-l.border-faint.py-1(v-for="item in approach") {{ item }}
     .text-error.text-right.border-l.border-faint.py-1.pl-1 {{ res }}
-    template(v-if="weight")
+    template(v-if="ease === EnumEase.weight && Array.isArray(weight) && weight.length")
       .text-left.pr-1.py-1.border-t.border-faint(class="text-[rgb(var(--colorIcon))]/40") кг
       .text-center.border-l.border-faint.border-t.py-1(v-for="item in weight") {{ item }}
       .text-error.text-right.border-l.border-faint.border-t.py-1.pl-1 {{ resWeigth }}
