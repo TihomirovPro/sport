@@ -12,6 +12,7 @@ import { EnumEase, type TypeExercise, type TypeWorkout, type TypeWorkoutCreate }
 interface UseWorkoutProgressionUIParams {
   activeUser: Ref<{ status?: string } | null | undefined>
   activeExercise: Ref<TypeExercise | null | undefined>
+  selectUpdateWorkout: Ref<TypeWorkout | null>
   workouts: Ref<TypeWorkout[]>
   workout: Ref<TypeWorkoutCreate>
   approaches: Ref<number>
@@ -22,6 +23,7 @@ interface UseWorkoutProgressionUIParams {
 export function useWorkoutProgressionUI({
   activeUser,
   activeExercise,
+  selectUpdateWorkout,
   workouts,
   workout,
   approaches,
@@ -104,7 +106,18 @@ export function useWorkoutProgressionUI({
     )
   })
 
-  const canShowProgression = computed(() => canManageProgression.value && !isComplex.value && (isWeightMode.value || isBodyweightMode.value))
+  const hasSuggestionData = computed(() => {
+    if (isWeightMode.value) return progressionSuggestion.value.basedOnSessions > 0
+    return bodyweightSuggestion.value.basedOnSessions > 0
+  })
+
+  const canShowProgression = computed(() => {
+    return canManageProgression.value
+      && !selectUpdateWorkout.value
+      && !isComplex.value
+      && (isWeightMode.value || isBodyweightMode.value)
+      && hasSuggestionData.value
+  })
 
   function suggestionActionText(mode: string, type: 'weight' | 'bodyweight'): string {
     if (type === 'weight') {
@@ -171,7 +184,15 @@ export function useWorkoutProgressionUI({
     isWeightMode.value ? 'weight' : 'bodyweight'
   ))
 
-  const recommendationWeightsLine = computed(() => progressionSuggestion.value.nextWeights.join(' / '))
+  const normalizedSuggestionWeights = computed(() => {
+    return progressionSuggestion.value.nextWeights.map((item) => {
+      const numeric = Number(item)
+      if (!Number.isFinite(numeric)) return 0
+      return Math.max(0, Math.round(numeric))
+    })
+  })
+
+  const recommendationWeightsLine = computed(() => normalizedSuggestionWeights.value.join(' / '))
 
   const recommendationRepsLine = computed(() => {
     if (isWeightMode.value) {
@@ -188,7 +209,7 @@ export function useWorkoutProgressionUI({
     }
 
     if (isWeightMode.value) {
-      const suggestedWeights = progressionSuggestion.value.nextWeights
+      const suggestedWeights = normalizedSuggestionWeights.value
       const suggestedReps = progressionSuggestion.value.nextReps
       if (!suggestedWeights.length) return
 
@@ -212,7 +233,7 @@ export function useWorkoutProgressionUI({
       adaptiveState: isWeightMode.value ? progressionSuggestion.value.adaptiveState : null,
       adaptiveIncrementKg: isWeightMode.value ? progressionSuggestion.value.adaptiveIncrementKg : null,
       targetReps: isWeightMode.value ? progressionSuggestion.value.targetReps : null,
-      nextWeights: isWeightMode.value ? progressionSuggestion.value.nextWeights : null,
+      nextWeights: isWeightMode.value ? normalizedSuggestionWeights.value : null,
       nextReps: isWeightMode.value ? progressionSuggestion.value.nextReps : bodyweightSuggestion.value.nextReps,
       basedOnSessions: isWeightMode.value ? progressionSuggestion.value.basedOnSessions : bodyweightSuggestion.value.basedOnSessions,
       confidenceLevel: activeSuggestionConfidenceLevel.value,

@@ -48,7 +48,7 @@ useHead({
 <template lang="pug">
 div
   Filters
-  .grid.gap-6.pt-4
+  .grid.gap-4.pt-4
     template(v-for="item in filteredWorkouts" :key="item.id")
       Workout(
         :id="item.id"
