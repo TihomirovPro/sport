@@ -64,6 +64,8 @@ function fallbackToOfflineWrite(
   path: string,
   data?: unknown
 ) {
+  if (!uid) throw new Error('Пользователь не авторизован')
+
   if (type === 'remove') {
     updateCachedPath(uid, path, null, { remove: true })
     enqueueOperation('remove', path)
@@ -91,6 +93,7 @@ export const createData = async <T>(path: string, data: T) => {
     const uid = getCurrentUserId()
 
     if (isOfflineClient()) {
+      if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, fullPath, data)
       enqueueOperation('set', fullPath, data)
       return key
@@ -102,7 +105,7 @@ export const createData = async <T>(path: string, data: T) => {
   } catch (error) {
     const uid = getCurrentUserId()
 
-    if (isRetriableWriteError(error)) {
+    if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'set', fullPath, data)
       return key
     }
@@ -119,6 +122,7 @@ export const createDataWithoutKey = async <T>(path: string, data: T) => {
     const uid = getCurrentUserId()
 
     if (isOfflineClient()) {
+      if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, path, data)
       enqueueOperation('set', path, data)
       return
@@ -128,7 +132,7 @@ export const createDataWithoutKey = async <T>(path: string, data: T) => {
     updateCachedPath(uid, path, data)
   } catch (error) {
     const uid = getCurrentUserId()
-    if (isRetriableWriteError(error)) {
+    if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'set', path, data)
       return
     }
@@ -145,6 +149,7 @@ export const updateData = async <T extends object>(path: string, data: T) => {
     const uid = getCurrentUserId()
 
     if (isOfflineClient()) {
+      if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, path, data, { merge: true })
       enqueueOperation('update', path, data)
       return
@@ -154,7 +159,7 @@ export const updateData = async <T extends object>(path: string, data: T) => {
     updateCachedPath(uid, path, data, { merge: true })
   } catch (error) {
     const uid = getCurrentUserId()
-    if (isRetriableWriteError(error)) {
+    if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'update', path, data)
       return
     }
@@ -171,6 +176,7 @@ export const removeData = async (path: string) => {
     const uid = getCurrentUserId()
 
     if (isOfflineClient()) {
+      if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, path, null, { remove: true })
       enqueueOperation('remove', path)
       return
@@ -180,7 +186,7 @@ export const removeData = async (path: string) => {
     updateCachedPath(uid, path, null, { remove: true })
   } catch (error) {
     const uid = getCurrentUserId()
-    if (isRetriableWriteError(error)) {
+    if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'remove', path)
       return
     }
@@ -195,7 +201,11 @@ export const onData = (path: string, callback: (snapshot: DataSnapshot) => void)
 
   try {
     emitCachedSnapshot(getCurrentUserId(), path, callback)
+  } catch (cachedError) {
+    logFirebaseError('onDataCachedBeforeSubscribe', cachedError)
+  }
 
+  try {
     return onValue(
       ref(getFirebaseDb(), dbPath(path)),
       (snapshot) => {

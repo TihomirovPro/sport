@@ -22,7 +22,6 @@ if (localStorage.getItem('baseColor')) {
   v-if="activeUser.uid"
   class="grid-rows-[auto_1fr]"
 )
-  PwaInstall
   Header
 
   main.px-2.py-3.max-w-2xl.size-full.mx-auto.relative

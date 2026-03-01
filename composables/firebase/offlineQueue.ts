@@ -8,6 +8,8 @@ const OFFLINE_QUEUE_KEY = 'pp-offline-queue-v1'
 const PERSIST_DELAY_MS = 120
 const FLUSH_RETRY_BASE_MS = 1_500
 const FLUSH_RETRY_MAX_MS = 30_000
+const MAX_PENDING_OPERATIONS = 500
+const OPERATION_TTL_MS = 1000 * 60 * 60 * 24 * 30
 
 type PendingOperationType = 'set' | 'update' | 'remove'
 
@@ -17,6 +19,7 @@ type PendingOperation = {
   path: string
   type: PendingOperationType
   data?: unknown
+  createdAt: number
 }
 
 let pendingOperationsMemory: PendingOperation[] | null = null
@@ -71,9 +74,65 @@ function getCurrentUid(): string | null {
   return getFirebaseAuth().currentUser?.uid || readLastAuthUid() || null
 }
 
+function isPendingOperationType(value: unknown): value is PendingOperationType {
+  return value === 'set' || value === 'update' || value === 'remove'
+}
+
+function normalizeOperation(raw: unknown): PendingOperation | null {
+  if (!raw || typeof raw !== 'object') return null
+
+  const candidate = raw as Partial<PendingOperation>
+  const id = String(candidate.id || '').trim()
+  const uid = String(candidate.uid || '').trim()
+  const path = normalizePath(String(candidate.path || ''))
+
+  if (!id || !uid || !path || !isPendingOperationType(candidate.type)) {
+    return null
+  }
+
+  const normalizedCreatedAt = Number(candidate.createdAt)
+  const createdAt = Number.isFinite(normalizedCreatedAt) && normalizedCreatedAt > 0
+    ? normalizedCreatedAt
+    : Date.now()
+
+  return {
+    id,
+    uid,
+    path,
+    type: candidate.type,
+    data: cloneValue(candidate.data),
+    createdAt
+  }
+}
+
+function normalizeOperations(rawOperations: unknown[]): PendingOperation[] {
+  return rawOperations
+    .map(normalizeOperation)
+    .filter((item): item is PendingOperation => Boolean(item))
+}
+
+function pruneExpiredOperations(operations: PendingOperation[]): PendingOperation[] {
+  const now = Date.now()
+  return operations.filter((operation) => (now - operation.createdAt) <= OPERATION_TTL_MS)
+}
+
+function trimOperations(operations: PendingOperation[]): PendingOperation[] {
+  if (operations.length <= MAX_PENDING_OPERATIONS) return operations
+  return operations.slice(operations.length - MAX_PENDING_OPERATIONS)
+}
+
 function readPendingOperations(): PendingOperation[] {
   if (!pendingOperationsMemory) {
-    pendingOperationsMemory = readJson<PendingOperation[]>(OFFLINE_QUEUE_KEY, [])
+    const rawQueue = readJson<unknown>(OFFLINE_QUEUE_KEY, [])
+    const rawList = Array.isArray(rawQueue) ? rawQueue : []
+    const normalized = normalizeOperations(rawList)
+    const prepared = trimOperations(pruneExpiredOperations(normalized))
+
+    pendingOperationsMemory = prepared
+
+    if (prepared.length !== normalized.length) {
+      schedulePersist(() => pendingOperationsMemory ?? [])
+    }
   }
   return pendingOperationsMemory
 }
@@ -135,7 +194,8 @@ function compactOperations(operations: PendingOperation[]): PendingOperation[] {
       compacted[lastIndex] = {
         ...last,
         id: current.id,
-        data: mergeUpdatePayload(last.data, current.data)
+        data: mergeUpdatePayload(last.data, current.data),
+        createdAt: current.createdAt
       }
       continue
     }
@@ -143,7 +203,8 @@ function compactOperations(operations: PendingOperation[]): PendingOperation[] {
     compacted[lastIndex] = {
       ...last,
       id: current.id,
-      data: mergeUpdatePayload(last.data, current.data)
+      data: mergeUpdatePayload(last.data, current.data),
+      createdAt: current.createdAt
     }
   }
 
@@ -178,16 +239,18 @@ export function enqueueOperation(type: PendingOperationType, path: string, data?
 
   const operations = prunePendingOperationsToUid(uid)
   const normalizedPath = normalizePath(path)
+  if (!normalizedPath) throw new Error('Некорректный путь для оффлайн-операции')
 
   operations.push({
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     uid,
     type,
     path: normalizedPath,
-    data: cloneValue(data)
+    data: cloneValue(data),
+    createdAt: Date.now()
   })
 
-  writePendingOperations(compactOperations(operations))
+  writePendingOperations(trimOperations(compactOperations(operations)))
   updatePendingStatus()
 }
 
