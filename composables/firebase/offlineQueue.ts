@@ -6,6 +6,8 @@ import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
 
 const OFFLINE_QUEUE_KEY = 'pp-offline-queue-v1'
 const PERSIST_DELAY_MS = 120
+const FLUSH_RETRY_BASE_MS = 1_500
+const FLUSH_RETRY_MAX_MS = 30_000
 
 type PendingOperationType = 'set' | 'update' | 'remove'
 
@@ -19,6 +21,8 @@ type PendingOperation = {
 
 let pendingOperationsMemory: PendingOperation[] | null = null
 let pendingOpsPersistTimer: ReturnType<typeof setTimeout> | null = null
+let flushRetryTimer: ReturnType<typeof setTimeout> | null = null
+let flushFailureCount = 0
 let offlineSyncInitialized = false
 let isFlushingQueue = false
 
@@ -79,6 +83,73 @@ function writePendingOperations(operations: PendingOperation[]) {
   schedulePersist(() => pendingOperationsMemory ?? [])
 }
 
+function normalizePath(path: string): string {
+  return path.split('/').filter(Boolean).join('/')
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function mergeUpdatePayload(prev: unknown, next: unknown): Record<string, unknown> {
+  const prevObject = isPlainObject(prev) ? prev : {}
+  const nextObject = isPlainObject(next) ? next : {}
+  return { ...prevObject, ...nextObject }
+}
+
+function compactOperations(operations: PendingOperation[]): PendingOperation[] {
+  const compacted: PendingOperation[] = []
+
+  for (const current of operations) {
+    const lastIndex = compacted.findLastIndex(
+      (item) => item.uid === current.uid && item.path === current.path
+    )
+    const last = lastIndex >= 0 ? compacted[lastIndex] : null
+
+    if (!last) {
+      compacted.push(current)
+      continue
+    }
+
+    if (current.type === 'remove') {
+      compacted[lastIndex] = current
+      continue
+    }
+
+    if (current.type === 'set') {
+      compacted[lastIndex] = current
+      continue
+    }
+
+    // Ниже обрабатывается case current.type === 'update'
+    if (last.type === 'remove') {
+      compacted[lastIndex] = {
+        ...current,
+        type: 'set',
+        data: mergeUpdatePayload({}, current.data)
+      }
+      continue
+    }
+
+    if (last.type === 'set') {
+      compacted[lastIndex] = {
+        ...last,
+        id: current.id,
+        data: mergeUpdatePayload(last.data, current.data)
+      }
+      continue
+    }
+
+    compacted[lastIndex] = {
+      ...last,
+      id: current.id,
+      data: mergeUpdatePayload(last.data, current.data)
+    }
+  }
+
+  return compacted
+}
+
 function prunePendingOperationsToUid(uid: string): PendingOperation[] {
   const queue = readPendingOperations()
   const filtered = queue.filter((item) => item.uid === uid)
@@ -106,14 +177,17 @@ export function enqueueOperation(type: PendingOperationType, path: string, data?
   if (!uid) throw new Error('Пользователь не авторизован')
 
   const operations = prunePendingOperationsToUid(uid)
+  const normalizedPath = normalizePath(path)
+
   operations.push({
     id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
     uid,
     type,
-    path,
+    path: normalizedPath,
     data: cloneValue(data)
   })
-  writePendingOperations(operations)
+
+  writePendingOperations(compactOperations(operations))
   updatePendingStatus()
 }
 
@@ -153,14 +227,41 @@ export async function flushOfflineQueue() {
 
   try {
     const remaining = [...queue]
+    let hadError = false
 
     for (const operation of currentUserQueue) {
-      await runPendingOperation(operation)
-      const operationIndex = remaining.findIndex((item) => item.id === operation.id)
-      if (operationIndex >= 0) remaining.splice(operationIndex, 1)
+      try {
+        await runPendingOperation(operation)
+        const operationIndex = remaining.findIndex((item) => item.id === operation.id)
+        if (operationIndex >= 0) {
+          remaining.splice(operationIndex, 1)
+          writePendingOperations(remaining)
+          setOfflinePendingOperations(remaining.length)
+        }
+      } catch (error) {
+        hadError = true
+        logFirebaseError('flushOfflineQueueItem', error)
+        break
+      }
     }
 
-    writePendingOperations(remaining)
+    if (!hadError) {
+      flushFailureCount = 0
+      if (flushRetryTimer) {
+        clearTimeout(flushRetryTimer)
+        flushRetryTimer = null
+      }
+      writePendingOperations(remaining)
+    } else {
+      flushFailureCount += 1
+      const retryDelay = Math.min(FLUSH_RETRY_BASE_MS * (2 ** (flushFailureCount - 1)), FLUSH_RETRY_MAX_MS)
+
+      if (flushRetryTimer) clearTimeout(flushRetryTimer)
+      flushRetryTimer = setTimeout(() => {
+        flushRetryTimer = null
+        if (navigator.onLine) void flushOfflineQueue()
+      }, retryDelay)
+    }
   } catch (error) {
     logFirebaseError('flushOfflineQueue', error)
   } finally {
@@ -178,6 +279,12 @@ export function clearOfflineUserData(uid: string) {
   const filtered = queue.filter((item) => item.uid !== uid)
   if (filtered.length !== queue.length) {
     writePendingOperations(filtered)
+  }
+
+  flushFailureCount = 0
+  if (flushRetryTimer) {
+    clearTimeout(flushRetryTimer)
+    flushRetryTimer = null
   }
 
   updatePendingStatus()
@@ -213,6 +320,12 @@ export function initOfflineSync() {
       goOffline(getFirebaseDb())
     } catch (error) {
       logFirebaseError('goOffline', error)
+    }
+  })
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && navigator.onLine) {
+      void flushOfflineQueue()
     }
   })
 
