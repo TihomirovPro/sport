@@ -6,6 +6,10 @@ import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUs
 
 export { getFirebaseApp, getFirebaseAuth, getFirebaseDb, clearOfflineUserData, initOfflineSync, flushOfflineQueue }
 
+// Compat exports for stale cached chunks (PWA/SW) that may still import these names.
+export const data = undefined
+export const callback = undefined
+
 const ONLINE_WRITE_TIMEOUT_MS = 4500
 const WRITE_TIMEOUT_CODE = 'pp/write-timeout'
 const RETRIABLE_DB_ERROR_CODES = new Set([
