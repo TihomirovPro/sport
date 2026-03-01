@@ -1,5 +1,6 @@
 import { onAuthStateChanged } from 'firebase/auth'
 import { getFirebaseAuth, updateData, clearOfflineUserData } from './firebaseInit'
+import { clearLastAuthUid, readLastAuthUid, writeLastAuthUid } from './firebase/authSession'
 
 let authUnsubscribe: (() => void) | null = null
 let userUnsubscribe: (() => void) | null = null
@@ -44,8 +45,13 @@ export const initUser = () => {
   try {
     authUnsubscribe = onAuthStateChanged(auth, (user) => {
       const previousUid = userStore.activeUser.uid
+      const rememberedUid = readLastAuthUid()
+      const offlineUid = previousUid || rememberedUid
+      const shouldKeepOfflineSession = process.client && !navigator.onLine && !!offlineUid
 
       if (user) {
+        writeLastAuthUid(user.uid)
+
         if (previousUid && previousUid !== user.uid) {
           clearOfflineUserData(previousUid)
         }
@@ -60,6 +66,16 @@ export const initUser = () => {
 
         getAllExercises()
       } else {
+        if (shouldKeepOfflineSession) {
+          userStore.activeUser.uid = offlineUid
+          writeLastAuthUid(offlineUid)
+          getUserData()
+          getAllExercises()
+          return
+        }
+
+        clearLastAuthUid()
+
         if (createUserTimeout) {
           clearTimeout(createUserTimeout)
           createUserTimeout = null

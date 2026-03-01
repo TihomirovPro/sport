@@ -1,6 +1,7 @@
 import { goOffline, goOnline, ref, remove, set, update } from 'firebase/database'
 import { setOfflinePendingOperations, setOnlineStatus } from '~/composables/offlineState'
 import { dbPath, getFirebaseAuth, getFirebaseDb, logFirebaseError } from './client'
+import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
 
 const OFFLINE_QUEUE_KEY = 'pp-offline-queue-v1'
@@ -63,7 +64,7 @@ function schedulePersist(valueGetter: () => unknown) {
 }
 
 function getCurrentUid(): string | null {
-  return getFirebaseAuth().currentUser?.uid || null
+  return getFirebaseAuth().currentUser?.uid || readLastAuthUid() || null
 }
 
 function readPendingOperations(): PendingOperation[] {
