@@ -3,6 +3,7 @@ import { ACTIVE_EXERCISE_STORAGE_KEY } from '~/composables/storageKeys'
 
 export const useExerciseStore = defineStore('exercise', () => {
   const allExercises = ref<TypeExercise[]>([])
+  const allExercisesLoaded = ref(false)
   const activeExercise = ref<TypeExercise | null>(null)
   const selectUpdateExercise = ref<TypeExercise | null>(null)
 
@@ -29,6 +30,7 @@ export const useExerciseStore = defineStore('exercise', () => {
 
   return {
     allExercises,
+    allExercisesLoaded,
     activeExercise,
     selectUpdateExercise,
     setActiveExercise,

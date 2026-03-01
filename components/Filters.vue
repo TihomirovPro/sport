@@ -320,7 +320,7 @@ function showChart() {
 
 <template lang="pug">
 .filters
-  template(v-if="availableFilterElements.intervals.length > 0")
+  template(v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Интервал
     TabsWrap.pb-1
       TabsItem(
@@ -331,7 +331,7 @@ function showChart() {
         :title="interval"
       ).text-xs
   
-  template(v-if="availableFilterElements.approaches.length > 0")
+  template(v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Пoдходы
     TabsWrap.pb-1
       TabsItem(
@@ -342,7 +342,7 @@ function showChart() {
         :title="approach"
       ).text-xs
   
-  template(v-if="allFilterElements.eases.length > 0")
+  template(v-if="allFilterElements.eases.length > 1")
     .pb-1.text-xs(v-if="!hideFilterTitles") Сложность
     TabsWrap(v-if="workouts")
       TabsItem(

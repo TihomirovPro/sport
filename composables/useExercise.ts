@@ -2,29 +2,39 @@ import type { TypeExercise, TypeExerciseCreate } from "./types"
 import { updateData, onData } from './firebaseInit'
 
 let exercisesUnsubscribe: (() => void) | null = null
+let clearExercisesTimer: ReturnType<typeof setTimeout> | null = null
 type TypeExerciseDb = Omit<TypeExercise, 'id'>
+
+function clearDelayedExercisesReset() {
+  if (!clearExercisesTimer) return
+  clearTimeout(clearExercisesTimer)
+  clearExercisesTimer = null
+}
 
 export const stopAllExercisesSubscription = () => {
   if (!exercisesUnsubscribe) return
   exercisesUnsubscribe()
   exercisesUnsubscribe = null
+  clearDelayedExercisesReset()
 }
 
 export const getAllExercises = () => {
   const exerciseStore = useExerciseStore()
 
   stopAllExercisesSubscription()
+  exerciseStore.allExercisesLoaded = false
 
   exercisesUnsubscribe = onData('exercises', (snapshot) => {
     const data = snapshot.val() as Record<string, TypeExerciseDb> | null
 
     if (data) {
-      exerciseStore.allExercises = []
+      clearDelayedExercisesReset()
+      const nextExercises: TypeExercise[] = []
       Object.keys(data).forEach((key) => {
         const exercise = data[key]
         if (!exercise) return
 
-        exerciseStore.allExercises.push({
+        nextExercises.push({
           name: exercise.name,
           color: exercise.color,
           icon: exercise.icon,
@@ -35,15 +45,31 @@ export const getAllExercises = () => {
           id: key,
         })
       })
-    } else {
-      exerciseStore.allExercises = []
+
+      nextExercises.sort((a, b) => {
+        if (a.order < b.order) return -1
+        if (a.order > b.order) return 1
+        return 0
+      })
+
+      exerciseStore.allExercises = nextExercises
+      exerciseStore.allExercisesLoaded = true
+      return
     }
 
-    exerciseStore.allExercises.sort((a, b) => {
-      if (a.order < b.order) return -1
-      if (a.order > b.order) return 1
-      return 0
-    })
+    const hadExercises = exerciseStore.allExercises.length > 0
+    if (hadExercises) {
+      clearDelayedExercisesReset()
+      clearExercisesTimer = setTimeout(() => {
+        exerciseStore.allExercises = []
+        exerciseStore.allExercisesLoaded = true
+        clearExercisesTimer = null
+      }, 900)
+      return
+    }
+
+    exerciseStore.allExercises = []
+    exerciseStore.allExercisesLoaded = true
   })
 
   return exercisesUnsubscribe

@@ -3,6 +3,7 @@ import { EnumEase, type TypeWorkout, type WorkoutActiveFilters, type WorkoutForm
 export const useWorkoutStore = defineStore('workout', () => {
   const workouts = ref<TypeWorkout[]>([])
   const filteredWorkouts = ref<TypeWorkout[]>([])
+  const workoutsLoaded = ref(false)
   const selectUpdateWorkout = ref<TypeWorkout | null>(null)
   const activeFilters = ref<WorkoutActiveFilters>({
     ease: '',
@@ -38,6 +39,7 @@ export const useWorkoutStore = defineStore('workout', () => {
   return {
     workouts,
     filteredWorkouts,
+    workoutsLoaded,
     selectUpdateWorkout,
     activeFilters,
     formDefaults,
