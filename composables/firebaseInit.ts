@@ -6,17 +6,88 @@ import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUs
 
 export { getFirebaseApp, getFirebaseAuth, getFirebaseDb, clearOfflineUserData, initOfflineSync, flushOfflineQueue }
 
+const ONLINE_WRITE_TIMEOUT_MS = 4500
+const WRITE_TIMEOUT_CODE = 'pp/write-timeout'
+const RETRIABLE_DB_ERROR_CODES = new Set([
+  'database/network-error',
+  'database/disconnected',
+  'database/unavailable'
+])
+
 function isOfflineClient() {
   return process.client && !navigator.onLine
+}
+
+type FirebaseLikeError = {
+  code?: string
+  message?: string
+}
+
+function createWriteTimeoutError(): Error & { code: string } {
+  const error = new Error('Превышено время ожидания записи')
+  return Object.assign(error, { code: WRITE_TIMEOUT_CODE })
+}
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(createWriteTimeoutError()), timeoutMs)
+
+    promise.then((value) => {
+      clearTimeout(timer)
+      resolve(value)
+    }).catch((error) => {
+      clearTimeout(timer)
+      reject(error)
+    })
+  })
+}
+
+function isRetriableWriteError(error: unknown): boolean {
+  const candidate = error as FirebaseLikeError | null | undefined
+  const code = String(candidate?.code || '').trim()
+
+  if (code === WRITE_TIMEOUT_CODE) return true
+  if (RETRIABLE_DB_ERROR_CODES.has(code)) return true
+
+  const message = String(candidate?.message || '').toLowerCase()
+  if (!message) return false
+
+  return message.includes('network')
+    || message.includes('disconnected')
+    || message.includes('offline')
+    || message.includes('timeout')
+}
+
+function fallbackToOfflineWrite(
+  uid: string | null,
+  type: 'set' | 'update' | 'remove',
+  path: string,
+  data?: unknown
+) {
+  if (type === 'remove') {
+    updateCachedPath(uid, path, null, { remove: true })
+    enqueueOperation('remove', path)
+    return
+  }
+
+  if (type === 'update') {
+    updateCachedPath(uid, path, data, { merge: true })
+    enqueueOperation('update', path, data)
+    return
+  }
+
+  updateCachedPath(uid, path, data)
+  enqueueOperation('set', path, data)
 }
 
 export const createData = async <T>(path: string, data: T) => {
   initOfflineSync()
 
+  const key = push(child(ref(getFirebaseDb()), path)).key
+  if (!key) throw new Error('Не удалось создать ключ записи')
+  const fullPath = `${path}/${key}`
+
   try {
-    const key = push(child(ref(getFirebaseDb()), path)).key
-    if (!key) throw new Error('Не удалось создать ключ записи')
-    const fullPath = `${path}/${key}`
     const uid = getCurrentUserId()
 
     if (isOfflineClient()) {
@@ -25,10 +96,17 @@ export const createData = async <T>(path: string, data: T) => {
       return key
     }
 
-    await set(ref(getFirebaseDb(), dbPath(fullPath)), data)
+    await withTimeout(set(ref(getFirebaseDb(), dbPath(fullPath)), data), ONLINE_WRITE_TIMEOUT_MS)
     updateCachedPath(uid, fullPath, data)
     return key
   } catch (error) {
+    const uid = getCurrentUserId()
+
+    if (isRetriableWriteError(error)) {
+      fallbackToOfflineWrite(uid, 'set', fullPath, data)
+      return key
+    }
+
     logFirebaseError('createData', error)
     throw error
   }
@@ -46,9 +124,15 @@ export const createDataWithoutKey = async <T>(path: string, data: T) => {
       return
     }
 
-    await set(ref(getFirebaseDb(), dbPath(path)), data)
+    await withTimeout(set(ref(getFirebaseDb(), dbPath(path)), data), ONLINE_WRITE_TIMEOUT_MS)
     updateCachedPath(uid, path, data)
   } catch (error) {
+    const uid = getCurrentUserId()
+    if (isRetriableWriteError(error)) {
+      fallbackToOfflineWrite(uid, 'set', path, data)
+      return
+    }
+
     logFirebaseError('createDataWithoutKey', error)
     throw error
   }
@@ -66,9 +150,15 @@ export const updateData = async <T extends object>(path: string, data: T) => {
       return
     }
 
-    await update(ref(getFirebaseDb(), dbPath(path)), data)
+    await withTimeout(update(ref(getFirebaseDb(), dbPath(path)), data), ONLINE_WRITE_TIMEOUT_MS)
     updateCachedPath(uid, path, data, { merge: true })
   } catch (error) {
+    const uid = getCurrentUserId()
+    if (isRetriableWriteError(error)) {
+      fallbackToOfflineWrite(uid, 'update', path, data)
+      return
+    }
+
     logFirebaseError('updateData', error)
     throw error
   }
@@ -86,9 +176,15 @@ export const removeData = async (path: string) => {
       return
     }
 
-    await remove(ref(getFirebaseDb(), dbPath(path)))
+    await withTimeout(remove(ref(getFirebaseDb(), dbPath(path))), ONLINE_WRITE_TIMEOUT_MS)
     updateCachedPath(uid, path, null, { remove: true })
   } catch (error) {
+    const uid = getCurrentUserId()
+    if (isRetriableWriteError(error)) {
+      fallbackToOfflineWrite(uid, 'remove', path)
+      return
+    }
+
     logFirebaseError('removeData', error)
     throw error
   }
