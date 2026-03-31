@@ -118,16 +118,6 @@ export default defineNuxtConfig({
       skipWaiting: true,
       navigateFallback: '/index.html',
       navigateFallbackDenylist: [/^\/__\//, /^\/api\//],
-      additionalManifestEntries: [
-        {
-          url: '/',
-          revision: appVersion
-        },
-        {
-          url: '/index.html',
-          revision: appVersion
-        }
-      ],
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json}'],
       runtimeCaching: [
         {
