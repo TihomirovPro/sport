@@ -55,7 +55,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/')
   }
 
-  if (isPublicRoute && !auth.currentUser && !userStore.activeUser.uid && !offlineRememberedUser) return
+  if (isPublicRoute && !auth.currentUser && !userStore.activeUser.uid && !offlineRememberedUser && !rememberedUid) return
 
   const user = await resolveAuthUser()
 
@@ -69,7 +69,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  if (offlineRememberedUser) {
+  // Fallback для офлайн-режима: iOS врёт про navigator.onLine при холодном старте,
+  // поэтому проверяем rememberedUid независимо от navigator.onLine
+  if (rememberedUid) {
     userStore.activeUser.uid = rememberedUid
 
     if (isPublicRoute) {
