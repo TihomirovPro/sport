@@ -116,7 +116,7 @@ export default defineNuxtConfig({
       cacheId: 'power-progress',
       clientsClaim: true,
       skipWaiting: true,
-      navigateFallback: '/index.html',
+      navigateFallback: '/',
       navigateFallbackDenylist: [/^\/__\//, /^\/api\//],
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json}'],
       runtimeCaching: [
