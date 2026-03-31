@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { signOut } from 'firebase/auth'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
+import { prepareLogout } from '~/composables/useUser'
 
 definePageMeta({
   title: 'Профиль',
@@ -8,6 +9,7 @@ definePageMeta({
 })
 
 async function signOutUser() {
+  prepareLogout()
   const auth = getFirebaseAuth()
   await signOut(auth)
   await navigateTo('/login')

@@ -2,6 +2,7 @@
 import { signOut } from 'firebase/auth'
 import { storeToRefs } from 'pinia'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
+import { prepareLogout } from '~/composables/useUser'
 import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 import packageJson from '~/package.json'
 
@@ -78,6 +79,7 @@ function confirmSignOut() {
 
 async function signOutUser() {
   try {
+    prepareLogout()
     const auth = getFirebaseAuth()
     await signOut(auth)
     await navigateTo('/login')

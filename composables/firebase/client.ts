@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app'
 import type { FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
 import { getDatabase, type Database } from 'firebase/database'
+import { readLastAuthUid } from '~/composables/firebase/authSession'
 
 interface FirebaseConfig {
   apiKey: string
@@ -55,7 +56,8 @@ export const getFirebaseAuth = () => {
 }
 
 export function dbPath(path: string): string {
-  const userID = getFirebaseAuth().currentUser?.uid
+  // Fallback на localStorage: Firebase currentUser = null при холодном старте офлайн на iOS
+  const userID = getFirebaseAuth().currentUser?.uid || readLastAuthUid()
   if (!userID) throw new Error('Пользователь не авторизован')
   return `users/${userID}/${path}`
 }

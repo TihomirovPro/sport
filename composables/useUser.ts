@@ -5,6 +5,14 @@ import { clearLastAuthUid, readLastAuthUid, writeLastAuthUid } from './firebase/
 let authUnsubscribe: (() => void) | null = null
 let userUnsubscribe: (() => void) | null = null
 let createUserTimeout: ReturnType<typeof setTimeout> | null = null
+// Флаг явного выхода: без него iOS-баг (navigator.onLine = true офлайн)
+// приводит к тому, что onAuthStateChanged(null) стирает сессию при холодном старте
+let intentionalLogout = false
+
+export function prepareLogout() {
+  intentionalLogout = true
+  clearLastAuthUid()
+}
 type UserData = {
   name?: string
   email?: string
@@ -47,7 +55,9 @@ export const initUser = () => {
       const previousUid = userStore.activeUser.uid
       const rememberedUid = readLastAuthUid()
       const offlineUid = previousUid || rememberedUid
-      const shouldKeepOfflineSession = process.client && !navigator.onLine && !!offlineUid
+      // Не завязываемся на navigator.onLine: iOS врёт (возвращает true без интернета).
+      // Вместо этого используем явный флаг intentionalLogout.
+      const shouldKeepOfflineSession = !intentionalLogout && !!offlineUid
 
       if (user) {
         writeLastAuthUid(user.uid)
@@ -74,6 +84,7 @@ export const initUser = () => {
           return
         }
 
+        intentionalLogout = false
         clearLastAuthUid()
 
         if (createUserTimeout) {
