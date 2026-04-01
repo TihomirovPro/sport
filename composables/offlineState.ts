@@ -2,7 +2,8 @@ import { reactive, toRefs } from 'vue'
 
 const offlineState = reactive({
   isOnline: true,
-  pendingOperations: 0
+  pendingOperations: 0,
+  retryDelay: 0
 })
 
 export function useOfflineState() {
@@ -15,4 +16,8 @@ export function setOnlineStatus(value: boolean) {
 
 export function setOfflinePendingOperations(value: number) {
   offlineState.pendingOperations = value
+}
+
+export function setRetryDelay(value: number) {
+  offlineState.retryDelay = value
 }
