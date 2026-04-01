@@ -3,9 +3,10 @@ import { setOfflinePendingOperations, setOnlineStatus, setRetryDelay } from '~/c
 import { dbPath, getFirebaseAuth, getFirebaseDb, logFirebaseError } from './client'
 import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
-const OFFLINE_QUEUE_KEY = 'pp-offline-queue-v1'
+const OFFLINE_QUEUE_KEY = IDB_KEYS.OFFLINE_QUEUE
 const PERSIST_DELAY_MS = 120
 const FLUSH_RETRY_BASE_MS = 1_500
 const FLUSH_RETRY_MAX_MS = 30_000

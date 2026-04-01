@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
 const userStore = useUserStore()
 const { activeUser } = storeToRefs(userStore)
 
-const savedColor = idbStorage.getItem('baseColor')
+const savedColor = idbStorage.getItem(IDB_KEYS.BASE_COLOR)
 if (savedColor) {
   const r = parseInt(savedColor.slice(1, 3), 16)
   const g = parseInt(savedColor.slice(3, 5), 16)

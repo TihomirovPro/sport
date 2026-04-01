@@ -1,7 +1,8 @@
 import type { DataSnapshot } from 'firebase/database'
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
-const OFFLINE_CACHE_KEY = 'pp-offline-cache-v1'
+const OFFLINE_CACHE_KEY = IDB_KEYS.OFFLINE_CACHE
 const PERSIST_DELAY_MS = 120
 
 type OfflineCache = Record<string, Record<string, unknown>>

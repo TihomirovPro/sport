@@ -1,9 +1,10 @@
 import { onData, updateData } from '~/composables/firebaseInit'
 import { safeParseJson } from '~/composables/useWorkoutHelpers'
 import type { Ref } from 'vue'
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
-const PROGRESSION_SETTINGS_STORAGE_KEY = 'workout-progression-settings-v1'
+const PROGRESSION_SETTINGS_STORAGE_KEY = IDB_KEYS.PROGRESSION_SETTINGS
 
 type ProgressionSettings = {
   repMin?: number

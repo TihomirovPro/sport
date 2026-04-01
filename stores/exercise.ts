@@ -1,5 +1,5 @@
 import type { TypeExercise } from '~/composables/types'
-import { ACTIVE_EXERCISE_STORAGE_KEY } from '~/composables/storageKeys'
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
 export const useExerciseStore = defineStore('exercise', () => {
@@ -13,11 +13,11 @@ export const useExerciseStore = defineStore('exercise', () => {
     if (!import.meta.client) return
 
     if (exercise) {
-      idbStorage.setItem(ACTIVE_EXERCISE_STORAGE_KEY, JSON.stringify(exercise))
+      idbStorage.setItem(IDB_KEYS.ACTIVE_EXERCISE, JSON.stringify(exercise))
       return
     }
 
-    idbStorage.removeItem(ACTIVE_EXERCISE_STORAGE_KEY)
+    idbStorage.removeItem(IDB_KEYS.ACTIVE_EXERCISE)
   }
 
   function patchActiveExercise(patch: Partial<TypeExercise>) {
