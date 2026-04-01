@@ -5,8 +5,8 @@ import { clearLastAuthUid, readLastAuthUid, writeLastAuthUid } from './firebase/
 let authUnsubscribe: (() => void) | null = null
 let userUnsubscribe: (() => void) | null = null
 let createUserTimeout: ReturnType<typeof setTimeout> | null = null
-// Флаг явного выхода: без него iOS-баг (navigator.onLine = true офлайн)
-// приводит к тому, что onAuthStateChanged(null) стирает сессию при холодном старте
+// Флаг явного выхода: на iOS navigator.onLine ненадёжен (см. composables/platform/ios.ts),
+// поэтому onAuthStateChanged(null) при холодном старте нельзя трактовать как реальный логаут.
 let intentionalLogout = false
 
 export function prepareLogout() {
@@ -51,10 +51,9 @@ export const initUser = () => {
   const workoutStore = useWorkoutStore()
 
   // Немедленно загружаем данные из кэша, не дожидаясь onAuthStateChanged.
-  // Это исправляет холодный старт на iOS: navigator.onLine врёт (true офлайн),
-  // поэтому Firebase пытается обновить токен по сети — это может занять > 2500ms
-  // (таймаут middleware). Страница рендерится раньше, чем приходит ответ,
-  // и пользователь видит пустой экран. Предзагрузка из кэша устраняет проблему.
+  // На iOS navigator.onLine ненадёжен (см. composables/platform/ios.ts): Firebase пытается
+  // обновить токен по сети и это может занять > 2500ms (таймаут middleware).
+  // Предзагрузка из кэша устраняет пустой экран при холодном старте.
   if (process.client) {
     const preloadUid = readLastAuthUid()
     if (preloadUid) {
@@ -69,8 +68,8 @@ export const initUser = () => {
       const previousUid = userStore.activeUser.uid
       const rememberedUid = readLastAuthUid()
       const offlineUid = previousUid || rememberedUid
-      // Не завязываемся на navigator.onLine: iOS врёт (возвращает true без интернета).
-      // Вместо этого используем явный флаг intentionalLogout.
+      // navigator.onLine ненадёжен на iOS (см. composables/platform/ios.ts) —
+      // используем явный флаг intentionalLogout.
       const shouldKeepOfflineSession = !intentionalLogout && !!offlineUid
 
       if (user) {

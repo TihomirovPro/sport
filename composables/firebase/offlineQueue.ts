@@ -5,6 +5,7 @@ import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
 import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
+import { getOnlineStatus } from '~/composables/platform/ios'
 
 const OFFLINE_QUEUE_KEY = IDB_KEYS.OFFLINE_QUEUE
 const PERSIST_DELAY_MS = 120
@@ -266,7 +267,7 @@ async function runPendingOperation(operation: PendingOperation) {
 }
 
 export async function flushOfflineQueue() {
-  if (!process.client || isFlushingQueue || !navigator.onLine || !isFirebaseConnected) return
+  if (!process.client || isFlushingQueue || !getOnlineStatus() || !isFirebaseConnected) return
 
   const uid = getCurrentUid()
   if (!uid) {
@@ -325,7 +326,7 @@ export async function flushOfflineQueue() {
       flushRetryTimer = setTimeout(() => {
         flushRetryTimer = null
         setRetryDelay(0)
-        if (navigator.onLine && isFirebaseConnected) void flushOfflineQueue()
+        if (getOnlineStatus() && isFirebaseConnected) void flushOfflineQueue()
       }, retryDelay)
     }
   } catch (error) {
@@ -361,11 +362,11 @@ export function initOfflineSync() {
   if (!process.client || offlineSyncInitialized) return
 
   offlineSyncInitialized = true
-  setOnlineStatus(navigator.onLine)
+  setOnlineStatus(getOnlineStatus())
   updatePendingStatus()
 
   try {
-    if (navigator.onLine) goOnline(getFirebaseDb())
+    if (getOnlineStatus()) goOnline(getFirebaseDb())
     else goOffline(getFirebaseDb())
   } catch (error) {
     logFirebaseError('initOfflineSyncConnection', error)
@@ -391,7 +392,7 @@ export function initOfflineSync() {
   })
 
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && navigator.onLine) {
+    if (!document.hidden && getOnlineStatus()) {
       void flushOfflineQueue()
     }
   })
@@ -399,7 +400,7 @@ export function initOfflineSync() {
   try {
     onValue(ref(getFirebaseDb(), '.info/connected'), (snap) => {
       isFirebaseConnected = snap.val() === true
-      if (isFirebaseConnected && navigator.onLine) {
+      if (isFirebaseConnected && getOnlineStatus()) {
         void flushOfflineQueue()
       }
     })

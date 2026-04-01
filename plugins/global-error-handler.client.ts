@@ -1,3 +1,5 @@
+import { getOnlineStatus } from '~/composables/platform/ios'
+
 function getUserErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {
     return `Произошла ошибка: ${error.message}`
@@ -26,7 +28,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   }
 
   const reportError = (error: unknown, source: string) => {
-    if (isDynamicImportFetchError(error) && !navigator.onLine) {
+    if (isDynamicImportFetchError(error) && !getOnlineStatus()) {
       notifyError('Оффлайн-перезагрузка в dev-режиме ограничена. Проверьте в сборке preview.')
       return
     }

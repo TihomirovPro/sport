@@ -2,6 +2,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { readLastAuthUid } from '~/composables/firebase/authSession'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
+import { getOnlineStatus } from '~/composables/platform/ios'
 
 const publicRouteNames = new Set(['login'])
 const AUTH_RESOLVE_TIMEOUT_MS = 2500
@@ -46,7 +47,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const isPublicRoute = publicRouteNames.has(routeName)
   const auth = getFirebaseAuth()
   const rememberedUid = readLastAuthUid()
-  const offlineRememberedUser = process.client && !navigator.onLine && !auth.currentUser && !!rememberedUid
+  const offlineRememberedUser = process.client && !getOnlineStatus() && !auth.currentUser && !!rememberedUid
 
   if (!isPublicRoute && userStore.activeUser.uid) return
 
@@ -72,8 +73,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return
   }
 
-  // Fallback для офлайн-режима: iOS врёт про navigator.onLine при холодном старте,
-  // поэтому проверяем rememberedUid независимо от navigator.onLine
+  // Fallback для офлайн-режима: на iOS getOnlineStatus() всегда true (см. composables/platform/ios.ts),
+  // поэтому offlineRememberedUser = false на iOS — этот блок перехватывает холодный старт.
   if (rememberedUid) {
     userStore.activeUser.uid = rememberedUid
 
