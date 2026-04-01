@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
 import { getFirebaseAuth } from '~/composables/firebaseInit'
+import { getOnlineStatus } from '~/composables/platform/ios'
 
 definePageMeta({
   layout: 'login'
 })
 
 async function loginWithGoogle() {
-  if (!navigator.onLine) {
+  if (!getOnlineStatus()) {
     const { notifyError } = useNotifications()
     notifyError('Для входа через Google нужен интернет')
     return

@@ -1,6 +1,7 @@
 import type { DataSnapshot } from 'firebase/database'
 import { child, onValue, push, ref, remove, set, update } from 'firebase/database'
 import { dbPath, getFirebaseApp, getFirebaseAuth, getFirebaseDb, logFirebaseError } from '~/composables/firebase/client'
+import { getOnlineStatus } from '~/composables/platform/ios'
 import { emitCachedSnapshot, updateCachedPath } from '~/composables/firebase/offlineCache'
 import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/composables/firebase/offlineQueue'
 
@@ -18,7 +19,7 @@ const RETRIABLE_DB_ERROR_CODES = new Set([
 ])
 
 function isOfflineClient() {
-  return process.client && !navigator.onLine
+  return process.client && !getOnlineStatus()
 }
 
 type FirebaseLikeError = {
