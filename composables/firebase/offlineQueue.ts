@@ -1,5 +1,5 @@
-import { goOffline, goOnline, ref, remove, set, update } from 'firebase/database'
-import { setOfflinePendingOperations, setOnlineStatus } from '~/composables/offlineState'
+import { goOffline, goOnline, onValue, ref, remove, set, update } from 'firebase/database'
+import { setOfflinePendingOperations, setOnlineStatus, setRetryDelay } from '~/composables/offlineState'
 import { dbPath, getFirebaseAuth, getFirebaseDb, logFirebaseError } from './client'
 import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
@@ -29,6 +29,7 @@ let flushRetryTimer: ReturnType<typeof setTimeout> | null = null
 let flushFailureCount = 0
 let offlineSyncInitialized = false
 let isFlushingQueue = false
+let isFirebaseConnected = true
 
 function readJson<T>(key: string, fallback: T): T {
   if (!process.client) return fallback
@@ -264,7 +265,7 @@ async function runPendingOperation(operation: PendingOperation) {
 }
 
 export async function flushOfflineQueue() {
-  if (!process.client || isFlushingQueue || !navigator.onLine) return
+  if (!process.client || isFlushingQueue || !navigator.onLine || !isFirebaseConnected) return
 
   const uid = getCurrentUid()
   if (!uid) {
@@ -286,7 +287,10 @@ export async function flushOfflineQueue() {
     const remaining = [...queue]
     let hadError = false
 
+    const blockedPaths = new Set<string>()
     for (const operation of currentUserQueue) {
+      if (blockedPaths.has(operation.path)) continue
+
       try {
         await runPendingOperation(operation)
         const operationIndex = remaining.findIndex((item) => item.id === operation.id)
@@ -297,13 +301,14 @@ export async function flushOfflineQueue() {
         }
       } catch (error) {
         hadError = true
+        blockedPaths.add(operation.path)
         logFirebaseError('flushOfflineQueueItem', error)
-        break
       }
     }
 
     if (!hadError) {
       flushFailureCount = 0
+      setRetryDelay(0)
       if (flushRetryTimer) {
         clearTimeout(flushRetryTimer)
         flushRetryTimer = null
@@ -311,12 +316,15 @@ export async function flushOfflineQueue() {
       writePendingOperations(remaining)
     } else {
       flushFailureCount += 1
-      const retryDelay = Math.min(FLUSH_RETRY_BASE_MS * (2 ** (flushFailureCount - 1)), FLUSH_RETRY_MAX_MS)
+      const baseDelay = Math.min(FLUSH_RETRY_BASE_MS * (2 ** (flushFailureCount - 1)), FLUSH_RETRY_MAX_MS)
+      const retryDelay = Math.round(baseDelay * (0.5 + Math.random() * 0.5))
+      setRetryDelay(retryDelay)
 
       if (flushRetryTimer) clearTimeout(flushRetryTimer)
       flushRetryTimer = setTimeout(() => {
         flushRetryTimer = null
-        if (navigator.onLine) void flushOfflineQueue()
+        setRetryDelay(0)
+        if (navigator.onLine && isFirebaseConnected) void flushOfflineQueue()
       }, retryDelay)
     }
   } catch (error) {
@@ -339,6 +347,7 @@ export function clearOfflineUserData(uid: string) {
   }
 
   flushFailureCount = 0
+  setRetryDelay(0)
   if (flushRetryTimer) {
     clearTimeout(flushRetryTimer)
     flushRetryTimer = null
@@ -386,9 +395,26 @@ export function initOfflineSync() {
     }
   })
 
+  try {
+    onValue(ref(getFirebaseDb(), '.info/connected'), (snap) => {
+      isFirebaseConnected = snap.val() === true
+      if (isFirebaseConnected && navigator.onLine) {
+        void flushOfflineQueue()
+      }
+    })
+  } catch (error) {
+    logFirebaseError('initFirebaseConnected', error)
+  }
+
   void flushOfflineQueue()
 }
 
 export function getCurrentUserId() {
   return getCurrentUid()
+}
+
+export function getWriteTimeout(): number {
+  if (flushFailureCount >= 3) return 1_500
+  if (flushFailureCount >= 1) return 3_000
+  return 4_500
 }

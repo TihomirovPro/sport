@@ -2,7 +2,7 @@ import type { DataSnapshot } from 'firebase/database'
 import { child, onValue, push, ref, remove, set, update } from 'firebase/database'
 import { dbPath, getFirebaseApp, getFirebaseAuth, getFirebaseDb, logFirebaseError } from '~/composables/firebase/client'
 import { emitCachedSnapshot, updateCachedPath } from '~/composables/firebase/offlineCache'
-import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, initOfflineSync } from '~/composables/firebase/offlineQueue'
+import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/composables/firebase/offlineQueue'
 
 export { getFirebaseApp, getFirebaseAuth, getFirebaseDb, clearOfflineUserData, initOfflineSync, flushOfflineQueue }
 
@@ -10,7 +10,6 @@ export { getFirebaseApp, getFirebaseAuth, getFirebaseDb, clearOfflineUserData, i
 export const data = undefined
 export const callback = undefined
 
-const ONLINE_WRITE_TIMEOUT_MS = 4500
 const WRITE_TIMEOUT_CODE = 'pp/write-timeout'
 const RETRIABLE_DB_ERROR_CODES = new Set([
   'database/network-error',
@@ -103,7 +102,7 @@ export const createData = async <T>(path: string, data: T) => {
       return key
     }
 
-    await withTimeout(set(ref(getFirebaseDb(), dbPath(fullPath)), data), ONLINE_WRITE_TIMEOUT_MS)
+    await withTimeout(set(ref(getFirebaseDb(), dbPath(fullPath)), data), getWriteTimeout())
     updateCachedPath(uid, fullPath, data)
     return key
   } catch (error) {
@@ -132,7 +131,7 @@ export const createDataWithoutKey = async <T>(path: string, data: T) => {
       return
     }
 
-    await withTimeout(set(ref(getFirebaseDb(), dbPath(path)), data), ONLINE_WRITE_TIMEOUT_MS)
+    await withTimeout(set(ref(getFirebaseDb(), dbPath(path)), data), getWriteTimeout())
     updateCachedPath(uid, path, data)
   } catch (error) {
     const uid = getCurrentUserId()
@@ -159,7 +158,7 @@ export const updateData = async <T extends object>(path: string, data: T) => {
       return
     }
 
-    await withTimeout(update(ref(getFirebaseDb(), dbPath(path)), data), ONLINE_WRITE_TIMEOUT_MS)
+    await withTimeout(update(ref(getFirebaseDb(), dbPath(path)), data), getWriteTimeout())
     updateCachedPath(uid, path, data, { merge: true })
   } catch (error) {
     const uid = getCurrentUserId()
@@ -186,7 +185,7 @@ export const removeData = async (path: string) => {
       return
     }
 
-    await withTimeout(remove(ref(getFirebaseDb(), dbPath(path))), ONLINE_WRITE_TIMEOUT_MS)
+    await withTimeout(remove(ref(getFirebaseDb(), dbPath(path))), getWriteTimeout())
     updateCachedPath(uid, path, null, { remove: true })
   } catch (error) {
     const uid = getCurrentUserId()
