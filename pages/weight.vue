@@ -2,6 +2,7 @@
 import { Chart } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
 import { addWeight, removeWeight, stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
+import { idbStorage } from '~/composables/storage/idb'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -50,7 +51,7 @@ appStore.headerTitle = 'Мой вес'
 onMounted(() => {
   subscribeWeights()
 
-  const savedColor = localStorage.getItem('baseColor')
+  const savedColor = idbStorage.getItem('baseColor')
   if (savedColor) chartColor.value = savedColor
   selectedDate.value = getTodayDate()
 })

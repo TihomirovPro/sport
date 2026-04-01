@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { idbStorage } from '~/composables/storage/idb'
 
 const route = useRoute()
 const router = useRouter()
@@ -49,7 +50,7 @@ function back() {
   }
 
   for (const key of meta.removeStorageKeys ?? []) {
-    localStorage.removeItem(key)
+    idbStorage.removeItem(key)
   }
 
   router.push(resolveBackTarget(meta))

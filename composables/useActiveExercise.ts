@@ -1,6 +1,7 @@
 import type { Ref } from 'vue'
 import type { EnumEase, TypeExercise } from '~/composables/types'
 import { ACTIVE_EXERCISE_STORAGE_KEY } from '~/composables/storageKeys'
+import { idbStorage } from '~/composables/storage/idb'
 
 type RestoreActiveExerciseOptions = {
   fallbackEase?: EnumEase[]
@@ -31,7 +32,7 @@ export function useActiveExercise() {
   function readStoredActiveExercise(options: RestoreActiveExerciseOptions = {}): TypeExercise | null {
     if (!import.meta.client) return null
 
-    const raw = localStorage.getItem(ACTIVE_EXERCISE_STORAGE_KEY)
+    const raw = idbStorage.getItem(ACTIVE_EXERCISE_STORAGE_KEY)
     if (!raw) return null
 
     try {

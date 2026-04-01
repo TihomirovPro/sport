@@ -3,6 +3,7 @@ import { setOfflinePendingOperations, setOnlineStatus } from '~/composables/offl
 import { dbPath, getFirebaseAuth, getFirebaseDb, logFirebaseError } from './client'
 import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
+import { idbStorage } from '~/composables/storage/idb'
 
 const OFFLINE_QUEUE_KEY = 'pp-offline-queue-v1'
 const PERSIST_DELAY_MS = 120
@@ -29,16 +30,10 @@ let flushFailureCount = 0
 let offlineSyncInitialized = false
 let isFlushingQueue = false
 
-function getStorage(): Storage | null {
-  if (!process.client) return null
-  return window.localStorage
-}
-
 function readJson<T>(key: string, fallback: T): T {
-  const storage = getStorage()
-  if (!storage) return fallback
+  if (!process.client) return fallback
 
-  const raw = storage.getItem(key)
+  const raw = idbStorage.getItem(key)
   if (!raw) return fallback
 
   try {
@@ -49,9 +44,8 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 function writeJson(key: string, value: unknown) {
-  const storage = getStorage()
-  if (!storage) return
-  storage.setItem(key, JSON.stringify(value))
+  if (!process.client) return
+  idbStorage.setItem(key, JSON.stringify(value))
 }
 
 function schedulePersist(valueGetter: () => unknown) {
