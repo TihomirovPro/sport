@@ -1,9 +1,12 @@
+import { IDB_KEYS } from './keys'
+
 const DB_NAME = 'pp-storage'
 const STORE_NAME = 'keyval'
 const DB_VERSION = 1
 const MIGRATION_FLAG = '__idb_migrated_v1'
+const KEYS_MIGRATION_V2_FLAG = '__idb_keys_v2'
 
-// Fixed keys to migrate from localStorage on first run
+// Fixed keys to migrate from localStorage on first run (original localStorage key names)
 const FIXED_MIGRATION_KEYS = [
   'pp-last-auth-uid-v1',
   'pp-offline-queue-v1',
@@ -14,6 +17,18 @@ const FIXED_MIGRATION_KEYS = [
   'hideFilterTitles',
   'baseColor',
 ]
+
+// Renames of already-migrated IDB keys to the new uniform naming style
+const KEY_RENAMES: [string, string][] = [
+  ['newWorkout', IDB_KEYS.NEW_WORKOUT],
+  ['approaches', IDB_KEYS.APPROACHES],
+  ['activeExercise', IDB_KEYS.ACTIVE_EXERCISE],
+  ['hideFilterTitles', IDB_KEYS.HIDE_FILTER_TITLES],
+  ['baseColor', IDB_KEYS.BASE_COLOR],
+]
+
+const OLD_PROGRESSION_PREFIX = 'workout-progression-settings-v1:'
+const NEW_PROGRESSION_PREFIX = `${IDB_KEYS.PROGRESSION_SETTINGS}:`
 
 let db: IDBDatabase | null = null
 const memoryCache = new Map<string, string>()
@@ -94,7 +109,7 @@ function migrateFromLocalStorage(): void {
     const dynamicKeys: string[] = []
     for (let i = 0; i < window.localStorage.length; i++) {
       const key = window.localStorage.key(i)
-      if (key?.startsWith('workout-progression-settings-v1:')) {
+      if (key?.startsWith(OLD_PROGRESSION_PREFIX)) {
         dynamicKeys.push(key)
       }
     }
@@ -113,6 +128,35 @@ function migrateFromLocalStorage(): void {
   }
 }
 
+function migrateKeysV2(): void {
+  try {
+    for (const [oldKey, newKey] of KEY_RENAMES) {
+      const value = memoryCache.get(oldKey)
+      if (value !== undefined) {
+        memoryCache.set(newKey, value)
+        writeToDb(newKey, value)
+        memoryCache.delete(oldKey)
+        deleteFromDb(oldKey)
+      }
+    }
+
+    for (const [key, value] of [...memoryCache.entries()]) {
+      if (key.startsWith(OLD_PROGRESSION_PREFIX)) {
+        const newKey = NEW_PROGRESSION_PREFIX + key.slice(OLD_PROGRESSION_PREFIX.length)
+        memoryCache.set(newKey, value)
+        writeToDb(newKey, value)
+        memoryCache.delete(key)
+        deleteFromDb(key)
+      }
+    }
+
+    memoryCache.set(KEYS_MIGRATION_V2_FLAG, '1')
+    writeToDb(KEYS_MIGRATION_V2_FLAG, '1')
+  } catch {
+    // silent — migration failure is non-fatal
+  }
+}
+
 export async function initIdbStorage(): Promise<void> {
   try {
     db = await openDb()
@@ -124,6 +168,10 @@ export async function initIdbStorage(): Promise<void> {
 
     if (!entries.has(MIGRATION_FLAG)) {
       migrateFromLocalStorage()
+    }
+
+    if (!entries.has(KEYS_MIGRATION_V2_FLAG)) {
+      migrateKeysV2()
     }
   } catch {
     // If IDB is unavailable, the in-memory cache still works for the session

@@ -3,6 +3,7 @@ import { Chart } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
 import type { Filter } from '~/composables/types'
 import { EnumEase } from '~/composables/types'
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
 import {
@@ -228,7 +229,7 @@ const filter = ref<Filter>({
   },
 })
 
-const color = idbStorage.getItem('baseColor') || '#3b82f6'
+const color = idbStorage.getItem(IDB_KEYS.BASE_COLOR) || '#3b82f6'
 const r = parseInt(color.slice(1, 3), 16)
 const g = parseInt(color.slice(3, 5), 16)
 const b = parseInt(color.slice(5, 7), 16)

@@ -1,7 +1,8 @@
+import { IDB_KEYS } from '~/composables/storage/keys'
 import { idbStorage } from '~/composables/storage/idb'
 
 export const useAppStore = defineStore('app', () => {
-  const HIDE_FILTER_TITLES_KEY = 'hideFilterTitles'
+  const HIDE_FILTER_TITLES_KEY = IDB_KEYS.HIDE_FILTER_TITLES
   const headerTitle = ref('Упражнения')
   const hideFilterTitles = ref(false)
 
