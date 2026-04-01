@@ -50,6 +50,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!isPublicRoute && userStore.activeUser.uid) return
 
+  // Если uid уже выставлен (например, из preload в initUser) и мы на публичной странице — редиректим
+  if (isPublicRoute && userStore.activeUser.uid) return navigateTo('/')
+
   if (isPublicRoute && offlineRememberedUser) {
     userStore.activeUser.uid = rememberedUid
     return navigateTo('/')

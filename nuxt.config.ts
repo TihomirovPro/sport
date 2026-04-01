@@ -86,8 +86,13 @@ export default defineNuxtConfig({
     client: {
       installPrompt: true
     },
+    injectManifest: {
+      globPatterns: ['**/*.{js,css,html,png,svg,ico}'],
+    },
     manifest: {
-      display: "standalone",
+      id: '/',
+      display: "fullscreen",
+      display_override: ['standalone', 'minimal-ui'],
       name: 'Power Progress',
       short_name: 'Power Progress',
       description: 'Дневник для записи тренировок и отслеживания прогресса',
@@ -95,7 +100,6 @@ export default defineNuxtConfig({
       background_color: '#ffffff',
       theme_color: '#000000',
       start_url: '/',
-      scope: '/',
       icons: [
         {
           src: '/icon.png',
@@ -118,22 +122,8 @@ export default defineNuxtConfig({
       skipWaiting: true,
       navigateFallback: '/',
       navigateFallbackAllowlist: [/^\/$/],
-      navigateFallbackDenylist: [/^\/__\//, /^\/api\//],
       globIgnores: ['**/200*', '**/404*'],
-      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-      runtimeCaching: [
-        {
-          urlPattern: /\/_nuxt\/.*/i,
-          handler: 'CacheFirst',
-          options: {
-            cacheName: 'nuxt-assets',
-            expiration: {
-              maxEntries: 200,
-              maxAgeSeconds: 60 * 60 * 24 * 7
-            }
-          }
-        }
-      ]
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json,woff2}'],
     },
     devOptions: {
       enabled: true,

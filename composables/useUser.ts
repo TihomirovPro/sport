@@ -50,6 +50,20 @@ export const initUser = () => {
   const exerciseStore = useExerciseStore()
   const workoutStore = useWorkoutStore()
 
+  // Немедленно загружаем данные из кэша, не дожидаясь onAuthStateChanged.
+  // Это исправляет холодный старт на iOS: navigator.onLine врёт (true офлайн),
+  // поэтому Firebase пытается обновить токен по сети — это может занять > 2500ms
+  // (таймаут middleware). Страница рендерится раньше, чем приходит ответ,
+  // и пользователь видит пустой экран. Предзагрузка из кэша устраняет проблему.
+  if (process.client) {
+    const preloadUid = readLastAuthUid()
+    if (preloadUid) {
+      userStore.activeUser.uid = preloadUid
+      getUserData()
+      getAllExercises()
+    }
+  }
+
   try {
     authUnsubscribe = onAuthStateChanged(auth, (user) => {
       const previousUid = userStore.activeUser.uid
