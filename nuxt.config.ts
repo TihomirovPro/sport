@@ -117,8 +117,10 @@ export default defineNuxtConfig({
       clientsClaim: true,
       skipWaiting: true,
       navigateFallback: '/',
+      navigateFallbackAllowlist: [/^\/$/],
       navigateFallbackDenylist: [/^\/__\//, /^\/api\//],
-      globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest,json}'],
+      globIgnores: ['**/200*', '**/404*'],
+      globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
       runtimeCaching: [
         {
           urlPattern: /\/_nuxt\/.*/i,
