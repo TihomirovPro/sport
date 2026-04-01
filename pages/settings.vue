@@ -5,6 +5,7 @@ import { getFirebaseAuth } from '~/composables/firebaseInit'
 import { prepareLogout } from '~/composables/useUser'
 import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 import packageJson from '~/package.json'
+import { idbStorage } from '~/composables/storage/idb'
 
 definePageMeta({
   backTo: '/'
@@ -29,7 +30,7 @@ const showModalColor = ref(false)
 const showModalRubbers = ref(false)
 const appVersion = packageJson.version || 'dev'
 
-const storedBaseColor = localStorage.getItem('baseColor')
+const storedBaseColor = idbStorage.getItem('baseColor')
 if (storedBaseColor) baseColor.value = storedBaseColor
 
 appStore.headerTitle = 'Настройки'
@@ -51,7 +52,7 @@ function selectColor(color: string) {
   showModalColor.value = false
 
   baseColor.value = color
-  localStorage.setItem('baseColor', color)
+  idbStorage.setItem('baseColor', color)
 
   const r = parseInt(color.slice(1, 3), 16)
   const g = parseInt(color.slice(3, 5), 16)

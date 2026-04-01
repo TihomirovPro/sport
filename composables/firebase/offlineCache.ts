@@ -1,4 +1,5 @@
 import type { DataSnapshot } from 'firebase/database'
+import { idbStorage } from '~/composables/storage/idb'
 
 const OFFLINE_CACHE_KEY = 'pp-offline-cache-v1'
 const PERSIST_DELAY_MS = 120
@@ -8,16 +9,10 @@ type OfflineCache = Record<string, Record<string, unknown>>
 let offlineCacheMemory: OfflineCache | null = null
 let offlineCachePersistTimer: ReturnType<typeof setTimeout> | null = null
 
-function getStorage(): Storage | null {
-  if (!process.client) return null
-  return window.localStorage
-}
-
 function readJson<T>(key: string, fallback: T): T {
-  const storage = getStorage()
-  if (!storage) return fallback
+  if (!process.client) return fallback
 
-  const raw = storage.getItem(key)
+  const raw = idbStorage.getItem(key)
   if (!raw) return fallback
 
   try {
@@ -28,9 +23,8 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 function writeJson(key: string, value: unknown) {
-  const storage = getStorage()
-  if (!storage) return
-  storage.setItem(key, JSON.stringify(value))
+  if (!process.client) return
+  idbStorage.setItem(key, JSON.stringify(value))
 }
 
 export function cloneValue<T>(value: T): T {

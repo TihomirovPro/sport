@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
+import { idbStorage } from '~/composables/storage/idb'
 
 const userStore = useUserStore()
 const { activeUser } = storeToRefs(userStore)
 
-if (localStorage.getItem('baseColor')) {
-  const color = localStorage.getItem('baseColor')
-
-  const r = parseInt(color.slice(1, 3), 16)
-  const g = parseInt(color.slice(3, 5), 16)
-  const b = parseInt(color.slice(5, 7), 16)
+const savedColor = idbStorage.getItem('baseColor')
+if (savedColor) {
+  const r = parseInt(savedColor.slice(1, 3), 16)
+  const g = parseInt(savedColor.slice(3, 5), 16)
+  const b = parseInt(savedColor.slice(5, 7), 16)
 
   const html = document.querySelector('html')
-  html.style.setProperty('--colorAccent', `${r} ${g} ${b}`)
+  html?.style.setProperty('--colorAccent', `${r} ${g} ${b}`)
 }
 
 </script>

@@ -1,31 +1,24 @@
 import { LAST_AUTH_UID_STORAGE_KEY } from '~/composables/storageKeys'
-
-function getStorage(): Storage | null {
-  if (!process.client) return null
-  return window.localStorage
-}
+import { idbStorage } from '~/composables/storage/idb'
 
 export function readLastAuthUid(): string {
-  const storage = getStorage()
-  if (!storage) return ''
-  return storage.getItem(LAST_AUTH_UID_STORAGE_KEY) || ''
+  if (!process.client) return ''
+  return idbStorage.getItem(LAST_AUTH_UID_STORAGE_KEY) || ''
 }
 
 export function writeLastAuthUid(uid: string) {
-  const storage = getStorage()
-  if (!storage) return
+  if (!process.client) return
 
   const normalizedUid = String(uid || '').trim()
   if (!normalizedUid) {
-    storage.removeItem(LAST_AUTH_UID_STORAGE_KEY)
+    idbStorage.removeItem(LAST_AUTH_UID_STORAGE_KEY)
     return
   }
 
-  storage.setItem(LAST_AUTH_UID_STORAGE_KEY, normalizedUid)
+  idbStorage.setItem(LAST_AUTH_UID_STORAGE_KEY, normalizedUid)
 }
 
 export function clearLastAuthUid() {
-  const storage = getStorage()
-  if (!storage) return
-  storage.removeItem(LAST_AUTH_UID_STORAGE_KEY)
+  if (!process.client) return
+  idbStorage.removeItem(LAST_AUTH_UID_STORAGE_KEY)
 }

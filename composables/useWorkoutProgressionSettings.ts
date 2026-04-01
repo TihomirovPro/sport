@@ -1,6 +1,7 @@
 import { onData, updateData } from '~/composables/firebaseInit'
 import { safeParseJson } from '~/composables/useWorkoutHelpers'
 import type { Ref } from 'vue'
+import { idbStorage } from '~/composables/storage/idb'
 
 const PROGRESSION_SETTINGS_STORAGE_KEY = 'workout-progression-settings-v1'
 
@@ -38,7 +39,7 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
   function loadProgressionSettings(exerciseId: string) {
     if (!process.client) return
 
-    const raw = localStorage.getItem(progressionSettingsKey(exerciseId))
+    const raw = idbStorage.getItem(progressionSettingsKey(exerciseId))
     if (!raw) return
 
     const parsed = safeParseJson<ProgressionSettings>(raw, {})
@@ -49,7 +50,7 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
   function saveProgressionSettings(exerciseId: string) {
     if (!process.client) return
 
-    localStorage.setItem(progressionSettingsKey(exerciseId), JSON.stringify({
+    idbStorage.setItem(progressionSettingsKey(exerciseId), JSON.stringify({
       repMin: progressionRepMin.value,
       repMax: progressionRepMax.value
     }))

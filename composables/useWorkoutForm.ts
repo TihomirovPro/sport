@@ -7,6 +7,7 @@ import {
   parseDurationToSeconds,
   safeParseJson
 } from '~/composables/useWorkoutHelpers'
+import { idbStorage } from '~/composables/storage/idb'
 
 interface UseWorkoutFormParams {
   activeExercise: Ref<TypeExercise | null | undefined>
@@ -96,8 +97,8 @@ export function useWorkoutForm({
   })
 
   if (import.meta.client && !selectUpdateWorkout.value) {
-    const newWorkoutRaw = localStorage.getItem('newWorkout')
-    const approachesRaw = localStorage.getItem('approaches')
+    const newWorkoutRaw = idbStorage.getItem('newWorkout')
+    const approachesRaw = idbStorage.getItem('approaches')
 
     if (newWorkoutRaw) {
       const fallbackDefaults = resolveFormDefaults(activeExercise.value?.ease ?? [])
@@ -131,8 +132,8 @@ export function useWorkoutForm({
 
   function clearDraftStorage() {
     if (!import.meta.client) return
-    localStorage.removeItem('newWorkout')
-    localStorage.removeItem('approaches')
+    idbStorage.removeItem('newWorkout')
+    idbStorage.removeItem('approaches')
   }
 
   function updateWeight(idx: number, value: string | number | undefined) {
@@ -265,8 +266,8 @@ export function useWorkoutForm({
     () => {
       if (!import.meta.client) return
       if (!selectUpdateWorkout.value) {
-        localStorage.setItem('newWorkout', JSON.stringify(workout.value))
-        localStorage.setItem('approaches', JSON.stringify(approaches.value))
+        idbStorage.setItem('newWorkout', JSON.stringify(workout.value))
+        idbStorage.setItem('approaches', JSON.stringify(approaches.value))
       }
     },
     { deep: true }
