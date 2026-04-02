@@ -9,22 +9,24 @@ const emit = defineEmits<{
   remove: []
   cancelRemove: []
 }>()
-
 </script>
 
-<template lang="pug">
-Modal(:isShow="isShow" @hiden="emit('hiden')")
-  template(#content)
-    .modal__text {{ text }}
+<template>
+  <Modal :isShow="isShow" @hiden="emit('hiden')">
+    <template #content>
+      <div class="modal__text">{{ text }}</div>
+    </template>
 
-  template(#bottom)
-    BaseButton(
-      text="Отменить"
-      @click="emit('cancelRemove')"
-    )
-    BaseButton(
-      red
-      text="Удалить"
-      @click="emit('remove')"
-    )
+    <template #bottom>
+      <BaseButton
+        text="Отменить"
+        @click="emit('cancelRemove')"
+      />
+      <BaseButton
+        red
+        text="Удалить"
+        @click="emit('remove')"
+      />
+    </template>
+  </Modal>
 </template>

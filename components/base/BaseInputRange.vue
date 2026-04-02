@@ -24,49 +24,71 @@ const emit = defineEmits<{
 function updateValue(e:Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
+
+const title = computed(() => {
+  if (props.view === 'interval') return `Интервал: В ${props.modelValue} мин`
+  if (props.view === 'rpe') return `RPE: ${props.modelValue}`
+  return `Подходы: ${props.modelValue}`
+})
+
+const fillPercent = computed(() => {
+  const val = +props.modelValue
+  const min = +props.min
+  const max = +props.max
+  return ((val - min) / (max - min)) * 100
+})
 </script>
 
-<template lang="pug">
-.input-range.relative(class="z-10")
-  .absolute.flex.justify-between(class="ml-[13px] w-[calc(100%-26px)] -z-[1] h-[22px] bottom-0")
-    .h-full.bg-faint(
-      v-for="i in steps"
-      :key="i"
-      class="w-[1px]"
-    )
-  span(v-if="view === 'interval'") Интервал: В {{ modelValue }} мин
-  span(v-else-if="view === 'rpe'") RPE: {{ modelValue }}
-  span(v-else) Подходы: {{ modelValue }}
+<template>
+  <div class="relative z-10">
+    <div class="ml-[13px] w-[calc(100%-26px)] -z-[1] h-[22px] bottom-0 absolute flex justify-between">
+      <div
+        v-for="i in steps"
+        :key="i"
+        class="h-full bg-faint w-[1px]"
+      />
+    </div>
+    <span>{{ title }}</span>
 
-  input(
-    type="range"
-    :min='min'
-    :max='max'
-    :step="step"
-    :value="modelValue"
-    @input="updateValue"
-  )
+    <input
+      type="range"
+      name="range"
+      :min='min'
+      :max='max'
+      :step="step"
+      :value="modelValue"
+      :style="{ '--fill': `${fillPercent}%` }"
+      @input="updateValue"
+      class="bg-transparent mt-4 w-full appearance-none"
+    />
+  </div>
 </template>
 
-<style lang="stylus">
-.input-range
-  input
-    background-color transparent
-    margin-top 16px
-    width 100%
-    appearance none
+<style scoped lang="stylus">
+input
+  &:focus
+    outline none
 
-    &::-webkit-slider-runnable-track
-      height 10px
-      background-color unquote('rgb(var(--colorFaint))')
-      border-radius 12px
+  &::-webkit-slider-runnable-track
+    height 10px
+    background linear-gradient(
+      to right,
+      unquote('rgb(var(--colorAccent))') var(--fill),
+      unquote('rgb(var(--colorFaint))') var(--fill)
+    )
+    border-radius 12px
 
-    &::-webkit-slider-thumb
-      height 26px
-      width 26px
-      background-color unquote('rgb(var(--colorAccent))')
-      border-radius 50%
-      transform translateY(-8px)
-      box-shadow:shadow 0 0 10px rgba(0, 0, 0, 0.2)
-      -webkit-appearance none
+  &::-webkit-slider-thumb
+    height 26px
+    width 26px
+    background-color unquote('rgb(var(--colorAccent))')
+    border-radius 50%
+    transform translateY(-8px)
+    box-shadow 0 2px 10px rgba(0, 0, 0, 0.25)
+    -webkit-appearance none
+    transition transform 0.15s ease, box-shadow 0.15s ease
+
+  &:active::-webkit-slider-thumb
+    transform translateY(-8px) scale(1.2)
+    box-shadow 0 4px 16px rgba(0, 0, 0, 0.35)
 </style>
