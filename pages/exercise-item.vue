@@ -49,12 +49,18 @@ useHead({
 })
 </script>
 
-<template lang="pug">
-div
-  Filters
-  .grid.gap-4.pt-4(v-if="filteredWorkouts.length")
-    template(v-for="item in filteredWorkouts" :key="item.id")
-      Workout(
+<template>
+<div>
+  <Filters />
+  <div
+    class="grid gap-4 pt-4"
+    v-if="filteredWorkouts.length"
+  >
+    <template
+      v-for="item in filteredWorkouts"
+      :key="item.id"
+    >
+      <Workout
         :id="item.id"
         :date="item.date"
         :interval="`В ${item.interval} мин`"
@@ -67,15 +73,19 @@ div
         :desc="item.desc"
         :res="item.res"
         :resWeigth="item.resWeigth"
-      )
-  .grid.gap-3.p-4.rounded-xl.border.border-faint.text-center.mt-4(
+      />
+    </template> 
+  </div>
+  <div
+    class="grid gap-3 p-4 rounded-xl border border-faint text-center mt-4 bg-faint/20"
     v-else-if="workoutsLoaded"
-    class="bg-faint/20"
-  )
-    p.text-sm.opacity-75 У вас пока нет тренировок
-    p.text-xs.opacity-60 Нажмите на плюс в правом верхнем углу или добавьте первую тренировку кнопкой ниже
-    BaseButton(
+  >
+    <p class="text-sm opacity-75">У вас пока нет тренировок</p>
+    <p class="text-xs opacity-60">Нажмите на плюс в правом верхнем углу или добавьте первую тренировку кнопкой ниже</p>
+    <BaseButton
       text="Добавить тренировку"
       @click="toCreateWorkout"
-    )
+    />
+  </div>
+</div>
 </template>
