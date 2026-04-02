@@ -330,25 +330,23 @@ function showChart() {
 
   template(v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Интервал
-    TabsWrap.pb-1
-      TabsItem(
+    .flex.rounded-xl.p-1.overflow-x-auto.mb-2(class="bg-accent/10 scrollbar-none gap-0.5")
+      .flex-1.shrink-0.text-center.py-1.rounded-lg.text-sm.cursor-pointer.transition(
         v-for="interval in availableFilterElements.intervals"
         :key="interval"
-        :active="filter.interval === interval"
+        :class="filter.interval === interval ? 'bg-white text-accent font-semibold shadow-sm' : 'text-accent/50'"
         @click="filter.changeInterval(interval)"
-        :title="interval"
-      ).text-xs
-  
+      ) {{ interval }}
+
   template(v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0")
-    .pb-1.text-xs(v-if="!hideFilterTitles") Пoдходы
-    TabsWrap.pb-1
-      TabsItem(
+    .pb-1.text-xs(v-if="!hideFilterTitles") Подходы
+    .flex.rounded-xl.p-1.overflow-x-auto.mb-2(class="bg-accent/10 scrollbar-none gap-0.5")
+      .flex-1.shrink-0.text-center.py-1.rounded-lg.text-sm.cursor-pointer.transition(
         v-for="approach in availableFilterElements.approaches"
         :key="approach"
-        :active="filter.approach === approach"
+        :class="filter.approach === approach ? 'bg-white text-accent font-semibold shadow-sm' : 'text-accent/50'"
         @click="filter.changeApproach(approach)"
-        :title="approach"
-      ).text-xs
+      ) {{ approach }}
   Chart(
     v-if="showChart()"
     type="line"
