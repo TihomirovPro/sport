@@ -155,6 +155,17 @@ function hasHighRepVariability(reps: number[]): boolean {
   return spread >= 3 || relativeSpread >= 0.35
 }
 
+function getRepTrendDirection(reps: number[]): 'descending' | 'ascending' | 'flat' {
+  if (reps.length < 2) return 'flat'
+  const first = reps[0]
+  const last = reps[reps.length - 1]
+  const avg = reps.reduce((sum, r) => sum + r, 0) / reps.length
+  const threshold = avg > 0 ? avg * 0.2 : 1
+  if (first - last >= threshold) return 'descending'
+  if (last - first >= threshold) return 'ascending'
+  return 'flat'
+}
+
 function sanitizeForAutoIncrement(session: ProgressionSession): ProgressionSession | null {
   if (!isValidSessionMeta(session)) return null
   if (!Array.isArray(session.weights) || !session.weights.length) return null
@@ -412,6 +423,29 @@ export function computeProgressionSuggestion(
 
   if (minReps >= repMax && latestAdjustedRpe <= 8 && successRate >= 0.4) {
     if (highVariability) {
+      const trendDirection = getRepTrendDirection(latest.reps)
+      if (trendDirection === 'ascending') {
+        const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'increase')
+        return {
+          mode: 'increase',
+          profileKey,
+          basedOnSessions,
+          adaptiveWindow: basedOnSessions,
+          adaptiveIncrementKg: stepKg,
+          adaptiveState: adaptive.state,
+          nextWeights: latestWeights.map((weight) => roundToIncrementUp(weight + stepKg, autoBaseIncrementKg)),
+          nextReps: new Array(profile.sets).fill(repMin),
+          targetReps: repMin,
+          reason: 'Повторы растут по ходу подходов — вес недостаточно тяжёлый. Добавляем нагрузку.',
+          confidenceLevel: confidence.level,
+          confidenceScore: confidence.score,
+          validationDroppedSessions
+        }
+      }
+
+      const holdReason = trendDirection === 'descending'
+        ? 'Повторы падают к концу подходов — усталость нарастает. Стабилизируй технику перед повышением веса.'
+        : 'Разброс по подходам непоследовательный. Стабилизируй повторы, затем повышай нагрузку.'
       const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'hold')
       return {
         mode: 'hold',
@@ -423,7 +457,7 @@ export function computeProgressionSuggestion(
         nextWeights: latestWeights,
         nextReps: latestReps,
         targetReps: minReps,
-        reason: 'Разброс по подходам высокий. Сначала стабилизируй повторы, затем повышай нагрузку.',
+        reason: holdReason,
         confidenceLevel: confidence.level,
         confidenceScore: confidence.score,
         validationDroppedSessions
@@ -541,13 +575,31 @@ export function computeBodyweightRepsSuggestion(
 
   if (maxReps >= repMax && latestAdjustedRpe <= 8.5 && successRate >= 0.4) {
     if (highVariability) {
+      const trendDirection = getRepTrendDirection(latest.reps)
+      if (trendDirection === 'ascending') {
+        const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'increase')
+        return {
+          mode: 'increase',
+          profileKey,
+          basedOnSessions,
+          nextReps: latestReps.map((item) => clamp(item + 1, 1, 100)),
+          reason: 'Повторы растут по ходу подходов — нагрузка недостаточная. Добавляем по 1 повтору.',
+          confidenceLevel: confidence.level,
+          confidenceScore: confidence.score,
+          validationDroppedSessions
+        }
+      }
+
+      const holdReason = trendDirection === 'descending'
+        ? 'Повторы падают к концу подходов — усталость нарастает. Стабилизируй технику перед повышением объёма.'
+        : 'Разброс по подходам непоследовательный. Стабилизируй повторы, затем повышай объём.'
       const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'hold')
       return {
         mode: 'hold',
         profileKey,
         basedOnSessions,
         nextReps: latestReps,
-        reason: 'Разброс по подходам высокий. Сначала стабилизируй повторы, затем повышай объем.',
+        reason: holdReason,
         confidenceLevel: confidence.level,
         confidenceScore: confidence.score,
         validationDroppedSessions

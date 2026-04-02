@@ -6,7 +6,7 @@ import { formatWorkoutDate, normalizeWorkoutDate, toDateInputValue } from '~/com
 definePageMeta({
   backTo: '/exercise-item',
   clearSelectUpdateWorkout: true,
-  removeStorageKeys: ['newWorkout', 'approaches']
+  removeStorageKeys: ['pp-new-workout-v1', 'pp-approaches-v1']
 })
 
 const router = useRouter()
