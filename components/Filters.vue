@@ -150,11 +150,7 @@ function getInitialEase(): '' | EnumEase {
     return activeFilters.value.ease
   }
 
-  if (allFilterElements.value.eases.length === 1) {
-    return allFilterElements.value.eases[0] ?? ''
-  }
-
-  return ''
+  return allFilterElements.value.eases[0] ?? ''
 }
 
 function getInitialInterval(): number {
@@ -203,8 +199,8 @@ const filter = ref<Filter>({
   approach: getInitialApproach(),
 
   changeEase: (ease: '' | EnumEase) => {
-    if (ease === filter.value.ease) filter.value.ease = ''
-    else filter.value.ease = ease
+    if (ease === filter.value.ease) return
+    filter.value.ease = ease
 
     if (ease === EnumEase.weight) optionsLines.scales.y1.display = true
     else optionsLines.scales.y1.display = false
@@ -305,6 +301,7 @@ watch(
   availableFilterElements,
   () => {
     if (filter.value.ease && !allFilterElements.value.eases.includes(filter.value.ease)) filter.value.ease = ''
+    if (!filter.value.ease && allFilterElements.value.eases.length > 0) filter.value.ease = allFilterElements.value.eases[0]!
     if (filter.value.interval && !availableFilterElements.value.intervals.includes(filter.value.interval)) filter.value.interval = 0
     if (filter.value.approach && !availableFilterElements.value.approaches.includes(filter.value.approach)) filter.value.approach = 0
 
@@ -322,6 +319,15 @@ function showChart() {
 
 <template lang="pug">
 .filters
+  template(v-if="allFilterElements.eases.length > 1")
+    .flex.border-b.border-faint.mb-2
+      .flex-1.pb-2.text-center.text-sm.cursor-pointer.border-b-2.transition(
+        v-for="ease in allFilterElements.eases"
+        :key="ease"
+        :class="filter.ease === ease ? 'border-accent text-accent font-medium' : 'border-transparent opacity-40'"
+        @click="filter.changeEase(ease)"
+      ) {{ ease }}
+
   template(v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0")
     .pb-1.text-xs(v-if="!hideFilterTitles") Интервал
     TabsWrap.pb-1
@@ -342,17 +348,6 @@ function showChart() {
         :active="filter.approach === approach"
         @click="filter.changeApproach(approach)"
         :title="approach"
-      ).text-xs
-  
-  template(v-if="allFilterElements.eases.length > 1")
-    .pb-1.text-xs(v-if="!hideFilterTitles") Сложность
-    TabsWrap(v-if="workouts")
-      TabsItem(
-        v-for="ease in allFilterElements.eases"
-        :key="ease"
-        :active="filter.ease === ease"
-        @click="filter.changeEase(ease)"
-        :title="ease"
       ).text-xs
   Chart(
     v-if="showChart()"
