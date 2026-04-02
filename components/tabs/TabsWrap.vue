@@ -1,4 +1,5 @@
-<template lang="pug">
-.flex.justify-between.gap-1
-  slot
+<template>
+  <div class="flex justify-between gap-1">
+    <slot />
+  </div>
 </template>

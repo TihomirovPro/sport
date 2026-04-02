@@ -40,28 +40,28 @@ const fillPercent = computed(() => {
 </script>
 
 <template>
-  <div class="relative z-10">
-    <div class="ml-[13px] w-[calc(100%-26px)] -z-[1] h-[22px] bottom-0 absolute flex justify-between">
-      <div
-        v-for="i in steps"
-        :key="i"
-        class="h-full bg-faint w-[1px]"
-      />
-    </div>
-    <span>{{ title }}</span>
-
-    <input
-      type="range"
-      name="range"
-      :min='min'
-      :max='max'
-      :step="step"
-      :value="modelValue"
-      :style="{ '--fill': `${fillPercent}%` }"
-      @input="updateValue"
-      class="bg-transparent mt-4 w-full appearance-none"
+<div class="relative z-10">
+  <div class="ml-[13px] w-[calc(100%-26px)] -z-[1] h-[22px] bottom-0 absolute flex justify-between">
+    <div
+      v-for="i in steps"
+      :key="i"
+      class="h-full bg-faint w-[1px]"
     />
   </div>
+  <span>{{ title }}</span>
+
+  <input
+    type="range"
+    name="range"
+    :min='min'
+    :max='max'
+    :step="step"
+    :value="modelValue"
+    :style="{ '--fill': `${fillPercent}%` }"
+    @input="updateValue"
+    class="bg-transparent mt-4 w-full appearance-none"
+  />
+</div>
 </template>
 
 <style scoped lang="stylus">
