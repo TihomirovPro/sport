@@ -220,96 +220,122 @@ async function onRemoveWeight(id: string) {
 
 <template lang="pug">
 .grid.gap-4
-  .grid.gap-2.border.border-faint.rounded.p-3
-    p.font-semibold Добавить вес
-    input.border.border-faint.p-2.rounded.w-full.bg-transparent(
-      v-model="selectedDate"
-      type="date"
-    )
-    .flex.items-center.gap-2
-      input.border.border-faint.p-2.rounded.w-full.bg-transparent(
-        v-model="weightValue"
-        type="number"
-        inputmode="decimal"
-        step="0.1"
-        min="1"
-        placeholder="Например, 82.5"
-        @keyup.enter="submitWeight"
-      )
-      BaseButton(
-        text="Сохранить"
-        class="!w-auto whitespace-nowrap"
-        :disabled="isSaving"
-        @click="submitWeight"
-      )
 
-  .grid.gap-3.border.border-faint.rounded.p-3(v-if="entries.length")
-    p.font-semibold Период статистики
+  //- Add weight form
+  .border.border-faint.rounded-xl.p-4.grid.gap-3
+    p.font-semibold.text-sm.uppercase.tracking-wide.text-gray-500 Добавить запись
     .grid.grid-cols-2.gap-2
-      button.border.border-faint.rounded.p-2.text-xs.cursor-pointer(
-        type="button"
-        :class="{ 'bg-accent text-white border-transparent': activePeriod === 'all' }"
-        @click="activePeriod = 'all'"
-      ) За все время
-      button.border.border-faint.rounded.p-2.text-xs.cursor-pointer(
-        type="button"
-        :class="{ 'bg-accent text-white border-transparent': activePeriod === 'year' }"
-        @click="activePeriod = 'year'"
-      ) За год
-      button.border.border-faint.rounded.p-2.text-xs.cursor-pointer(
-        type="button"
-        :class="{ 'bg-accent text-white border-transparent': activePeriod === 'month' }"
-        @click="activePeriod = 'month'"
-      ) За месяц
-      button.border.border-faint.rounded.p-2.text-xs.cursor-pointer(
-        type="button"
-        :class="{ 'bg-accent text-white border-transparent': activePeriod === 'week' }"
-        @click="activePeriod = 'week'"
-      ) За неделю
+      .grid.gap-1
+        label.text-xs.text-gray-500(for="weight-date") Дата
+        input#weight-date.border.border-faint.p-2.rounded-lg.w-full.bg-transparent.text-sm(
+          v-model="selectedDate"
+          type="date"
+        )
+      .grid.gap-1
+        label.text-xs.text-gray-500(for="weight-value") Вес, кг
+        input#weight-value.border.border-faint.p-2.rounded-lg.w-full.bg-transparent.text-sm(
+          v-model="weightValue"
+          type="number"
+          inputmode="decimal"
+          step="0.1"
+          min="1"
+          placeholder="82.5"
+          @keyup.enter="submitWeight"
+        )
+    BaseButton(
+      text="Сохранить"
+      :disabled="isSaving"
+      @click="submitWeight"
+    )
 
-  .grid.gap-3.border.border-faint.rounded.p-3(v-if="stats")
-    p.font-semibold Статистика
-    .grid.grid-cols-2.gap-2.text-sm
-      .border.border-faint.rounded.p-2
+  //- Period tabs
+  .flex.gap-1.p-1.border.border-faint.rounded-xl.bg-transparent(v-if="entries.length")
+    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
+      type="button"
+      class="py-1.5"
+      :class="activePeriod === 'all' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
+      @click="activePeriod = 'all'"
+    ) Всё
+    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
+      type="button"
+      class="py-1.5"
+      :class="activePeriod === 'year' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
+      @click="activePeriod = 'year'"
+    ) Год
+    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
+      type="button"
+      class="py-1.5"
+      :class="activePeriod === 'month' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
+      @click="activePeriod = 'month'"
+    ) Месяц
+    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
+      type="button"
+      class="py-1.5"
+      :class="activePeriod === 'week' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
+      @click="activePeriod = 'week'"
+    ) Неделя
+
+  //- Stats
+  template(v-if="stats")
+    .grid.grid-cols-2.gap-2
+      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
         p.text-xs.text-gray-500 Последний
-        p.font-semibold {{ formatWeight(stats.latest.value) }}
-      .border.border-faint.rounded.p-2
+        p.text-xl.font-bold.tracking-tight {{ formatWeight(stats.latest.value) }}
+        p.text-xs.text-gray-500 {{ formatDate(stats.latest.createdAt) }}
+      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
         p.text-xs.text-gray-500 Изменение
-        p.font-semibold {{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} кг` }}
-      .border.border-faint.rounded.p-2
-        p.text-xs.text-gray-500 Средний
-        p.font-semibold {{ formatWeight(stats.average) }}
-      .border.border-faint.rounded.p-2
+        p.text-xl.font-bold.tracking-tight(
+          :class="stats.change === null ? '' : stats.change > 0 ? 'text-error' : stats.change < 0 ? 'text-green-500' : ''"
+        ) {{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} кг` }}
+        p.text-xs.text-gray-500 от предыдущего
+      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
+        p.text-xs.text-gray-500 Среднее
+        p.text-xl.font-bold.tracking-tight {{ formatWeight(stats.average) }}
+        p.text-xs.text-gray-500 за период
+      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
         p.text-xs.text-gray-500 Диапазон
-        p.font-semibold {{ `${formatWeight(stats.min)} - ${formatWeight(stats.max)}` }}
+        p.text-base.font-bold.tracking-tight {{ formatWeight(stats.min) }}
+        p.text-xs.text-gray-500 — {{ formatWeight(stats.max) }}
 
-  .border.border-faint.rounded.p-3(v-else-if="entries.length")
-    p.text-sm.text-gray-500 За выбранный период нет данных
+  .border.border-faint.rounded-xl.p-4(v-else-if="entries.length")
+    p.text-sm.text-gray-500.text-center За выбранный период нет данных
 
-  .grid.gap-2.border.border-faint.rounded.p-3(v-if="filteredEntries.length")
-    p.font-semibold График изменения веса
-    .h-52
+  //- Chart
+  .border.border-faint.rounded-xl.p-4.grid.gap-3(v-if="filteredEntries.length")
+    p.font-semibold.text-sm График
+    .h-48
       Chart(
         type="line"
         :data="chartData"
         :options="chartOptions"
       )
 
-  .grid.gap-2.border.border-faint.rounded.p-3(v-if="entries.length")
-    p.font-semibold История
-    .flex.items-center.justify-between.border-b.border-faint.py-2(
-      v-for="entry in entries"
-      :key="entry.id"
-    )
-      .grid.gap-1
-        p {{ formatWeight(entry.value) }}
-        p.text-xs.text-gray-500 {{ formatDate(entry.createdAt) }}
-      button.text-xs.text-error.cursor-pointer(
-        type="button"
-        :disabled="deletingId === entry.id"
-        @click="onRemoveWeight(entry.id)"
-      ) {{ deletingId === entry.id ? 'Удаление...' : 'Удалить' }}
+  //- History
+  .border.border-faint.rounded-xl.p-4.grid.gap-3(v-if="entries.length")
+    p.font-semibold.text-sm История
+    .grid.gap-0
+      .flex.items-center.justify-between(
+        v-for="(entry, index) in entries"
+        :key="entry.id"
+        class="py-2.5"
+        :class="index < entries.length - 1 ? 'border-b border-faint' : ''"
+      )
+        .flex.items-center.gap-3
+          .w-2.h-2.rounded-full.bg-accent.shrink-0
+          .grid.gap-0
+            p.font-semibold.text-sm {{ formatWeight(entry.value) }}
+            p.text-xs.text-gray-500 {{ formatDate(entry.createdAt) }}
+        button.text-xs.text-error.cursor-pointer.py-1.px-2.rounded-lg.border.border-transparent.transition-all(
+          type="button"
+          :disabled="deletingId === entry.id"
+          class="hover:border-error/30"
+          :class="{ 'opacity-50 pointer-events-none': deletingId === entry.id }"
+          @click="onRemoveWeight(entry.id)"
+        ) {{ deletingId === entry.id ? '...' : 'Удалить' }}
 
-  .border.border-faint.rounded.p-3(v-else)
-    p.text-sm.text-gray-500 Пока нет данных о весе
+  //- Empty state
+  .border.border-faint.rounded-xl.p-8.grid.place-items-center.gap-2(v-else)
+    p.text-2xl ⚖️
+    p.text-sm.text-gray-500.text-center Пока нет данных о весе
+    p.text-xs.text-gray-500.text-center Добавьте первую запись выше
 </template>

@@ -22,22 +22,24 @@ function active() {
 }
 </script>
 
-<template lang="pug">
-.grid.gap-5.items-center.border-b.border-faint(
-  class="grid-cols-[56px_1fr_40px]"
-)
-  .flex-center.size-14.text-4xl.p-1.rounded-xl.uppercase.text-white.bg-accent(
+<template>
+<div class="grid-cols-[56px_1fr_40px] grid gap-5 items-center border-b border-faint">
+  <div
+    class="flex-center size-14 text-4xl p-1 rounded-xl uppercase text-white bg-accent"
     :style="`background: ${color}`"
     @click="update"
-  )
-    .text-2xl.text-white(v-if="!icon") {{ name[0] }}
-    Icon(v-else :icon="icon" color="#fff")
+  >
+    <div class="text-2xl text-white" v-if="!icon">{{ name[0] }}</div>
+    <Icon v-else :icon="icon" color="#fff" />
+  </div>
 
-  .cursor-pointer.py-6.text-lg(
-    class="text-[rgb(var(--colorIcon))]"
+  <div
+    class="text-[rgb(var(--colorIcon))] cursor-pointer py-6 text-lg"
     @click="active"
-  ) {{ name }}
-  .hangle.flex-center.flex-col.gap-1.h-full.cursor-pointer.opacity-50.transition(class="hover:opacity-90")
-    .w-6.bg-accent.rounded(class="h-0.5")
-    .w-6.bg-accent.rounded(class="h-0.5")
+  >{{ name }}</div>
+  <div class="hangle flex-center flex-col gap-1 h-full cursor-pointer opacity-50 transition hover:opacity-90">
+    <div class="w-6 bg-accent rounded h-0.5" />
+    <div class="w-6 bg-accent rounded h-0.5" />
+  </div>
+</div>
 </template>

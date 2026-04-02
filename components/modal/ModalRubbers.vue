@@ -99,39 +99,62 @@ async function reset() {
 <template lang="pug">
 Modal(:isShow="isShow" @hiden="emit('hiden')")
   template(#content)
-    .text-sm.font-medium Набор резин
-    .text-xs.opacity-70 Изменения применяются в экране тренировки
+    .flex.items-start.justify-between
+      div
+        .text-base.font-semibold Набор резин
+        .text-xs.opacity-50(class="mt-0.5") Изменения применяются в экране тренировки
+      .text-xs.opacity-40.font-medium.tabular-nums(class="pt-0.5") {{ localRubbers.length }} шт
 
     .grid.gap-2
-      .grid.gap-2.border.border-faint.rounded-lg.p-2(
-        v-for="(item, index) in localRubbers"
-        :key="index"
-      )
-        BaseInput(
-          v-model="item.name"
-          type="text"
-          placeholder="Название"
+      TransitionGroup(name="rubber-list")
+        .relative.rounded-xl.border.border-faint.overflow-hidden(
+          v-for="(item, index) in localRubbers"
+          :key="index"
         )
-        .flex.items-center.gap-3
-          input.h-10.w-16.cursor-pointer(
-            :value="toHexColor(item.color)"
-            type="color"
-            @input="onColorInput(index, $event)"
-          )
-          BaseInput(
-            v-model="item.color"
-            type="text"
-            placeholder="#3b82f6 или rgb(...)"
-          )
-          button.text-error.text-sm.ml-auto(
-            type="button"
-            @click="removeRubber(index)"
-          ) Удалить
+          .flex.items-center.gap-0
+            label.relative.cursor-pointer.shrink-0.self-stretch.flex.items-center.justify-center(
+              class="w-14"
+              :style="`background: ${toHexColor(item.color)}18`"
+              :title="'Выбрать цвет'"
+            )
+              .size-8.rounded-full.shadow-md.transition-transform(
+                class="hover:scale-105"
+                :style="`background: ${toHexColor(item.color)}`"
+              )
+              input.absolute.inset-0.opacity-0.cursor-pointer.size-full(
+                :value="toHexColor(item.color)"
+                type="color"
+                @input="onColorInput(index, $event)"
+              )
+            .flex-1.flex.flex-col.gap-1.py-2.px-3
+              input.bg-transparent.text-sm.font-medium.w-full.outline-none.placeholder-opacity-40(
+                v-model="item.name"
+                type="text"
+                placeholder="Название резины"
+                class="border-b border-faint/60 pb-1 focus:border-accent transition-colors"
+              )
+              input.bg-transparent.text-xs.opacity-50.w-full.outline-none(
+                v-model="item.color"
+                type="text"
+                placeholder="#3b82f6"
+                class="font-mono focus:opacity-80 transition-opacity"
+              )
+            button.shrink-0.self-stretch.flex.items-center.justify-center.transition-colors(
+              class="w-10 text-error/40 hover:text-error hover:bg-error/8"
+              type="button"
+              @click="removeRubber(index)"
+            )
+              svg.size-4(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+                path(d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6")
 
-      button.border.border-faint.rounded-lg.py-2(
+      button.flex.items-center.justify-center.gap-2.rounded-xl.border.border-dashed.border-faint.py-3.w-full.transition-colors(
+        class="text-sm opacity-60 hover:opacity-100 hover:border-accent hover:text-accent"
         type="button"
         @click="addRubber"
-      ) + Добавить резину
+      )
+        svg.size-4(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round")
+          path(d="M12 5v14M5 12h14")
+        span Добавить резину
 
   template(#bottom)
     BaseButton(
@@ -144,3 +167,15 @@ Modal(:isShow="isShow" @hiden="emit('hiden')")
       @click="save"
     )
 </template>
+
+<style scoped>
+.rubber-list-enter-active,
+.rubber-list-leave-active {
+  transition: all 0.2s ease;
+}
+.rubber-list-enter-from,
+.rubber-list-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+</style>
