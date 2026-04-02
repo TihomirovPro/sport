@@ -15,18 +15,23 @@ const catalogStore = useCatalogStore()
 const { icons } = storeToRefs(catalogStore)
 </script>
 
-<template lang="pug">
-Modal(:isShow="isShow" @hiden="emit('hiden')")
-  template(#content)
-    .grid.gap-2.grid-cols-4.place-items-center.text-5xl
-      .w-full.p-2.rounded-lg(
+<template>
+<Modal :isShow="isShow" @hiden="emit('hiden')">
+  <template #content>
+    <div class="grid gap-2 grid-cols-4 place-items-center text-5xl">
+      <div
+        class="w-full p-2 rounded-lg"
         :key="icon"
         v-for="icon in icons"
         :class="{ 'border bg-accent/20 border-accent' : activeIcon === icon }"
         @click="emit('selectIcon', icon)"
-      )
-        Icon(
+      >
+        <Icon
           :icon="icon"
           color="rgb(var(--colorIcon))"
-        )
+        />
+      </div>
+    </div>
+  </template>
+</Modal>
 </template>

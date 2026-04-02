@@ -17,10 +17,10 @@ if (props.disabled) classes.push('opacity-60 cursor-not-allowed pointer-events-n
 </script>
 
 <template>
-  <button
-    :class="classes"
-    :disabled="props.disabled"
-  >
-    {{ text }}
-  </button>
+<button
+  :class="classes"
+  :disabled="props.disabled"
+>
+  {{ text }}
+</button>
 </template>

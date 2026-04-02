@@ -18,25 +18,25 @@ const classes = 'border border-faint p-2 rounded w-full max-width-full bg-transp
 </script>
 
 <template>
-  <textarea
-    v-if="type === 'textarea'"
-    name="textarea"
-    class="min-h-[52px]"
-    :class="classes"
-    :value="modelValue ?? ''"
-    :placeholder="placeholder"
-    autocomplete="off"
-    @input="updateValue"
-  />
+<textarea
+  v-if="type === 'textarea'"
+  name="textarea"
+  class="min-h-[52px]"
+  :class="classes"
+  :value="modelValue ?? ''"
+  :placeholder="placeholder"
+  autocomplete="off"
+  @input="updateValue"
+/>
 
-  <input
-    v-else
-    name="input"
-    :type="type"
-    :value="modelValue ?? ''"
-    :placeholder="placeholder"
-    :class="[classes, { 'border-error': error }]"
-    autocomplete="off"
-    @input="updateValue"
-  />
+<input
+  v-else
+  name="input"
+  :type="type"
+  :value="modelValue ?? ''"
+  :placeholder="placeholder"
+  :class="[classes, { 'border-error': error }]"
+  autocomplete="off"
+  @input="updateValue"
+/>
 </template>

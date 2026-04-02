@@ -16,14 +16,14 @@ function isActive(ease: EnumEase) {
 }
 </script>
 
-<template lang="pug">
-div
-  TabsWrap
-    TabsItem(
-      v-for="ease in eases"
-      :key="ease"
-      :active="isActive(ease)"
-      @click="emit('selectEase', ease)"
-      :title="ease"
-    )
+<template>
+<TabsWrap>
+  <TabsItem
+    v-for="ease in eases"
+    :key="ease"
+    :active="isActive(ease)"
+    @click="emit('selectEase', ease)"
+    :title="ease"
+  />
+</TabsWrap>
 </template>
