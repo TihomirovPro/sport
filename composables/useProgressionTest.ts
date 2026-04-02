@@ -155,6 +155,13 @@ function hasHighRepVariability(reps: number[]): boolean {
   return spread >= 3 || relativeSpread >= 0.35
 }
 
+function computeStableRepTarget(reps: number[], repMin: number, repMax: number): number {
+  const sorted = [...reps].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  const median = sorted.length % 2 !== 0 ? sorted[mid] : Math.floor((sorted[mid - 1] + sorted[mid]) / 2)
+  return clamp(median, repMin, repMax - 1)
+}
+
 function getRepTrendDirection(reps: number[]): 'descending' | 'ascending' | 'flat' {
   if (reps.length < 2) return 'flat'
   const first = reps[0]
@@ -360,6 +367,10 @@ export function computeProgressionSuggestion(
   const basedOnSessions = history.length
   const latestAdjustedRpe = clamp(latest.rpe + intervalLoadPenalty, 1, 10)
   const highVariability = hasHighRepVariability(latest.reps)
+  const sortedRepsForHold = [...latest.reps].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
+  const repMedianIdx = Math.floor(sortedRepsForHold.length / 2)
+  const repMedian = sortedRepsForHold.length % 2 !== 0 ? sortedRepsForHold[repMedianIdx] : Math.floor((sortedRepsForHold[repMedianIdx - 1] + sortedRepsForHold[repMedianIdx]) / 2)
+  const stableHoldReps = new Array(profile.sets).fill(clamp(repMedian, 1, 100))
 
   if (history.length < 2) {
     const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'bootstrap')
@@ -455,8 +466,8 @@ export function computeProgressionSuggestion(
         adaptiveIncrementKg: stepKg,
         adaptiveState: adaptive.state,
         nextWeights: latestWeights,
-        nextReps: latestReps,
-        targetReps: minReps,
+        nextReps: stableHoldReps,
+        targetReps: clamp(repMedian, repMin, repMax),
         reason: holdReason,
         confidenceLevel: confidence.level,
         confidenceScore: confidence.score,
@@ -491,9 +502,9 @@ export function computeProgressionSuggestion(
     adaptiveIncrementKg: stepKg,
     adaptiveState: adaptive.state,
     nextWeights: latestWeights,
-    nextReps: latestReps,
-    targetReps: minReps,
-    reason: 'Оставь текущие повторы и удерживай качество техники.',
+    nextReps: stableHoldReps,
+    targetReps: repMedian,
+    reason: 'Оставь текущие веса и удерживай качество техники.',
     confidenceLevel: confidence.level,
     confidenceScore: confidence.score,
     validationDroppedSessions
@@ -541,6 +552,10 @@ export function computeBodyweightRepsSuggestion(
   const latestReps = latest.reps.map((item) => clamp(Math.round(item), 1, 100))
   const latestAdjustedRpe = clamp(latest.rpe + intervalLoadPenalty, 1, 10)
   const highVariability = hasHighRepVariability(latest.reps)
+  const sortedBwReps = [...latest.reps].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
+  const bwMedianIdx = Math.floor(sortedBwReps.length / 2)
+  const bwRepMedian = sortedBwReps.length % 2 !== 0 ? sortedBwReps[bwMedianIdx] : Math.floor((sortedBwReps[bwMedianIdx - 1] + sortedBwReps[bwMedianIdx]) / 2)
+  const stableBwHoldReps = new Array(profile.sets).fill(clamp(bwRepMedian, 1, 100))
 
   if (basedOnSessions < 2) {
     const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'bootstrap')
@@ -560,13 +575,14 @@ export function computeBodyweightRepsSuggestion(
   const successRate = history.filter((item) => Math.min(...item.reps) >= repMax && clamp(item.rpe + intervalLoadPenalty, 1, 10) <= 8.5).length / basedOnSessions
 
   if (minReps < repMin || latestAdjustedRpe >= 9.5 || overloadRate >= 0.45) {
+    const stableTarget = computeStableRepTarget(latest.reps, repMin, repMax)
     const confidence = computeConfidenceScore(basedOnSessions, profileSessions.length, profile.intervalMinutes, latestAdjustedRpe, 'decrease')
     return {
       mode: 'decrease',
       profileKey,
       basedOnSessions,
-      nextReps: latestReps.map((item) => clamp(item - 1, 1, 100)),
-      reason: 'Подходы тяжёлые по RPE/повторам. Лучше немного снизить объем.',
+      nextReps: new Array(profile.sets).fill(stableTarget),
+      reason: `Есть провальные подходы. Выровняй все подходы до стабильных ${stableTarget} повторений.`,
       confidenceLevel: confidence.level,
       confidenceScore: confidence.score,
       validationDroppedSessions
@@ -598,7 +614,7 @@ export function computeBodyweightRepsSuggestion(
         mode: 'hold',
         profileKey,
         basedOnSessions,
-        nextReps: latestReps,
+        nextReps: stableBwHoldReps,
         reason: holdReason,
         confidenceLevel: confidence.level,
         confidenceScore: confidence.score,
@@ -624,7 +640,7 @@ export function computeBodyweightRepsSuggestion(
     mode: 'hold',
     profileKey,
     basedOnSessions,
-    nextReps: latestReps,
+    nextReps: stableBwHoldReps,
     reason: 'Оставь текущие повторы и удерживай качество техники.',
     confidenceLevel: confidence.level,
     confidenceScore: confidence.score,

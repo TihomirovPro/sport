@@ -35,6 +35,7 @@ function updateValue(e:Event) {
       class="w-[1px]"
     )
   span(v-if="view === 'interval'") Интервал: В {{ modelValue }} мин
+  span(v-else-if="view === 'rpe'") RPE: {{ modelValue }}
   span(v-else) Подходы: {{ modelValue }}
 
   input(
