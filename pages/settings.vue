@@ -80,6 +80,10 @@ function toWeightPage() {
   void router.push('/weight')
 }
 
+function toMeasurePage() {
+  void router.push('/measure')
+}
+
 function confirmSignOut() {
   if (!process.client) return
   if (!window.confirm('Выйти из аккаунта?')) return
@@ -215,6 +219,25 @@ async function signOutUser() {
           span.text-sm.opacity-50 {{ lastWeightText }}
           svg.opacity-40(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
             polyline(points="9 18 15 12 9 6")
+
+      .h-px.bg-faint.mx-4
+
+      //- Body measurements
+      .flex.items-center.justify-between.px-4.py-3.cursor-pointer(
+        @click="toMeasurePage"
+      )
+        .flex.items-center.gap-3
+          .size-8.rounded-lg.flex-center.bg-faint.opacity-80
+            svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+              path(d="M2 12h20")
+              path(d="M2 12l4-4")
+              path(d="M2 12l4 4")
+              path(d="M22 12l-4-4")
+              path(d="M22 12l-4 4")
+              line(x1="12" y1="8" x2="12" y2="16")
+          span.text-sm Замеры тела
+        svg.opacity-40(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+          polyline(points="9 18 15 12 9 6")
 
   //- Sign out
   button.w-full.py-3.rounded-xl.text-sm.font-medium.border.border-error.text-error.transition-opacity.active_opacity-60(
