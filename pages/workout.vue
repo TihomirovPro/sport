@@ -257,13 +257,14 @@ onUnmounted(() => {
         :placeholder="`Вес ${index}`"
       )  
 
-  BaseInput(
+  BaseInputRange(
     v-if="!isComplex"
-    :model-value="workout.rpe ?? ''"
+    :model-value="workout.rpe ?? 8"
     @update:model-value="updateRpe"
-    type="text"
-    inputmode="decimal"
-    placeholder="RPE (1-10)"
+    min="1"
+    max="10"
+    step="0.5"
+    view="rpe"
   )
   p.text-xs.opacity-70(v-if="!isComplex") RPE оценивается по последнему рабочему подходу.
 
