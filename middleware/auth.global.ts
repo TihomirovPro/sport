@@ -5,6 +5,7 @@ import { getFirebaseAuth } from '~/composables/firebaseInit'
 import { getOnlineStatus } from '~/composables/platform/ios'
 
 const publicRouteNames = new Set(['login'])
+const openRouteNames = new Set(['landing'])
 const AUTH_RESOLVE_TIMEOUT_MS = 2500
 
 function resolveAuthUser() {
@@ -44,6 +45,9 @@ function resolveAuthUser() {
 export default defineNuxtRouteMiddleware(async (to) => {
   const userStore = useUserStore()
   const routeName = String(to.name ?? '')
+
+  if (openRouteNames.has(routeName)) return
+
   const isPublicRoute = publicRouteNames.has(routeName)
   const auth = getFirebaseAuth()
   const rememberedUid = readLastAuthUid()
