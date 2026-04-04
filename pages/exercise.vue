@@ -243,19 +243,19 @@ watch(
         color="#fff"
       )
       .text-white.text-2xl(v-else) {{ exercise.name[0] }}
-    BaseInput(
+    UiInput(
       v-model="exercise.name"
       type="text"
       :error="error"
-      placeholder="Название упражения"
+      placeholder="Название упражнения"
     )
 
-  TabsWrap
-    TabsItem(
+  UiTabsWrap
+    UiTabsItem(
       title="Цвет"
       @click="showModalColor = true"
     )
-    TabsItem(
+    UiTabsItem(
       title="Иконка"
       @click="showModalIcon = true"
     )      
@@ -275,7 +275,7 @@ watch(
   )
 
   .grid.gap-5(v-if="exercise.isComplex && canManageComplexes")
-    BaseInput(
+    UiInput(
       v-model="exercise.complexDesc"
       type="textarea"
       placeholder="Описание комплекса"
@@ -283,7 +283,7 @@ watch(
     )
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
-    BaseButton(
+    UiButton(
       v-if="!selectUpdateExercise"
       :text="isSaving ? 'Сохранение...' : 'Добавить'"
       :disabled="isSaving"
@@ -291,13 +291,13 @@ watch(
     ).mt-auto
 
     template(v-else)
-      BaseButton(
+      UiButton(
         red
         :disabled="isSaving"
         text="Удалить"
         @click="deleted"
       )
-      BaseButton(
+      UiButton(
         :text="isSaving ? 'Сохранение...' : 'Сохранить'"
         :disabled="isSaving"
         @click="update"

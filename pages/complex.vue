@@ -87,14 +87,14 @@ async function saveComplex() {
 <template>
 <div class="flex flex-col gap-3 min-h-full">
   <div v-if="!canManageComplexes" class="text-sm text-error">Добавление комплексов доступно только пользователю со статусом admin</div>
-  <BaseInput
+  <UiInput
     v-model="complex.description"
     type="textarea"
     placeholder="Описание комплекса"
     class="min-h-[200px]"
   />
 
-  <BaseButton
+  <UiButton
     v-if="canManageComplexes"
     text="Сохранить комплекс"
     @click="saveComplex"

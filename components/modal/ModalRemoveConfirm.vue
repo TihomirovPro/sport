@@ -12,21 +12,21 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <Modal :isShow="isShow" @hiden="emit('hiden')">
+  <UiModal :isShow="isShow" @hiden="emit('hiden')">
     <template #content>
       <div class="modal__text">{{ text }}</div>
     </template>
 
     <template #bottom>
-      <BaseButton
+      <UiButton
         text="Отменить"
         @click="emit('cancelRemove')"
       />
-      <BaseButton
+      <UiButton
         red
         text="Удалить"
         @click="emit('remove')"
       />
     </template>
-  </Modal>
+  </UiModal>
 </template>

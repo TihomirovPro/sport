@@ -30,7 +30,7 @@ function active() {
     @click="update"
   >
     <div class="text-2xl text-white" v-if="!icon">{{ name[0] }}</div>
-    <Icon v-else :icon="icon" color="#fff" />
+    <UiIcon v-else :icon="icon" color="#fff" />
   </div>
 
   <div

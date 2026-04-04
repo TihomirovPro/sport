@@ -47,7 +47,7 @@ appStore.headerTitle = 'Упражнения'
   )
     p.text-sm.opacity-75 У вас пока нет упражнений
     p.text-xs.opacity-60 Нажмите на плюс в правом верхнем углу или добавьте первое упражнение кнопкой ниже
-    BaseButton(
+    UiButton(
       text="Добавить упражнение"
       @click="toCreateExercise"
     )

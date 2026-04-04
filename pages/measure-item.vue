@@ -241,38 +241,14 @@ async function onRemoveEntry(id: string) {
           placeholder="38.5"
           @keyup.enter="submitEntry"
         )
-    BaseButton(
+    UiButton(
       text="Сохранить"
       :disabled="isSaving"
       @click="submitEntry"
     )
 
   //- Period tabs
-  .flex.gap-1.p-1.border.border-faint.rounded-xl.bg-transparent(v-if="activeEntries.length")
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'all' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'all'"
-    ) Всё
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'year' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'year'"
-    ) Год
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'month' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'month'"
-    ) Месяц
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'week' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'week'"
-    ) Неделя
+  UiPeriodTabs(v-if="activeEntries.length" v-model="activePeriod")
 
   //- Stats
   template(v-if="stats")
@@ -333,8 +309,5 @@ async function onRemoveEntry(id: string) {
         ) {{ deletingId === entry.id ? '...' : 'Удалить' }}
 
   //- Empty state
-  .border.border-faint.rounded-xl.p-8.grid.place-items-center.gap-2(v-else)
-    p.text-2xl 📐
-    p.text-sm.text-gray-500.text-center Пока нет записей
-    p.text-xs.text-gray-500.text-center Добавьте первую запись выше
+  UiEmptyState(v-else icon="📐" title="Пока нет записей" hint="Добавьте первую запись выше")
 </template>

@@ -242,38 +242,14 @@ async function onRemoveWeight(id: string) {
           placeholder="82.5"
           @keyup.enter="submitWeight"
         )
-    BaseButton(
+    UiButton(
       text="Сохранить"
       :disabled="isSaving"
       @click="submitWeight"
     )
 
   //- Period tabs
-  .flex.gap-1.p-1.border.border-faint.rounded-xl.bg-transparent(v-if="entries.length")
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'all' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'all'"
-    ) Всё
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'year' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'year'"
-    ) Год
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'month' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'month'"
-    ) Месяц
-    button.flex-1.text-xs.rounded-lg.cursor-pointer.transition-all.font-medium(
-      type="button"
-      class="py-1.5"
-      :class="activePeriod === 'week' ? 'bg-accent text-white shadow-sm' : 'text-gray-500 hover:text-current'"
-      @click="activePeriod = 'week'"
-    ) Неделя
+  UiPeriodTabs(v-if="entries.length" v-model="activePeriod")
 
   //- Stats
   template(v-if="stats")
@@ -334,8 +310,5 @@ async function onRemoveWeight(id: string) {
         ) {{ deletingId === entry.id ? '...' : 'Удалить' }}
 
   //- Empty state
-  .border.border-faint.rounded-xl.p-8.grid.place-items-center.gap-2(v-else)
-    p.text-2xl ⚖️
-    p.text-sm.text-gray-500.text-center Пока нет данных о весе
-    p.text-xs.text-gray-500.text-center Добавьте первую запись выше
+  UiEmptyState(v-else icon="⚖️" title="Пока нет данных о весе" hint="Добавьте первую запись выше")
 </template>

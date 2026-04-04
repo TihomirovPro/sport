@@ -7,7 +7,7 @@ const props = defineProps<{
 
 const classes = [
   `cursor-pointer transition
-  block py-2.5 px-4 w-full rounded
+  block py-2.5 px-4 w-full rounded-xl
   text-white text-center text-lg`
 ]
 

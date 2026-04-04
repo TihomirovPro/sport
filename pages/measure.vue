@@ -123,7 +123,7 @@ function openType(type: { id: string; name: string; unit: string }) {
             placeholder="см"
             @keyup.enter="submitType"
           )
-      BaseButton(
+      UiButton(
         text="Сохранить"
         :disabled="isSaving"
         @click="submitType"
@@ -163,8 +163,5 @@ function openType(type: { id: string; name: string; unit: string }) {
           polyline(points="9 18 15 12 9 6")
 
   //- Empty state
-  .border.border-faint.rounded-xl.p-8.grid.place-items-center.gap-2(v-else)
-    p.text-2xl 📏
-    p.text-sm.text-gray-500.text-center Замеры не добавлены
-    p.text-xs.text-gray-500.text-center Нажмите «Добавить замер» выше
+  UiEmptyState(v-else icon="📏" title="Замеры не добавлены" hint="Нажмите «Добавить замер» выше")
 </template>
