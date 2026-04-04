@@ -7,8 +7,8 @@ import {
   parseDurationToSeconds,
   safeParseJson
 } from '~/composables/useWorkoutHelpers'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 interface UseWorkoutFormParams {
   activeExercise: Ref<TypeExercise | null | undefined>

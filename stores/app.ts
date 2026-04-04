@@ -1,5 +1,5 @@
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 export const useAppStore = defineStore('app', () => {
   const HIDE_FILTER_TITLES_KEY = IDB_KEYS.HIDE_FILTER_TITLES

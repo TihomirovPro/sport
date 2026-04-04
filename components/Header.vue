@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { idbStorage } from '~/composables/storage/idb'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 const route = useRoute()
 const router = useRouter()

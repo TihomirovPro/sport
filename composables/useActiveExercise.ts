@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import type { EnumEase, TypeExercise } from '~/composables/types'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 type RestoreActiveExerciseOptions = {
   fallbackEase?: EnumEase[]

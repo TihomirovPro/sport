@@ -59,6 +59,16 @@ export default defineNuxtConfig({
     { path: '~/shared/ui', prefix: 'Ui', pathPrefix: false },
   ],
 
+  imports: {
+    dirs: [
+      'shared/config',
+      'shared/api',
+      'shared/api/storage',
+      'shared/api/platform',
+      'shared/api/firebase',
+    ]
+  },
+
   modules: [
     '@pinia/nuxt',
     '@vite-pwa/nuxt',

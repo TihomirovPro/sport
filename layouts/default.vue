@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 const userStore = useUserStore()
 const { activeUser } = storeToRefs(userStore)

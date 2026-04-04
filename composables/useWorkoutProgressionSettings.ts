@@ -1,8 +1,8 @@
-import { onData, updateData } from '~/composables/firebaseInit'
+import { onData, updateData } from '~/shared/api/firebaseInit'
 import { safeParseJson } from '~/composables/useWorkoutHelpers'
 import type { Ref } from 'vue'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 const PROGRESSION_SETTINGS_STORAGE_KEY = IDB_KEYS.PROGRESSION_SETTINGS
 

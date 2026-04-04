@@ -1,5 +1,5 @@
 import type { ComputedRef, Ref } from 'vue'
-import { createData } from '~/composables/firebaseInit'
+import { createData } from '~/shared/api/firebaseInit'
 import {
   buildProfileKey,
   computeBodyweightRepsSuggestion,

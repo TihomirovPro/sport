@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { createData, removeData, updateData } from '~/composables/firebaseInit'
+import { createData, removeData, updateData } from '~/shared/api/firebaseInit'
 import { normalizeRpe } from '~/composables/useWorkoutHelpers'
 import type { TypeWorkout, TypeWorkoutCreate } from '~/composables/types'
 

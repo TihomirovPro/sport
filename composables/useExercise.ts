@@ -1,5 +1,5 @@
 import type { TypeExercise, TypeExerciseCreate } from "./types"
-import { updateData, onData } from './firebaseInit'
+import { updateData, onData } from '~/shared/api/firebaseInit'
 
 let exercisesUnsubscribe: (() => void) | null = null
 let clearExercisesTimer: ReturnType<typeof setTimeout> | null = null
