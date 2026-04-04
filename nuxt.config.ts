@@ -54,6 +54,11 @@ export default defineNuxtConfig({
     }
   },
 
+  components: [
+    { path: '~/components', pathPrefix: true },
+    { path: '~/shared/ui', prefix: 'Ui', pathPrefix: false },
+  ],
+
   modules: [
     '@pinia/nuxt',
     '@vite-pwa/nuxt',

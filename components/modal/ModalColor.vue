@@ -16,7 +16,7 @@ const { colors } = storeToRefs(catalogStore)
 </script>
 
 <template>
-<Modal :isShow="isShow" @hiden="emit('hiden')">
+<UiModal :isShow="isShow" @hiden="emit('hiden')">
   <template #content>
     <div class="grid gap-1 grid-cols-6">
       <div
@@ -29,5 +29,5 @@ const { colors } = storeToRefs(catalogStore)
       </div>
     </div>
   </template>
-</Modal>
+</UiModal>
 </template>

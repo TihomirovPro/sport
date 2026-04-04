@@ -82,7 +82,7 @@ useHead({
   >
     <p class="text-sm opacity-75">У вас пока нет тренировок</p>
     <p class="text-xs opacity-60">Нажмите на плюс в правом верхнем углу или добавьте первую тренировку кнопкой ниже</p>
-    <BaseButton
+    <UiButton
       text="Добавить тренировку"
       @click="toCreateWorkout"
     />

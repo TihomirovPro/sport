@@ -97,7 +97,7 @@ async function reset() {
 </script>
 
 <template lang="pug">
-Modal(:isShow="isShow" @hiden="emit('hiden')")
+UiModal(:isShow="isShow" @hiden="emit('hiden')")
   template(#content)
     .flex.items-start.justify-between
       div
@@ -157,12 +157,12 @@ Modal(:isShow="isShow" @hiden="emit('hiden')")
         span Добавить резину
 
   template(#bottom)
-    BaseButton(
+    UiButton(
       red
       text="Сбросить"
       @click="reset"
     )
-    BaseButton(
+    UiButton(
       text="Сохранить"
       @click="save"
     )

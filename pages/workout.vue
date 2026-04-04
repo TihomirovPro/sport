@@ -167,10 +167,10 @@ onUnmounted(() => {
     )
     span {{ formatDate(workout.date) }}
   template(v-if="!isComplex")
-    BaseInputRange(v-model="workout.interval")
-    BaseInputRange(v-model="approaches" max="10" step="1" view="approaches")
+    UiInputRange(v-model="workout.interval")
+    UiInputRange(v-model="approaches" max="10" step="1" view="approaches")
   template(v-else)
-    BaseInput(
+    UiInput(
       v-model="complexTime"
       type="text"
       :error="error"
@@ -182,7 +182,7 @@ onUnmounted(() => {
         v-for="(item, idx) in complexExercises"
         :key="`complex-exercise-${idx}`"
       )
-        BaseInput(
+        UiInput(
           v-model="complexExercises[idx]"
           type="text"
           placeholder="Упражнение"
@@ -191,7 +191,7 @@ onUnmounted(() => {
           type="button"
           @click="removeComplexExercise(idx)"
         ) удалить
-      BaseButton(
+      UiButton(
         text="Добавить упражнение"
         @click="addComplexExercise"
       )
@@ -229,7 +229,7 @@ onUnmounted(() => {
         span.opacity-70(class="text-[11px]") Рекомендуемые веса
         span.font-semibold(class="text-[13px]") {{ recommendationWeightsLine }}
 
-    BaseButton(
+    UiButton(
       text="Применить рекомендацию"
       @click="applyProgressionSuggestion"
     )
@@ -240,7 +240,7 @@ onUnmounted(() => {
       :key="index"
     )
       .text-sm {{ timerApproach(index-1) }}
-      BaseInput(
+      UiInput(
         v-model="workout.approach[index-1]"
         type="text"
         :error="error"
@@ -248,7 +248,7 @@ onUnmounted(() => {
         :placeholder="`Подход ${index}`"
       )
 
-      BaseInput(
+      UiInput(
         v-if="workout.ease === EnumEase.weight"
         :model-value="Array.isArray(workout.weight) ? workout.weight[index-1] : ''"
         @update:model-value="(value) => updateWeight(index - 1, value)"
@@ -257,7 +257,7 @@ onUnmounted(() => {
         :placeholder="`Вес ${index}`"
       )  
 
-  BaseInputRange(
+  UiInputRange(
     v-if="!isComplex"
     :model-value="workout.rpe ?? 8"
     @update:model-value="updateRpe"
@@ -268,27 +268,27 @@ onUnmounted(() => {
   )
   p.text-xs.opacity-70(v-if="!isComplex") RPE оценивается по последнему рабочему подходу.
 
-  BaseInput(
+  UiInput(
     v-model="workout.desc"
     type="textarea"
     placeholder="Заметка"
   )
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
-    BaseButton(
+    UiButton(
       v-if="!selectUpdateWorkout"
       :disabled="isSaving"
       @click="add"
       :text="isSaving ? 'Сохранение...' : 'Добавить'"
     )
     template(v-else)
-      BaseButton(
+      UiButton(
         red
         :disabled="isSaving"
         @click="removeConfirm = true"
         text="Удалить"
       )
-      BaseButton(
+      UiButton(
         :disabled="isSaving"
         @click="updateSelectWorkout"
         :text="isSaving ? 'Сохранение...' : 'Сохранить'"

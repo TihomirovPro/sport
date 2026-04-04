@@ -17,13 +17,13 @@ function isActive(ease: EnumEase) {
 </script>
 
 <template>
-<TabsWrap>
-  <TabsItem
+<UiTabsWrap>
+  <UiTabsItem
     v-for="ease in eases"
     :key="ease"
     :active="isActive(ease)"
     @click="emit('selectEase', ease)"
     :title="ease"
   />
-</TabsWrap>
+</UiTabsWrap>
 </template>

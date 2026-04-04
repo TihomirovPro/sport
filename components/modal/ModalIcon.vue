@@ -16,7 +16,7 @@ const { icons } = storeToRefs(catalogStore)
 </script>
 
 <template>
-<Modal :isShow="isShow" @hiden="emit('hiden')">
+<UiModal :isShow="isShow" @hiden="emit('hiden')">
   <template #content>
     <div class="grid gap-2 grid-cols-4 place-items-center text-5xl">
       <div
@@ -26,12 +26,12 @@ const { icons } = storeToRefs(catalogStore)
         :class="{ 'border bg-accent/20 border-accent' : activeIcon === icon }"
         @click="emit('selectIcon', icon)"
       >
-        <Icon
+        <UiIcon
           :icon="icon"
           color="rgb(var(--colorIcon))"
         />
       </div>
     </div>
   </template>
-</Modal>
+</UiModal>
 </template>
