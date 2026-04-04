@@ -7,8 +7,8 @@ import {
   addMeasureEntry,
   removeMeasureEntry,
 } from '~/composables/useMeasure'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 import {
   Chart as ChartJS,
   CategoryScale,

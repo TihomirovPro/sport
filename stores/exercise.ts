@@ -1,6 +1,6 @@
 import type { TypeExercise } from '~/composables/types'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 export const useExerciseStore = defineStore('exercise', () => {
   const allExercises = ref<TypeExercise[]>([])

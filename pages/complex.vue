@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { updateData } from '~/composables/firebaseInit'
+import { updateData } from '~/shared/api/firebaseInit'
 
 definePageMeta({
   backTo: '/exercise-item'

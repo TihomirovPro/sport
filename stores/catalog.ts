@@ -1,4 +1,4 @@
-import { removeData, updateData } from '~/composables/firebaseInit'
+import { removeData, updateData } from '~/shared/api/firebaseInit'
 
 export const useCatalogStore = defineStore('catalog', () => {
   const settings = ref<[]>([])

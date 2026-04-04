@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { updateData, removeData, createData } from '~/composables/firebaseInit'
+import { updateData, removeData, createData } from '~/shared/api/firebaseInit'
 import type { TypeExerciseCreate } from '~/composables/types'
 import { EnumEase } from '~/composables/types';
 

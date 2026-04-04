@@ -1,4 +1,4 @@
-import { onData } from './firebaseInit'
+import { onData } from '~/shared/api/firebaseInit'
 import type { TypeWorkout } from "./types"
 import { normalizeWorkoutDate } from './useWorkoutHelpers'
 

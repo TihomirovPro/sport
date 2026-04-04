@@ -1,4 +1,4 @@
-import { getOnlineStatus } from '~/composables/platform/ios'
+import { getOnlineStatus } from '~/shared/api/platform/ios'
 
 function getUserErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) {

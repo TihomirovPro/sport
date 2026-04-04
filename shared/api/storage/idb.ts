@@ -1,4 +1,4 @@
-import { IDB_KEYS } from './keys'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
 
 const DB_NAME = 'pp-storage'
 const STORE_NAME = 'keyval'

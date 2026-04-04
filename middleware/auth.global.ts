@@ -1,8 +1,8 @@
 import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
-import { readLastAuthUid } from '~/composables/firebase/authSession'
-import { getFirebaseAuth } from '~/composables/firebaseInit'
-import { getOnlineStatus } from '~/composables/platform/ios'
+import { readLastAuthUid } from '~/shared/api/firebase/authSession'
+import { getFirebaseAuth } from '~/shared/api/firebaseInit'
+import { getOnlineStatus } from '~/shared/api/platform/ios'
 
 const publicRouteNames = new Set(['login'])
 const AUTH_RESOLVE_TIMEOUT_MS = 2500

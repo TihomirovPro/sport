@@ -1,6 +1,6 @@
 import type { DataSnapshot } from 'firebase/database'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 
 const OFFLINE_CACHE_KEY = IDB_KEYS.OFFLINE_CACHE
 const PERSIST_DELAY_MS = 120

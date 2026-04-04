@@ -1,5 +1,5 @@
 import type { DataSnapshot } from 'firebase/database'
-import { createData, onData, removeData } from './firebaseInit'
+import { createData, onData, removeData } from '~/shared/api/firebaseInit'
 import type { MeasureType, MeasureEntry } from '~/stores/measure'
 
 const TYPES_PATH = 'measureTypes'

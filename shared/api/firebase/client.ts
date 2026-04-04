@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app'
 import type { FirebaseApp } from 'firebase/app'
 import { getAuth, type Auth } from 'firebase/auth'
 import { getDatabase, type Database } from 'firebase/database'
-import { readLastAuthUid } from '~/composables/firebase/authSession'
+import { readLastAuthUid } from '~/shared/api/firebase/authSession'
 
 interface FirebaseConfig {
   apiKey: string

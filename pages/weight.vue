@@ -2,8 +2,8 @@
 import { Chart } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
 import { addWeight, removeWeight, stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
 import {
   Chart as ChartJS,
   CategoryScale,

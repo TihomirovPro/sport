@@ -1,9 +1,9 @@
 import type { DataSnapshot } from 'firebase/database'
 import { child, onValue, push, ref, remove, set, update } from 'firebase/database'
-import { dbPath, getFirebaseApp, getFirebaseAuth, getFirebaseDb, logFirebaseError } from '~/composables/firebase/client'
-import { getOnlineStatus } from '~/composables/platform/ios'
-import { emitCachedSnapshot, updateCachedPath } from '~/composables/firebase/offlineCache'
-import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/composables/firebase/offlineQueue'
+import { dbPath, getFirebaseApp, getFirebaseAuth, getFirebaseDb, logFirebaseError } from '~/shared/api/firebase/client'
+import { getOnlineStatus } from '~/shared/api/platform/ios'
+import { emitCachedSnapshot, updateCachedPath } from '~/shared/api/firebase/offlineCache'
+import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/shared/api/firebase/offlineQueue'
 
 export { getFirebaseApp, getFirebaseAuth, getFirebaseDb, clearOfflineUserData, initOfflineSync, flushOfflineQueue }
 

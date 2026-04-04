@@ -1,11 +1,11 @@
 import { goOffline, goOnline, onValue, ref, remove, set, update } from 'firebase/database'
-import { setOfflinePendingOperations, setOnlineStatus, setRetryDelay } from '~/composables/offlineState'
+import { setOfflinePendingOperations, setOnlineStatus, setRetryDelay } from '~/shared/api/offlineState'
 import { dbPath, getFirebaseAuth, getFirebaseDb, logFirebaseError } from './client'
 import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
-import { IDB_KEYS } from '~/composables/storage/keys'
-import { idbStorage } from '~/composables/storage/idb'
-import { getOnlineStatus } from '~/composables/platform/ios'
+import { IDB_KEYS } from '~/shared/config/storageKeys'
+import { idbStorage } from '~/shared/api/storage/idb'
+import { getOnlineStatus } from '~/shared/api/platform/ios'
 
 const OFFLINE_QUEUE_KEY = IDB_KEYS.OFFLINE_QUEUE
 const PERSIST_DELAY_MS = 120
