@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { getFirebaseAuth } from '~/shared/api/firebaseInit'
+import { getFirebaseAuth } from '~/shared/api/firebase/client'
 import { getOnlineStatus } from '~/shared/api/platform/ios'
 
 definePageMeta({

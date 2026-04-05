@@ -1,5 +1,7 @@
 import { onAuthStateChanged } from 'firebase/auth'
-import { getFirebaseAuth, updateData, clearOfflineUserData } from '~/shared/api/firebaseInit'
+import { getFirebaseAuth } from '~/shared/api/firebase/client'
+import { clearOfflineUserData } from '~/shared/api/firebase/offlineQueue'
+import { updateData } from '~/shared/api/firebaseInit'
 import { clearLastAuthUid, readLastAuthUid, writeLastAuthUid } from '~/shared/api/firebase/authSession'
 
 let authUnsubscribe: (() => void) | null = null

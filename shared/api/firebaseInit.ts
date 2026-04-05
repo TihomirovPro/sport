@@ -5,8 +5,6 @@ import { getOnlineStatus } from '~/shared/api/platform/ios'
 import { emitCachedSnapshot, updateCachedPath } from '~/shared/api/firebase/offlineCache'
 import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/shared/api/firebase/offlineQueue'
 
-export { getFirebaseApp, getFirebaseAuth, getFirebaseDb, clearOfflineUserData, initOfflineSync, flushOfflineQueue }
-
 // Compat exports for stale cached chunks (PWA/SW) that may still import these names.
 export const data = undefined
 export const callback = undefined
