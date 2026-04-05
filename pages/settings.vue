@@ -134,7 +134,7 @@ async function signOutUser() {
             line(x1="21" y1="12" x2="23" y2="12")
             line(x1="4.22" y1="19.78" x2="5.64" y2="18.36")
             line(x1="18.36" y1="5.64" x2="19.78" y2="4.22")
-        UiBaseToggle(:modelValue="isDark" :activeColor="baseColor" @update:modelValue="changeTheme")
+        UiToggle(:modelValue="isDark" :activeColor="baseColor" @update:modelValue="changeTheme")
 
       .h-px.bg-faint.mx-4
 
@@ -170,7 +170,7 @@ async function signOutUser() {
             line(x1="3" y1="6" x2="3.01" y2="6")
             line(x1="3" y1="12" x2="3.01" y2="12")
             line(x1="3" y1="18" x2="3.01" y2="18")
-        UiBaseToggle(v-model="hideFilterTitles" :activeColor="baseColor")
+        UiToggle(v-model="hideFilterTitles" :activeColor="baseColor")
 
       .h-px.bg-faint.mx-4
 
