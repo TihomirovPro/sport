@@ -249,7 +249,7 @@ watch(() => exercise.value.name, (name) => {
           @update:modelValue="selectEase(EnumEase.rubber)"
         )
 
-  TabsItem(
+  UiTabsItem(
     v-if="canManageComplexes"
     title="Комплекс"
     :active="exercise.isComplex"
