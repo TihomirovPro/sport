@@ -38,8 +38,9 @@ const formattedRpe = computed(() => {
 })
 
 function selectUpdate() {
-  selectUpdateWorkout.value = workouts.value.find(item => item.id === props.id) || null
-  router.push('/workout')
+  const found = workouts.value.find(item => item.id === props.id) || null
+  selectUpdateWorkout.value = found
+  if (found) router.push(`/exercise/${found.exercisesId}/workout`)
 }
 </script>
 

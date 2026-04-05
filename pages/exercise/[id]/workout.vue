@@ -4,29 +4,32 @@ import { EnumEase } from '~/composables/types'
 import { formatWorkoutDate, normalizeWorkoutDate, toDateInputValue } from '~/composables/useWorkoutHelpers'
 
 definePageMeta({
-  backTo: '/exercise-item',
+  backToExercise: true,
   clearSelectUpdateWorkout: true,
   removeStorageKeys: ['pp-new-workout-v1', 'pp-approaches-v1']
 })
 
+const route = useRoute()
 const router = useRouter()
 const exerciseStore = useExerciseStore()
 const workoutStore = useWorkoutStore()
 const catalogStore = useCatalogStore()
 const appStore = useAppStore()
 const userStore = useUserStore()
-const { activeExercise } = storeToRefs(exerciseStore)
+const { allExercises } = storeToRefs(exerciseStore)
 const { workouts, filteredWorkouts, selectUpdateWorkout } = storeToRefs(workoutStore)
 const { rubbersColor } = storeToRefs(catalogStore)
 const { headerTitle } = storeToRefs(appStore)
 const { activeUser } = storeToRefs(userStore)
 const { notifyError } = useNotifications()
-const { restoreActiveExerciseFromStorage } = useActiveExercise()
 const removeConfirm = ref(false)
 const isSaving = ref(false)
 
-const isComplex = computed(() => Boolean(activeExercise.value?.isComplex))
-const eases = computed(() => activeExercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
+const exerciseId = computed(() => String(route.params.id))
+const exercise = computed(() => allExercises.value.find(e => e.id === exerciseId.value) || null)
+
+const isComplex = computed(() => Boolean(exercise.value?.isComplex))
+const eases = computed(() => exercise.value?.ease || [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber])
 
 const {
   error,
@@ -41,7 +44,7 @@ const {
   validateWorkout,
   clearDraftStorage
 } = useWorkoutForm({
-  activeExercise,
+  exercise,
   selectUpdateWorkout,
   isComplex,
   resolveFormDefaults: workoutStore.resolveFormDefaults,
@@ -63,7 +66,7 @@ const {
   applyProgressionSuggestion
 } = useWorkoutProgressionUI({
   activeUser,
-  activeExercise,
+  exercise,
   selectUpdateWorkout,
   workouts,
   workout,
@@ -89,28 +92,16 @@ const { add, updateSelectWorkout, removeSelectWorkout } = useWorkoutPersistence(
 const formatDate = formatWorkoutDate
 const workoutDateInputRef = ref<HTMLInputElement | null>(null)
 const workoutDateModel = computed<string>({
-  get() {
-    return toDateInputValue(workout.value.date)
-  },
-  set(value) {
-    workout.value.date = normalizeWorkoutDate(value)
-  }
+  get() { return toDateInputValue(workout.value.date) },
+  set(value) { workout.value.date = normalizeWorkoutDate(value) }
 })
 
 function openDatePicker(event?: MouseEvent) {
   const input = workoutDateInputRef.value
   if (!input) return
-
-  // showPicker поддерживается не везде и может требовать жест пользователя.
   if (event?.isTrusted && typeof input.showPicker === 'function') {
-    try {
-      input.showPicker()
-      return
-    } catch {
-      // fallback ниже
-    }
+    try { input.showPicker(); return } catch { /* fallback */ }
   }
-
   input.focus()
   input.click()
 }
@@ -120,10 +111,8 @@ function timerApproach(time: number) {
     const s = +workout.value.interval * time * 60
     const minutes = String(Math.floor(s / 60)).length === 1 ? `0${Math.floor(s / 60)}` : Math.floor(s / 60)
     const seconds = String(s % 60).length === 1 ? `0${s % 60}` : s % 60
-
     return `${minutes}:${seconds}`
   }
-
   return '00:00'
 }
 
@@ -131,22 +120,11 @@ watchEffect(() => {
   headerTitle.value = selectUpdateWorkout.value ? 'Изменить тренировку' : 'Добавить тренировку'
 })
 
-useHead(() => ({
-  title: headerTitle.value
-}))
+useHead(() => ({ title: headerTitle.value }))
 
 onMounted(() => {
-  restoreActiveExerciseFromStorage(activeExercise, {
-    fallbackEase: [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
-  })
-
-  if (activeExercise.value?.id) {
-    getWorkouts(activeExercise.value.id)
-    workout.value.exercisesId = activeExercise.value.id
-  } else {
-    notifyError('Нет данных упражнения в оффлайн-кэше. Сначала откройте его онлайн.')
-    void router.push('/')
-  }
+  getWorkouts(exerciseId.value)
+  workout.value.exercisesId = exerciseId.value
 })
 
 onUnmounted(() => {
@@ -166,6 +144,7 @@ onUnmounted(() => {
       type="date"
     )
     span {{ formatDate(workout.date) }}
+
   template(v-if="!isComplex")
     UiInputRange(v-model="workout.interval")
     UiInputRange(v-model="approaches" max="10" step="1" view="approaches")
@@ -182,19 +161,9 @@ onUnmounted(() => {
         v-for="(item, idx) in complexExercises"
         :key="`complex-exercise-${idx}`"
       )
-        UiInput(
-          v-model="complexExercises[idx]"
-          type="text"
-          placeholder="Упражнение"
-        )
-        button.text-sm.text-error.px-2(
-          type="button"
-          @click="removeComplexExercise(idx)"
-        ) удалить
-      UiButton(
-        text="Добавить упражнение"
-        @click="addComplexExercise"
-      )
+        UiInput(v-model="complexExercises[idx]" type="text" placeholder="Упражнение")
+        button.text-sm.text-error.px-2(type="button" @click="removeComplexExercise(idx)") удалить
+      UiButton(text="Добавить упражнение" @click="addComplexExercise")
 
   TabsEases(
     v-if="!isComplex && eases.length > 1"
@@ -214,31 +183,22 @@ onUnmounted(() => {
   .grid.gap-3.border.border-faint.rounded-xl.p-3(v-if="canShowProgression")
     p.text-sm.leading-relaxed.font-medium.opacity-95 {{ activeSuggestionSummaryText }}
     p.text-xs.opacity-70 {{ activeSuggestionConfidenceLine }}
-
     .grid.grid-cols-2.gap-3
       .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
         class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
       )
         span.opacity-70(class="text-[11px]") Рекомендуемые повторы
         span.font-semibold(class="text-[13px]") {{ recommendationRepsLine }}
-  
       .border.border-faint.rounded-lg.px-3.py-2.grid.gap-1(
         v-if="isWeightMode"
         class="border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
       )
         span.opacity-70(class="text-[11px]") Рекомендуемые веса
         span.font-semibold(class="text-[13px]") {{ recommendationWeightsLine }}
-
-    UiButton(
-      text="Применить рекомендацию"
-      @click="applyProgressionSuggestion"
-    )
+    UiButton(text="Применить рекомендацию" @click="applyProgressionSuggestion")
 
   .approaches(v-if="!isComplex")
-    .flex.items-center.gap-3.mb-3(
-      v-for="index in +approaches"
-      :key="index"
-    )
+    .flex.items-center.gap-3.mb-3(v-for="index in +approaches" :key="index")
       .text-sm {{ timerApproach(index-1) }}
       UiInput(
         v-model="workout.approach[index-1]"
@@ -247,7 +207,6 @@ onUnmounted(() => {
         inputmode="numeric"
         :placeholder="`Подход ${index}`"
       )
-
       UiInput(
         v-if="workout.ease === EnumEase.weight"
         :model-value="Array.isArray(workout.weight) ? workout.weight[index-1] : ''"
@@ -255,7 +214,7 @@ onUnmounted(() => {
         type="text"
         inputmode="decimal"
         :placeholder="`Вес ${index}`"
-      )  
+      )
 
   UiInputRange(
     v-if="!isComplex"
@@ -268,11 +227,7 @@ onUnmounted(() => {
   )
   p.text-xs.opacity-70(v-if="!isComplex") RPE оценивается по последнему рабочему подходу.
 
-  UiInput(
-    v-model="workout.desc"
-    type="textarea"
-    placeholder="Заметка"
-  )
+  UiInput(v-model="workout.desc" type="textarea" placeholder="Заметка")
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
     UiButton(
@@ -282,18 +237,9 @@ onUnmounted(() => {
       :text="isSaving ? 'Сохранение...' : 'Добавить'"
     )
     template(v-else)
-      UiButton(
-        red
-        :disabled="isSaving"
-        @click="removeConfirm = true"
-        text="Удалить"
-      )
-      UiButton(
-        :disabled="isSaving"
-        @click="updateSelectWorkout"
-        :text="isSaving ? 'Сохранение...' : 'Сохранить'"
-      )
-  
+      UiButton(red :disabled="isSaving" @click="removeConfirm = true" text="Удалить")
+      UiButton(:disabled="isSaving" @click="updateSelectWorkout" :text="isSaving ? 'Сохранение...' : 'Сохранить'")
+
   ModalRemoveConfirm(
     text="Точно хочешь удалить данную запись?"
     :isShow="removeConfirm"

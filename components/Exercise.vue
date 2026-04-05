@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia'
 import type { TypeExercise } from '~/composables/types'
 
 const props = defineProps<TypeExercise>()
 
-const exerciseStore = useExerciseStore()
-const { selectUpdateExercise } = storeToRefs(exerciseStore)
 const router = useRouter()
 
 function update() {
-  selectUpdateExercise.value = props
-  router.push('/exercise')
+  router.push(`/exercise/${props.id}/edit`)
 }
 
 function active() {
-  exerciseStore.setActiveExercise(props)
   getWorkouts(props.id)
 
-  if (!props.isComplex) router.push('/exercise-item')
-  else router.push('/exercise-item?complex=true')
+  if (!props.isComplex) router.push(`/exercise/${props.id}`)
+  else router.push(`/exercise/${props.id}?complex=true`)
 }
 </script>
 

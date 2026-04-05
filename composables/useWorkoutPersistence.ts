@@ -107,7 +107,7 @@ export function useWorkoutPersistence({
         resWeigth: workoutPayload.resWeigth
       })
 
-      await router.push('/exercise-item')
+      await router.push(`/exercise/${workoutPayload.exercisesId}`)
       reset()
       clearDraftStorage()
     } catch (error) {
@@ -150,7 +150,7 @@ export function useWorkoutPersistence({
       })
 
       reset()
-      await router.push('/exercise-item')
+      await router.push(`/exercise/${workoutPayload.exercisesId}`)
     } catch (error) {
       console.error('[firebase:updateWorkout]', error)
       notifyError('Не удалось сохранить тренировку. Попробуйте снова.')
@@ -176,7 +176,7 @@ export function useWorkoutPersistence({
       }
 
       reset()
-      await router.push('/exercise-item')
+      await router.push(`/exercise/${selectedExerciseId}`)
     } catch (error) {
       console.error('[firebase:removeWorkout]', error)
       notifyError('Не удалось удалить тренировку. Попробуйте снова.')
