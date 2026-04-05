@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { EnumEase } from '~/composables/types'
-import { formatWorkoutDate, normalizeWorkoutDate, toDateInputValue } from '~/composables/useWorkoutHelpers'
+import { EnumEase } from '~/shared/config/enums'
 
 definePageMeta({
   backToExercise: true,

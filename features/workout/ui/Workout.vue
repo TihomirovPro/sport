@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import type { TypeWorkoutPage } from '~/composables/types'
+import type { TypeWorkoutPage } from '~/features/workout/model/types'
 
 const props = defineProps<TypeWorkoutPage & { isComplex?: boolean }>()
 
@@ -51,8 +51,6 @@ function selectUpdate() {
     p(v-if="isComplex") На время{{ rounds ? ` · ${rounds} кр.` : '' }}
     p(v-else) {{ approach.length }} x {{ interval }}
     p(v-if="!isComplex") {{ ease === EnumEase.rubber ? rubber : ease }}
-
-  .text-xs.pb-3(v-if="!isComplex && formattedRpe") RPE: {{ formattedRpe }}
 
   .grid(:style="cols" v-if="!isComplex")
     .text-left.py-1.pr-1(class="text-[rgb(var(--colorIcon))]/40") пвт

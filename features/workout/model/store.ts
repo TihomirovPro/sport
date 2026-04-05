@@ -1,4 +1,5 @@
-import { EnumEase, type TypeWorkout, type WorkoutActiveFilters, type WorkoutFormDefaults } from '~/composables/types'
+import { EnumEase } from '~/shared/config/enums'
+import type { TypeWorkout, WorkoutActiveFilters, WorkoutFormDefaults } from '~/features/workout/model/types'
 
 export const useWorkoutStore = defineStore('workout', () => {
   const workouts = ref<TypeWorkout[]>([])

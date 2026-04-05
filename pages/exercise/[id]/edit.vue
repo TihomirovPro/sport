@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { updateData, removeData } from '~/shared/api/firebaseInit'
-import type { TypeExerciseCreate } from '~/composables/types'
-import { EnumEase } from '~/composables/types'
+import type { TypeExerciseCreate } from '~/features/exercise/model/types'
+import { EnumEase } from '~/shared/config/enums'
 
 definePageMeta({
   backToExercise: true

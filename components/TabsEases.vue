@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { EnumEase } from '~/composables/types'
+import { EnumEase } from '~/shared/config/enums'
 
 const props = defineProps<{
   eases: EnumEase[]

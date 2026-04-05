@@ -1,5 +1,5 @@
 import { onData, updateData } from '~/shared/api/firebaseInit'
-import { safeParseJson } from '~/composables/useWorkoutHelpers'
+import { safeParseJson } from '~/features/workout/lib/helpers'
 import type { Ref } from 'vue'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'

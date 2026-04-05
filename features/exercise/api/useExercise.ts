@@ -1,4 +1,4 @@
-import type { TypeExercise, TypeExerciseCreate } from "./types"
+import type { TypeExercise, TypeExerciseCreate } from '~/features/exercise/model/types'
 import { updateData, onData } from '~/shared/api/firebaseInit'
 
 let exercisesUnsubscribe: (() => void) | null = null
@@ -76,8 +76,8 @@ export const getAllExercises = () => {
   return exercisesUnsubscribe
 }
 
-export const sortExercises = (exercises:TypeExercise[]) => {
-  const newExercises:{ [key:string]:TypeExerciseCreate } = {}
+export const sortExercises = (exercises: TypeExercise[]) => {
+  const newExercises: { [key: string]: TypeExerciseCreate } = {}
 
   exercises.forEach((el, i) => {
     const payload: TypeExerciseCreate = {
