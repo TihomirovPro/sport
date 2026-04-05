@@ -82,8 +82,8 @@ function median(values: number[]): number {
   if (!values.length) return 0
   const sorted = [...values].sort((a, b) => a - b)
   const middle = Math.floor(sorted.length / 2)
-  if (sorted.length % 2 === 0) return (sorted[middle - 1] + sorted[middle]) / 2
-  return sorted[middle]
+  if (sorted.length % 2 === 0) return (sorted[middle - 1]! + sorted[middle]!) / 2
+  return sorted[middle]!
 }
 
 function isValidSessionMeta(session: ProgressionSession): boolean {
@@ -158,14 +158,14 @@ function hasHighRepVariability(reps: number[]): boolean {
 function computeStableRepTarget(reps: number[], repMin: number, repMax: number): number {
   const sorted = [...reps].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
   const mid = Math.floor(sorted.length / 2)
-  const median = sorted.length % 2 !== 0 ? sorted[mid] : Math.floor((sorted[mid - 1] + sorted[mid]) / 2)
+  const median = sorted.length % 2 !== 0 ? sorted[mid]! : Math.floor((sorted[mid - 1]! + sorted[mid]!) / 2)
   return clamp(median, repMin, repMax - 1)
 }
 
 function getRepTrendDirection(reps: number[]): 'descending' | 'ascending' | 'flat' {
   if (reps.length < 2) return 'flat'
-  const first = reps[0]
-  const last = reps[reps.length - 1]
+  const first = reps[0]!
+  const last = reps[reps.length - 1]!
   const avg = reps.reduce((sum, r) => sum + r, 0) / reps.length
   const threshold = avg > 0 ? avg * 0.2 : 1
   if (first - last >= threshold) return 'descending'
@@ -204,13 +204,13 @@ function computeAutoBaseIncrement(history: ProgressionSession[]): number {
 
   const deltas: number[] = []
   for (let index = 1; index < sessionAverages.length; index += 1) {
-    const delta = Math.abs(sessionAverages[index] - sessionAverages[index - 1])
+    const delta = Math.abs(sessionAverages[index]! - sessionAverages[index - 1]!)
     if (delta > 0) deltas.push(delta)
   }
 
   const base = deltas.length
     ? median(deltas)
-    : sessionAverages[sessionAverages.length - 1] * 0.025
+    : sessionAverages[sessionAverages.length - 1]! * 0.025
 
   return clamp(roundToHalfStep(base), 0.5, 5)
 }
@@ -241,8 +241,8 @@ function computeAutoRepRange(history: ProgressionSession[]): { repMin: number, r
 
   const minRepsHistory = normalized.map((session) => Math.min(...session.reps))
   const maxRepsHistory = normalized.map((session) => Math.max(...session.reps))
-  const latestMin = minRepsHistory[0]
-  const latestMax = maxRepsHistory[0]
+  const latestMin = minRepsHistory[0]!
+  const latestMax = maxRepsHistory[0]!
 
   const rawMin = normalized.length < 3 ? latestMin : median(minRepsHistory)
   const rawMax = normalized.length < 3 ? latestMax : median(maxRepsHistory)
@@ -359,7 +359,7 @@ export function computeProgressionSuggestion(
     }
   }
 
-  const latest = history[0]
+  const latest = history[0]!
   const minReps = Math.min(...latest.reps)
   const latestReps = latest.reps.map((item) => clamp(Math.round(item), 1, 100))
   const latestWeights = latest.weights.map((item) => roundToIncrement(item, autoBaseIncrementKg))
@@ -369,7 +369,7 @@ export function computeProgressionSuggestion(
   const highVariability = hasHighRepVariability(latest.reps)
   const sortedRepsForHold = [...latest.reps].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
   const repMedianIdx = Math.floor(sortedRepsForHold.length / 2)
-  const repMedian = sortedRepsForHold.length % 2 !== 0 ? sortedRepsForHold[repMedianIdx] : Math.floor((sortedRepsForHold[repMedianIdx - 1] + sortedRepsForHold[repMedianIdx]) / 2)
+  const repMedian = sortedRepsForHold.length % 2 !== 0 ? sortedRepsForHold[repMedianIdx]! : Math.floor((sortedRepsForHold[repMedianIdx - 1]! + sortedRepsForHold[repMedianIdx]!) / 2)
   const stableHoldReps = new Array(profile.sets).fill(clamp(repMedian, 1, 100))
 
   if (history.length < 2) {
@@ -545,7 +545,7 @@ export function computeBodyweightRepsSuggestion(
     }
   }
 
-  const latest = history[0]
+  const latest = history[0]!
   const basedOnSessions = history.length
   const minReps = Math.min(...latest.reps)
   const maxReps = Math.max(...latest.reps)
@@ -554,7 +554,7 @@ export function computeBodyweightRepsSuggestion(
   const highVariability = hasHighRepVariability(latest.reps)
   const sortedBwReps = [...latest.reps].map(Number).filter(Number.isFinite).sort((a, b) => a - b)
   const bwMedianIdx = Math.floor(sortedBwReps.length / 2)
-  const bwRepMedian = sortedBwReps.length % 2 !== 0 ? sortedBwReps[bwMedianIdx] : Math.floor((sortedBwReps[bwMedianIdx - 1] + sortedBwReps[bwMedianIdx]) / 2)
+  const bwRepMedian = sortedBwReps.length % 2 !== 0 ? sortedBwReps[bwMedianIdx]! : Math.floor((sortedBwReps[bwMedianIdx - 1]! + sortedBwReps[bwMedianIdx]!) / 2)
   const stableBwHoldReps = new Array(profile.sets).fill(clamp(bwRepMedian, 1, 100))
 
   if (basedOnSessions < 2) {

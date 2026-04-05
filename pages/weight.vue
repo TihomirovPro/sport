@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Chart } from 'vue-chartjs'
+import { Chart as _Chart } from 'vue-chartjs'
+const Chart = _Chart as any
 import { storeToRefs } from 'pinia'
 import { addWeight, removeWeight, stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
@@ -80,8 +81,8 @@ const stats = computed(() => {
   const list = filteredEntries.value
   if (!list.length) return null
 
-  const latest = list[0]
-  const prev = list[1] || null
+  const latest = list[0]!
+  const prev = list[1] ?? null
   const sum = list.reduce((acc, item) => acc + item.value, 0)
   const average = sum / list.length
   const min = Math.min(...list.map((item) => item.value))

@@ -1,7 +1,7 @@
 import { onAuthStateChanged } from 'firebase/auth'
 import type { User } from 'firebase/auth'
 import { readLastAuthUid } from '~/shared/api/firebase/authSession'
-import { getFirebaseAuth } from '~/shared/api/firebaseInit'
+import { getFirebaseAuth } from '~/shared/api/firebase/client'
 import { getOnlineStatus } from '~/shared/api/platform/ios'
 
 const publicRouteNames = new Set(['login'])

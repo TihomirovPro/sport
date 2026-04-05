@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { signOut } from 'firebase/auth'
 import { storeToRefs } from 'pinia'
-import { getFirebaseAuth } from '~/shared/api/firebaseInit'
+import { getFirebaseAuth } from '~/shared/api/firebase/client'
 import { prepareLogout } from '~/composables/useUser'
 import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 import packageJson from '~/package.json'
@@ -48,7 +48,7 @@ const isDark = computed(() => colorMode.preference === 'dark')
 
 const userInitial = computed(() => {
   const name = activeUser.value.name || activeUser.value.email
-  return name ? name[0].toUpperCase() : '?'
+  return name ? name.charAt(0).toUpperCase() : '?'
 })
 
 const lastWeightText = computed(() => {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Chart } from 'vue-chartjs'
+import { Chart as _Chart } from 'vue-chartjs'
+const Chart = _Chart as any
 import { storeToRefs } from 'pinia'
 import {
   subscribeMeasureEntries,
@@ -94,7 +95,7 @@ const stats = computed(() => {
   const list = filteredEntries.value
   if (!list.length) return null
 
-  const latest = list[0]
+  const latest = list[0]!
   const prev = list[1] ?? null
   const sum = list.reduce((acc, e) => acc + e.value, 0)
   const average = sum / list.length
