@@ -48,7 +48,7 @@ function selectUpdate() {
 .grid.w-full.py-4.px-3.text-xs.border.border-faint.rounded-xl.shadow-md(class="bg-faint/20")
   .flex.items-center.justify-between.text-accent.pb-6
     p {{ formatDate }}
-    p(v-if="isComplex") На время
+    p(v-if="isComplex") На время{{ rounds ? ` · ${rounds} кр.` : '' }}
     p(v-else) {{ approach.length }} x {{ interval }}
     p(v-if="!isComplex") {{ ease === EnumEase.rubber ? rubber : ease }}
 

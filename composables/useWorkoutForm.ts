@@ -37,6 +37,9 @@ export function useWorkoutForm({
 
   function getNewWorkoutDefaults() {
     const defaults = resolveFormDefaults(exercise.value?.ease ?? [])
+    const templateItems = isComplex.value && Array.isArray(exercise.value?.complexItems) && exercise.value.complexItems.length > 0
+      ? [...exercise.value.complexItems]
+      : []
 
     return {
       approaches: defaults.approaches,
@@ -48,7 +51,8 @@ export function useWorkoutForm({
         rubber: '',
         approach: [],
         weight: [],
-        complexExercises: [],
+        complexExercises: templateItems,
+        rounds: undefined,
         desc: '',
         res: 0,
         resWeigth: 0
@@ -84,6 +88,7 @@ export function useWorkoutForm({
         complexExercises: Array.isArray(selectUpdateWorkout.value.complexExercises)
           ? [...selectUpdateWorkout.value.complexExercises]
           : [],
+        rounds: selectUpdateWorkout.value.rounds,
         desc: selectUpdateWorkout.value.desc || '',
         res: selectUpdateWorkout.value.res,
         resWeigth: selectUpdateWorkout.value.resWeigth
@@ -110,6 +115,10 @@ export function useWorkoutForm({
       const parsedApproaches = Number(parsedApproachesRaw)
       approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : fallbackDefaults.approaches
 
+      const idbComplexExercises = Array.isArray(newWorkout.complexExercises) && newWorkout.complexExercises.length > 0
+        ? newWorkout.complexExercises
+        : (isComplex.value && Array.isArray(exercise.value?.complexItems) ? [...(exercise.value.complexItems ?? [])] : [])
+
       workout.value = {
         exercisesId: exercise.value?.id ?? '',
         date: newWorkout.date ?? nowDate,
@@ -119,7 +128,8 @@ export function useWorkoutForm({
         rpe: normalizeRpe(newWorkout.rpe),
         rubber: newWorkout.rubber || '',
         weight: Array.isArray(newWorkout.weight) ? newWorkout.weight : [],
-        complexExercises: Array.isArray(newWorkout.complexExercises) ? newWorkout.complexExercises : [],
+        complexExercises: idbComplexExercises,
+        rounds: Number.isFinite(Number(newWorkout.rounds)) && Number(newWorkout.rounds) > 0 ? Number(newWorkout.rounds) : undefined,
         desc: newWorkout.desc || '',
         res: 0,
         resWeigth: newWorkout.resWeigth ?? newWorkout.resWeidth ?? 0
@@ -197,6 +207,7 @@ export function useWorkoutForm({
       workout.value.res = durationSeconds
       workout.value.resWeigth = 0
       workout.value.rpe = undefined
+      workout.value.rounds = workout.value.rounds && workout.value.rounds > 0 ? Math.round(workout.value.rounds) : undefined
       workout.value.date = normalizeWorkoutDate(workout.value.date)
       error.value = false
       return true

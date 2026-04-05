@@ -14,9 +14,7 @@ const appStore = useAppStore()
 appStore.headerTitle = 'Добавить упражнение'
 
 const exerciseStore = useExerciseStore()
-const userStore = useUserStore()
 const { allExercises } = storeToRefs(exerciseStore)
-const { activeUser } = storeToRefs(userStore)
 const router = useRouter()
 
 const showModalColor = ref<boolean>(false)
@@ -26,7 +24,6 @@ const isSaving = ref<boolean>(false)
 const { notifyError } = useNotifications()
 
 const constEases = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
-const canManageComplexes = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
 
 const exercise = ref<TypeExerciseCreate>({
   name: '',
@@ -35,6 +32,7 @@ const exercise = ref<TypeExerciseCreate>({
   ease: constEases,
   isComplex: false,
   complexDesc: '',
+  complexItems: [],
   order: allExercises.value.length
 })
 
@@ -71,12 +69,21 @@ function selectEase(ease: EnumEase) {
 }
 
 function toggleComplex() {
-  if (!canManageComplexes.value) {
-    notifyError('Только пользователь со статусом admin может создавать комплексы')
-    return
-  }
   exercise.value.isComplex = !exercise.value.isComplex
-  if (!exercise.value.isComplex) exercise.value.complexDesc = ''
+  if (!exercise.value.isComplex) {
+    exercise.value.complexDesc = ''
+    exercise.value.complexItems = []
+  }
+}
+
+function addComplexItem() {
+  if (!Array.isArray(exercise.value.complexItems)) exercise.value.complexItems = []
+  exercise.value.complexItems.push('')
+}
+
+function removeComplexItem(idx: number) {
+  if (!Array.isArray(exercise.value.complexItems)) return
+  exercise.value.complexItems.splice(idx, 1)
 }
 
 function validateExercise(): boolean {
@@ -91,11 +98,10 @@ function validateExercise(): boolean {
     notifyError('Выберите хотя бы один тип сложности')
     return false
   }
-  if (exercise.value.isComplex && !canManageComplexes.value) {
-    notifyError('Только пользователь со статусом admin может создавать комплексы')
-    return false
-  }
   exercise.value.complexDesc = exercise.value.isComplex ? (exercise.value.complexDesc?.trim() || '') : ''
+  exercise.value.complexItems = exercise.value.isComplex
+    ? (exercise.value.complexItems ?? []).map(s => s.trim()).filter(Boolean)
+    : []
   error.value = false
   return true
 }
@@ -196,20 +202,44 @@ watch(() => exercise.value.name, (name) => {
           @update:modelValue="selectEase(EnumEase.rubber)"
         )
 
-  UiTabsItem(
-    v-if="canManageComplexes"
-    title="Комплекс"
-    :active="exercise.isComplex"
-    @click="toggleComplex"
-  )
+  .flex.flex-col.gap-1
+    p.text-xs.font-semibold.uppercase.opacity-40.px-1.pb-1 Комплекс
+    .flex.flex-col.rounded-xl.overflow-hidden.border.border-faint
+      UiSettingsItem(label="Комплекс" @click="toggleComplex")
+        template(#icon)
+          svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
+            rect(x="3" y="3" width="7" height="7" rx="1")
+            rect(x="14" y="3" width="7" height="7" rx="1")
+            rect(x="3" y="14" width="7" height="7" rx="1")
+            rect(x="14" y="14" width="7" height="7" rx="1")
+        UiToggle(:modelValue="exercise.isComplex" @update:modelValue="toggleComplex")
 
-  UiInput(
-    v-if="exercise.isComplex && canManageComplexes"
-    v-model="exercise.complexDesc"
-    type="textarea"
-    placeholder="Описание комплекса"
-    class="min-h-[120px]"
-  )
+      template(v-if="exercise.isComplex")
+        .h-px.bg-faint
+        .px-4.py-3
+          UiInput(
+            v-model="exercise.complexDesc"
+            type="textarea"
+            placeholder="Описание"
+          )
+        .h-px.bg-faint.mx-4
+        .px-4.pt-3.pb-1
+          p.text-xs.font-semibold.uppercase.opacity-40 Упражнения
+        .flex.items-center.gap-2.px-3.py-2.border-t.border-faint(
+          v-for="(item, idx) in exercise.complexItems"
+          :key="`ci-${idx}`"
+        )
+          UiInput(
+            v-model="exercise.complexItems[idx]"
+            type="text"
+            placeholder="Бурпи x10"
+          )
+          button.text-xs.text-error.shrink-0.px-2.py-1(
+            type="button"
+            @click="removeComplexItem(idx)"
+          ) —
+        .px-4.py-3.border-t.border-faint
+          UiButton(text="+ Упражнение" @click="addComplexItem")
 
   .mt-auto
     UiButton(

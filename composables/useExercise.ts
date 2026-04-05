@@ -41,6 +41,7 @@ export const getAllExercises = () => {
           ease: exercise.ease,
           isComplex: exercise.isComplex,
           complexDesc: exercise.complexDesc,
+          complexItems: Array.isArray(exercise.complexItems) ? exercise.complexItems : [],
           order: exercise.order,
           id: key,
         })
@@ -89,6 +90,7 @@ export const sortExercises = (exercises:TypeExercise[]) => {
     if (el.icon !== undefined) payload.icon = el.icon
     if (el.isComplex !== undefined) payload.isComplex = el.isComplex
     if (el.complexDesc !== undefined) payload.complexDesc = el.complexDesc
+    if (el.complexItems !== undefined) payload.complexItems = el.complexItems
 
     newExercises[`${el.id}`] = payload
   })
