@@ -56,6 +56,14 @@ const complexExercises = computed({
   set: (value) => { workout.value.complexExercises = value }
 })
 
+const complexRounds = computed({
+  get: () => workout.value.rounds !== undefined ? String(workout.value.rounds) : '',
+  set: (value) => {
+    const num = parseInt(String(value))
+    workout.value.rounds = !isNaN(num) && num > 0 ? num : undefined
+  }
+})
+
 const {
   canShowProgression,
   isWeightMode,
@@ -153,7 +161,13 @@ onUnmounted(() => {
       v-model="complexTime"
       type="text"
       :error="error"
-      placeholder="Время выполнения"
+      placeholder="Время выполнения (ММ:СС)"
+    )
+    UiInput(
+      v-model="complexRounds"
+      type="text"
+      inputmode="numeric"
+      placeholder="Кол-во кругов (необязательно)"
     )
     .grid.gap-2
       .text-sm.opacity-70 Упражнения в этой тренировке

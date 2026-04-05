@@ -8,6 +8,7 @@ export interface TypeExercise {
   icon?: string
   isComplex?: boolean
   complexDesc?: string
+  complexItems?: string[]
 }
 
 export type TypeExerciseCreate = Omit<TypeExercise, 'id'>
@@ -30,6 +31,7 @@ export interface TypeWorkout {
   rubber?: string
   desc?: string
   complexExercises?: string[]
+  rounds?: number
   approach: number[]
   weight?: number[]
   res: number
