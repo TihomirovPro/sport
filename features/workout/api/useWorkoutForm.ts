@@ -1,12 +1,14 @@
 import type { ComputedRef, Ref } from 'vue'
-import { EnumEase, type TypeExercise, type TypeWorkout, type TypeWorkoutCreate, type WorkoutFormDefaults } from '~/composables/types'
+import type { TypeExercise } from '~/features/exercise/model/types'
+import { EnumEase } from '~/shared/config/enums'
+import type { TypeWorkout, TypeWorkoutCreate, WorkoutFormDefaults } from '~/features/workout/model/types'
 import {
   normalizeNumberArray,
   normalizeRpe,
   normalizeWorkoutDate,
   parseDurationToSeconds,
   safeParseJson
-} from '~/composables/useWorkoutHelpers'
+} from '~/features/workout/lib/helpers'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
 

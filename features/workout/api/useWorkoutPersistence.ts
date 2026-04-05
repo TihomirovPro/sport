@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { createData, removeData, updateData } from '~/shared/api/firebaseInit'
-import { normalizeRpe } from '~/composables/useWorkoutHelpers'
-import type { TypeWorkout, TypeWorkoutCreate } from '~/composables/types'
+import { normalizeRpe } from '~/features/workout/lib/helpers'
+import type { TypeWorkout, TypeWorkoutCreate } from '~/features/workout/model/types'
 
 type WorkoutWritePayload = Omit<TypeWorkoutCreate, 'rpe'> & { rpe?: number }
 
@@ -69,15 +69,12 @@ export function useWorkoutPersistence({
   clearDraftStorage
 }: UseWorkoutPersistenceParams) {
   function upsertWorkoutInStore(item: TypeWorkout) {
-    // Оптимистично обновляем список до прихода снапшота подписки,
-    // затем useWorkouts.ts синхронизирует и при необходимости выравнивает состояние.
     const withoutCurrent = workouts.value.filter((workoutItem) => workoutItem.id !== item.id)
     workouts.value = sortByDateDesc([item, ...withoutCurrent])
     filteredWorkouts.value = [...workouts.value]
   }
 
   function removeWorkoutFromStore(id: string) {
-    // Локально убираем запись для мгновенного отклика UI, финальное состояние задаёт подписка.
     workouts.value = workouts.value.filter((workoutItem) => workoutItem.id !== id)
     filteredWorkouts.value = filteredWorkouts.value.filter((workoutItem) => workoutItem.id !== id)
   }

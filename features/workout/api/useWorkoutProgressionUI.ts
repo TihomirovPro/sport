@@ -5,9 +5,11 @@ import {
   computeBodyweightRepsSuggestion,
   computeProgressionSuggestion,
   type ProgressionSession
-} from '~/composables/useProgressionTest'
-import { parseIntervalMinutes } from '~/composables/useWorkoutHelpers'
-import { EnumEase, type TypeExercise, type TypeWorkout, type TypeWorkoutCreate } from '~/composables/types'
+} from '~/features/workout/lib/useProgressionTest'
+import { parseIntervalMinutes } from '~/features/workout/lib/helpers'
+import type { TypeExercise } from '~/features/exercise/model/types'
+import { EnumEase } from '~/shared/config/enums'
+import type { TypeWorkout, TypeWorkoutCreate } from '~/features/workout/model/types'
 
 interface UseWorkoutProgressionUIParams {
   activeUser: Ref<{ status?: string } | null | undefined>

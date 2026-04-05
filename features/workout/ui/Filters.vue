@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Chart } from 'vue-chartjs'
 import { storeToRefs } from 'pinia'
-import type { Filter } from '~/composables/types'
-import { EnumEase } from '~/composables/types'
+import type { Filter } from '~/features/workout/model/types'
+import { EnumEase } from '~/shared/config/enums'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
 
@@ -63,7 +63,7 @@ const optionsLines = reactive({
       display: true,
       position: 'right',
       grid: {
-        drawOnChartArea: false, 
+        drawOnChartArea: false,
       },
     }
   }
@@ -204,7 +204,7 @@ const filter = ref<Filter>({
 
     if (ease === EnumEase.weight) optionsLines.scales.y1.display = true
     else optionsLines.scales.y1.display = false
-    
+
     forceChartUpdate()
     syncActiveFilters()
     useFilterDebounced()
@@ -280,7 +280,7 @@ const data = computed(() => {
 
     weights.unshift(weight > 0 ? weight : null)
   })
-  
+
   if (weights.some((item) => item !== null)) {
     options.datasets.push({
       label: 'Вес',

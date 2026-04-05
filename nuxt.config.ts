@@ -57,6 +57,8 @@ export default defineNuxtConfig({
   components: [
     { path: '~/components', pathPrefix: true },
     { path: '~/shared/ui', prefix: 'Ui', pathPrefix: false },
+    { path: '~/features/exercise/ui', pathPrefix: false },
+    { path: '~/features/workout/ui', pathPrefix: false },
   ],
 
   imports: {
@@ -66,6 +68,11 @@ export default defineNuxtConfig({
       'shared/api/storage',
       'shared/api/platform',
       'shared/api/firebase',
+      'features/exercise/model',
+      'features/exercise/api',
+      'features/workout/model',
+      'features/workout/api',
+      'features/workout/lib',
     ]
   },
 

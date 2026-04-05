@@ -1,6 +1,6 @@
 import { onData } from '~/shared/api/firebaseInit'
-import type { TypeWorkout } from "./types"
-import { normalizeWorkoutDate } from './useWorkoutHelpers'
+import type { TypeWorkout } from '~/features/workout/model/types'
+import { normalizeWorkoutDate } from '~/features/workout/lib/helpers'
 
 let workoutsUnsubscribe: (() => void) | null = null
 let activeWorkoutExerciseId = ''
@@ -17,7 +17,7 @@ export const stopWorkoutsSubscription = () => {
   activeWorkoutExerciseId = ''
 }
 
-export const getWorkouts = (exercisesId:string) => {
+export const getWorkouts = (exercisesId: string) => {
   const workoutStore = useWorkoutStore()
   if (!exercisesId) {
     stopWorkoutsSubscription()
@@ -67,7 +67,7 @@ export const getWorkouts = (exercisesId:string) => {
           desc: workout.desc,
           res: workout.res,
           resWeigth: Array.isArray(workout.weight)
-            ? workout.weight.reduce((acc:number, item:number, index:number):number => {
+            ? workout.weight.reduce((acc: number, item: number, index: number): number => {
               const normalizedWeight = Number(item)
               const normalizedApproach = Number(workout.approach?.[index] ?? 0)
 

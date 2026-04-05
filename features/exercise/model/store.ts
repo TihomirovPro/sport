@@ -1,4 +1,4 @@
-import type { TypeExercise } from '~/composables/types'
+import type { TypeExercise } from '~/features/exercise/model/types'
 
 export const useExerciseStore = defineStore('exercise', () => {
   const allExercises = ref<TypeExercise[]>([])

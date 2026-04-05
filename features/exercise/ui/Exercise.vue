@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TypeExercise } from '~/composables/types'
+import type { TypeExercise } from '~/features/exercise/model/types'
 
 const props = defineProps<TypeExercise>()
 
