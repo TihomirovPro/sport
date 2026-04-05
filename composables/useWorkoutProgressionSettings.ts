@@ -12,7 +12,7 @@ type ProgressionSettings = {
 }
 
 type UseWorkoutProgressionSettingsParams = {
-  activeExerciseId: Readonly<Ref<string>>
+  exerciseId: Readonly<Ref<string>>
   canManageProgression: Readonly<Ref<boolean>>
 }
 
@@ -74,7 +74,7 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
     })
   }
 
-  const initialExerciseId = params.activeExerciseId.value
+  const initialExerciseId = params.exerciseId.value
   loadProgressionSettings(initialExerciseId)
   subscribeProgressionSettings(initialExerciseId)
 
@@ -84,7 +84,7 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
       progressionRepMin.value = Math.max(1, Math.round(progressionRepMin.value || 1))
       progressionRepMax.value = Math.max(progressionRepMin.value, Math.round(progressionRepMax.value || progressionRepMin.value))
 
-      const exerciseId = params.activeExerciseId.value
+      const exerciseId = params.exerciseId.value
       saveProgressionSettings(exerciseId)
 
       if (isApplyingRemoteProgressionSettings.value) return
@@ -102,7 +102,7 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
   )
 
   watch(
-    () => params.activeExerciseId.value,
+    () => params.exerciseId.value,
     (exerciseId) => {
       loadProgressionSettings(exerciseId)
       subscribeProgressionSettings(exerciseId)

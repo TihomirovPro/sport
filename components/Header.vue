@@ -8,20 +8,17 @@ const pagesWithoutBackBtn = new Set(['index'])
 const routeName = computed(() => String(route.name ?? ''))
 const isShowBackBtn = computed(() => !pagesWithoutBackBtn.has(routeName.value))
 const appStore = useAppStore()
-const exerciseStore = useExerciseStore()
 const workoutStore = useWorkoutStore()
 const { isOnline, pendingOperations } = useOfflineState()
 const offlineStatus = computed(() => isOnline.value ? `Синхронизация: ${pendingOperations.value}` : 'Оффлайн')
 const { headerTitle } = storeToRefs(appStore)
-const { selectUpdateExercise, activeExercise } = storeToRefs(exerciseStore)
 const { selectUpdateWorkout } = storeToRefs(workoutStore)
 
 type BackToResolver = string | ((routeName: string) => string)
 
 type BackMeta = {
   backTo?: BackToResolver
-  clearActiveExercise?: boolean
-  clearSelectUpdateExercise?: boolean
+  backToExercise?: boolean
   clearSelectUpdateWorkout?: boolean
   removeStorageKeys?: string[]
 }
@@ -29,6 +26,7 @@ type BackMeta = {
 const backMeta = computed(() => (route.meta ?? {}) as BackMeta)
 
 function resolveBackTarget(meta: BackMeta): string {
+  if (meta.backToExercise) return `/exercise/${route.params.id}`
   if (typeof meta.backTo === 'function') return meta.backTo(routeName.value)
   if (typeof meta.backTo === 'string' && meta.backTo.length) return meta.backTo
   return '/'
@@ -41,14 +39,6 @@ function back() {
     selectUpdateWorkout.value = null
   }
 
-  if (meta.clearActiveExercise && activeExercise.value) {
-    exerciseStore.setActiveExercise(null)
-  }
-
-  if (meta.clearSelectUpdateExercise) {
-    selectUpdateExercise.value = null
-  }
-
   for (const key of meta.removeStorageKeys ?? []) {
     idbStorage.removeItem(key)
   }
@@ -58,12 +48,12 @@ function back() {
 
 function addItem() {
   if (routeName.value === 'index') {
-    router.push('/exercise')
+    router.push('/exercise/new')
     return
   }
 
-  if (routeName.value === 'exercise-item') {
-    router.push('/workout')
+  if (routeName.value === 'exercise-id') {
+    router.push(`/exercise/${route.params.id}/workout`)
   }
 }
 

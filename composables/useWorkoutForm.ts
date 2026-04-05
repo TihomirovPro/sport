@@ -11,7 +11,7 @@ import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
 
 interface UseWorkoutFormParams {
-  activeExercise: Ref<TypeExercise | null | undefined>
+  exercise: Ref<TypeExercise | null | undefined>
   selectUpdateWorkout: Ref<TypeWorkout | null>
   isComplex: ComputedRef<boolean>
   resolveFormDefaults: (availableEases?: EnumEase[]) => WorkoutFormDefaults
@@ -19,7 +19,7 @@ interface UseWorkoutFormParams {
 }
 
 export function useWorkoutForm({
-  activeExercise,
+  exercise,
   selectUpdateWorkout,
   isComplex,
   resolveFormDefaults,
@@ -36,12 +36,12 @@ export function useWorkoutForm({
   }
 
   function getNewWorkoutDefaults() {
-    const defaults = resolveFormDefaults(activeExercise.value?.ease ?? [])
+    const defaults = resolveFormDefaults(exercise.value?.ease ?? [])
 
     return {
       approaches: defaults.approaches,
       workout: {
-        exercisesId: activeExercise.value?.id ?? '',
+        exercisesId: exercise.value?.id ?? '',
         date: nowDate,
         interval: defaults.interval,
         ease: defaults.ease,
@@ -102,7 +102,7 @@ export function useWorkoutForm({
     const approachesRaw = idbStorage.getItem(IDB_KEYS.APPROACHES)
 
     if (newWorkoutRaw) {
-      const fallbackDefaults = resolveFormDefaults(activeExercise.value?.ease ?? [])
+      const fallbackDefaults = resolveFormDefaults(exercise.value?.ease ?? [])
       const newWorkout = safeParseJson<Partial<TypeWorkoutCreate> & { resWeidth?: number }>(newWorkoutRaw, {})
       const parsedApproachesRaw = approachesRaw
         ? safeParseJson<unknown>(approachesRaw, fallbackDefaults.approaches)
@@ -111,7 +111,7 @@ export function useWorkoutForm({
       approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : fallbackDefaults.approaches
 
       workout.value = {
-        exercisesId: activeExercise.value?.id ?? '',
+        exercisesId: exercise.value?.id ?? '',
         date: newWorkout.date ?? nowDate,
         interval: newWorkout.interval ?? fallbackDefaults.interval,
         approach: Array.isArray(newWorkout.approach) ? newWorkout.approach : [],

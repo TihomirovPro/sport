@@ -1,37 +1,33 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import { updateData, removeData, createData } from '~/shared/api/firebaseInit'
+import { updateData, removeData } from '~/shared/api/firebaseInit'
 import type { TypeExerciseCreate } from '~/composables/types'
-import { EnumEase } from '~/composables/types';
+import { EnumEase } from '~/composables/types'
 
 definePageMeta({
-  backTo: '/',
-  clearSelectUpdateExercise: true
+  backToExercise: true
 })
 
-useHead({
-  title: 'Добавить упражнение'
-})
-
-const appStore = useAppStore()
-appStore.headerTitle = 'Добавить упражнение'
-
-const workoutStore = useWorkoutStore()
-const exerciseStore = useExerciseStore()
-const userStore = useUserStore()
-const { workouts } = storeToRefs(workoutStore)
-const { allExercises, selectUpdateExercise } = storeToRefs(exerciseStore)
-const { activeUser } = storeToRefs(userStore)
+const route = useRoute()
 const router = useRouter()
+const appStore = useAppStore()
+const exerciseStore = useExerciseStore()
+const workoutStore = useWorkoutStore()
+const userStore = useUserStore()
+const { allExercises } = storeToRefs(exerciseStore)
+const { workouts } = storeToRefs(workoutStore)
+const { activeUser } = storeToRefs(userStore)
+const { notifyError } = useNotifications()
+
+const exerciseId = computed(() => String(route.params.id))
+const sourceExercise = computed(() => allExercises.value.find(e => e.id === exerciseId.value) || null)
 
 const showModalColor = ref<boolean>(false)
 const showModalIcon = ref<boolean>(false)
-
 const error = ref<boolean>(false)
 const removeConfirm = ref<boolean>(false)
 const isSaving = ref<boolean>(false)
 const text = ref<string>('')
-const { notifyError } = useNotifications()
 
 const constEases = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
 const canManageComplexes = computed(() => String(activeUser.value.status || '').trim().toLowerCase() === 'admin')
@@ -43,65 +39,31 @@ const exercise = ref<TypeExerciseCreate>({
   ease: constEases,
   isComplex: false,
   complexDesc: '',
-  order: allExercises.value.length
+  order: 0
 })
 
-function reset() {
-  selectUpdateExercise.value = null
-  error.value = false
-  exercise.value = {
-    name: '',
-    color: '',
-    icon: '',
-    ease: constEases,
-    isComplex: false,
-    complexDesc: '',
-    order: 0
-  }
-}
-
 watchEffect(() => {
-  if (selectUpdateExercise.value) {
-    getWorkouts(selectUpdateExercise.value.id)
-    appStore.headerTitle = 'Изменить упражнение'
-
-    if (selectUpdateExercise.value.isComplex) {
-      appStore.headerTitle = 'Изменить комплекс'
-    }
-
-    const { id, ...exerciseUpdate } = selectUpdateExercise.value
-    exercise.value = {...exerciseUpdate }
-    
-    if (!selectUpdateExercise.value.ease) exercise.value.ease = constEases
-    else exercise.value.ease = selectUpdateExercise.value.ease
-
-  } else {
-    appStore.headerTitle = 'Добавить упражнение'
-    reset()
+  if (sourceExercise.value) {
+    const { id: _id, ...data } = sourceExercise.value
+    exercise.value = { ...data }
+    if (!exercise.value.ease) exercise.value.ease = constEases
+    appStore.headerTitle = exercise.value.isComplex ? 'Изменить комплекс' : 'Изменить упражнение'
   }
+})
+
+useHead(() => ({ title: appStore.headerTitle }))
+
+onMounted(() => {
+  if (!exerciseId.value) {
+    void router.push('/')
+    return
+  }
+  getWorkouts(exerciseId.value)
 })
 
 onUnmounted(() => {
   stopWorkoutsSubscription()
 })
-
-async function newExercise() {
-  if (isSaving.value) return
-  if (!validateExercise()) return
-
-  isSaving.value = true
-  try {
-    exercise.value.order = allExercises.value.length
-    await createData('exercises', exercise.value)
-    reset()
-    await router.push('/')
-  } catch (error) {
-    console.error('[firebase:newExercise]', error)
-    notifyError('Не удалось добавить упражнение. Попробуйте снова.')
-  } finally {
-    isSaving.value = false
-  }
-}
 
 async function update() {
   if (isSaving.value) return
@@ -109,20 +71,13 @@ async function update() {
 
   isSaving.value = true
   try {
-    const selectedExerciseId = selectUpdateExercise.value?.id
-    if (!selectedExerciseId) {
-      notifyError('Не выбрано упражнение для изменения')
-      return
-    }
-
     if (exercise.value.order === undefined) exercise.value.order = allExercises.value.length
     if (exercise.value.isComplex === undefined) exercise.value.isComplex = false
     if (exercise.value.complexDesc === undefined) exercise.value.complexDesc = ''
-    await updateData(`exercises/${selectedExerciseId}`, exercise.value)
-    reset()
+    await updateData(`exercises/${exerciseId.value}`, exercise.value)
     await router.push('/')
-  } catch (error) {
-    console.error('[firebase:updateExercise]', error)
+  } catch (e) {
+    console.error('[firebase:updateExercise]', e)
     notifyError('Не удалось сохранить упражнение. Попробуйте снова.')
   } finally {
     isSaving.value = false
@@ -133,19 +88,12 @@ async function remove() {
   if (isSaving.value) return
   isSaving.value = true
   try {
-    const selectedExerciseId = selectUpdateExercise.value?.id
-    if (!selectedExerciseId) {
-      notifyError('Не выбрано упражнение для удаления')
-      return
-    }
-
-    await removeData(`workout/${selectedExerciseId}`)
-    await removeData(`exercises/${selectedExerciseId}`)
+    await removeData(`workout/${exerciseId.value}`)
+    await removeData(`exercises/${exerciseId.value}`)
     removeConfirm.value = false
     await router.push('/')
-    reset()
-  } catch (error) {
-    console.error('[firebase:removeExercise]', error)
+  } catch (e) {
+    console.error('[firebase:removeExercise]', e)
     notifyError('Не удалось удалить упражнение. Попробуйте снова.')
   } finally {
     isSaving.value = false
@@ -154,25 +102,23 @@ async function remove() {
 
 function deleted() {
   if (isSaving.value) return
-  if (workouts.value.length) {
-    text.value = 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
-  } else {
-    text.value = 'Ты уверен, что хочешь удалить?)'
-  }
+  text.value = workouts.value.length
+    ? 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
+    : 'Ты уверен, что хочешь удалить?)'
   removeConfirm.value = true
 }
 
-function selectColor(color:string) {
+function selectColor(color: string) {
   exercise.value.color = color
   showModalColor.value = false
 }
 
-function selectIcon(icon:string) {
+function selectIcon(icon: string) {
   exercise.value.icon = icon
   showModalIcon.value = false
 }
 
-function selectEase(ease:EnumEase) {
+function selectEase(ease: EnumEase) {
   if (exercise.value.ease.includes(ease)) exercise.value.ease = [...exercise.value.ease.filter(el => el !== ease)]
   else exercise.value.ease.push(ease)
 }
@@ -182,52 +128,34 @@ function toggleComplex() {
     notifyError('Только пользователь со статусом admin может создавать комплексы')
     return
   }
-
   exercise.value.isComplex = !exercise.value.isComplex
-
-  if (!exercise.value.isComplex) {
-    exercise.value.complexDesc = ''
-  }
+  if (!exercise.value.isComplex) exercise.value.complexDesc = ''
 }
 
 function validateExercise(): boolean {
   const name = exercise.value.name.trim()
-
   if (!name) {
     error.value = true
     notifyError('Введите название упражнения')
     return false
   }
-
   exercise.value.name = name
-
   if (!Array.isArray(exercise.value.ease) || exercise.value.ease.length === 0) {
     notifyError('Выберите хотя бы один тип сложности')
     return false
   }
-
   if (exercise.value.isComplex && !canManageComplexes.value) {
     notifyError('Только пользователь со статусом admin может создавать комплексы')
     return false
   }
-
-  if (exercise.value.isComplex) {
-    exercise.value.complexDesc = exercise.value.complexDesc?.trim() || ''
-  } else {
-    exercise.value.complexDesc = ''
-  }
-
+  exercise.value.complexDesc = exercise.value.isComplex ? (exercise.value.complexDesc?.trim() || '') : ''
   error.value = false
-
   return true
 }
 
-watch(
-  () => exercise.value.name,
-  (name) => {
-    if (name.trim()) error.value = false
-  }
-)
+watch(() => exercise.value.name, (name) => {
+  if (name.trim()) error.value = false
+})
 </script>
 
 <template lang="pug">
@@ -237,11 +165,7 @@ watch(
       class="bg-accent min-w-[56px]"
       :style="`background: ${exercise.color}`"
     )
-      Icon(
-        v-if="exercise.icon"
-        :icon="exercise.icon"
-        color="#fff"
-      )
+      Icon(v-if="exercise.icon" :icon="exercise.icon" color="#fff")
       .text-white.text-2xl(v-else) {{ exercise.name[0] }}
     UiInput(
       v-model="exercise.name"
@@ -251,14 +175,9 @@ watch(
     )
 
   UiTabsWrap
-    UiTabsItem(
-      title="Цвет"
-      @click="showModalColor = true"
-    )
-    UiTabsItem(
-      title="Иконка"
-      @click="showModalIcon = true"
-    )      
+    UiTabsItem(title="Цвет" @click="showModalColor = true")
+    UiTabsItem(title="Иконка" @click="showModalIcon = true")
+
   p Сложность
 
   TabsEases(
@@ -284,24 +203,16 @@ watch(
 
   .grid.grid-flow-col.place-items-center.gap-5.mt-auto
     UiButton(
-      v-if="!selectUpdateExercise"
-      :text="isSaving ? 'Сохранение...' : 'Добавить'"
+      red
       :disabled="isSaving"
-      @click="newExercise"
-    ).mt-auto
-
-    template(v-else)
-      UiButton(
-        red
-        :disabled="isSaving"
-        text="Удалить"
-        @click="deleted"
-      )
-      UiButton(
-        :text="isSaving ? 'Сохранение...' : 'Сохранить'"
-        :disabled="isSaving"
-        @click="update"
-      )
+      text="Удалить"
+      @click="deleted"
+    )
+    UiButton(
+      :text="isSaving ? 'Сохранение...' : 'Сохранить'"
+      :disabled="isSaving"
+      @click="update"
+    )
 
   ModalRemoveConfirm(
     :text="text"
@@ -320,7 +231,7 @@ watch(
 
   ModalIcon(
     :isShow="showModalIcon"
-    :activeIcon='exercise.icon'
+    :activeIcon="exercise.icon"
     @hiden="showModalIcon = false"
     @selectIcon="(icon) => selectIcon(icon)"
   )

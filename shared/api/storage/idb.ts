@@ -13,7 +13,6 @@ const FIXED_MIGRATION_KEYS = [
   'pp-offline-cache-v1',
   'newWorkout',
   'approaches',
-  'activeExercise',
   'hideFilterTitles',
   'baseColor',
 ]
@@ -22,7 +21,6 @@ const FIXED_MIGRATION_KEYS = [
 const KEY_RENAMES: [string, string][] = [
   ['newWorkout', IDB_KEYS.NEW_WORKOUT],
   ['approaches', IDB_KEYS.APPROACHES],
-  ['activeExercise', IDB_KEYS.ACTIVE_EXERCISE],
   ['hideFilterTitles', IDB_KEYS.HIDE_FILTER_TITLES],
   ['baseColor', IDB_KEYS.BASE_COLOR],
 ]

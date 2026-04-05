@@ -11,7 +11,7 @@ import { EnumEase, type TypeExercise, type TypeWorkout, type TypeWorkoutCreate }
 
 interface UseWorkoutProgressionUIParams {
   activeUser: Ref<{ status?: string } | null | undefined>
-  activeExercise: Ref<TypeExercise | null | undefined>
+  exercise: Ref<TypeExercise | null | undefined>
   selectUpdateWorkout: Ref<TypeWorkout | null>
   workouts: Ref<TypeWorkout[]>
   workout: Ref<TypeWorkoutCreate>
@@ -22,7 +22,7 @@ interface UseWorkoutProgressionUIParams {
 
 export function useWorkoutProgressionUI({
   activeUser,
-  activeExercise,
+  exercise,
   selectUpdateWorkout,
   workouts,
   workout,
@@ -42,7 +42,7 @@ export function useWorkoutProgressionUI({
   })
 
   const progressionWeightSessions = computed<ProgressionSession[]>(() => {
-    const exerciseId = activeExercise.value?.id ?? ''
+    const exerciseId = exercise.value?.id ?? ''
 
     return workouts.value
       .filter((item) =>
@@ -67,7 +67,7 @@ export function useWorkoutProgressionUI({
   })
 
   const progressionBodyweightSessions = computed<ProgressionSession[]>(() => {
-    const exerciseId = activeExercise.value?.id ?? ''
+    const exerciseId = exercise.value?.id ?? ''
 
     return workouts.value
       .filter((item) =>
@@ -93,7 +93,7 @@ export function useWorkoutProgressionUI({
   const progressionSuggestion = computed(() => {
     return computeProgressionSuggestion(
       progressionWeightSessions.value,
-      activeExercise.value?.id ?? '',
+      exercise.value?.id ?? '',
       progressionProfile.value
     )
   })
@@ -101,7 +101,7 @@ export function useWorkoutProgressionUI({
   const bodyweightSuggestion = computed(() => {
     return computeBodyweightRepsSuggestion(
       progressionBodyweightSessions.value,
-      activeExercise.value?.id ?? '',
+      exercise.value?.id ?? '',
       progressionProfile.value
     )
   })
@@ -223,7 +223,7 @@ export function useWorkoutProgressionUI({
       workout.value.approach = [...suggestedReps]
     }
 
-    const exerciseId = String(activeExercise.value?.id || '').trim()
+    const exerciseId = String(exercise.value?.id || '').trim()
     if (!exerciseId) return
 
     const payload = {

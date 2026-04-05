@@ -4,8 +4,7 @@ export const IDB_KEYS = {
   OFFLINE_CACHE: 'pp-offline-cache-v1',
   NEW_WORKOUT: 'pp-new-workout-v1',
   APPROACHES: 'pp-approaches-v1',
-  ACTIVE_EXERCISE: 'pp-active-exercise-v1',
-  HIDE_FILTER_TITLES: 'pp-hide-filter-titles-v1',
+HIDE_FILTER_TITLES: 'pp-hide-filter-titles-v1',
   BASE_COLOR: 'pp-base-color-v1',
   PROGRESSION_SETTINGS: 'pp-workout-progression-settings-v1',
 } as const
