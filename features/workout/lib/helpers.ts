@@ -72,6 +72,12 @@ export function normalizeRpe(value: unknown): number | undefined {
   return Math.round(parsed * 10) / 10
 }
 
+export function formatTimer(totalSeconds: number): string {
+  const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')
+  const secs = (totalSeconds % 60).toString().padStart(2, '0')
+  return `${mins}:${secs}`
+}
+
 export function normalizeNumberArray(value: unknown): number[] {
   if (!Array.isArray(value)) return []
 

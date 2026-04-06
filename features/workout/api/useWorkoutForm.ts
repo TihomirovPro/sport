@@ -7,6 +7,7 @@ import {
   normalizeRpe,
   normalizeWorkoutDate,
   parseDurationToSeconds,
+  formatTimer,
   safeParseJson
 } from '~/features/workout/lib/helpers'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
@@ -27,33 +28,30 @@ export function useWorkoutForm({
   resolveFormDefaults,
   notifyError
 }: UseWorkoutFormParams) {
-  const nowDate = new Date().getTime()
   const error = ref(false)
   const complexTime = ref('')
 
-  function formatTimer(totalSeconds: number): string {
-    const mins = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')
-    const secs = (totalSeconds % 60).toString().padStart(2, '0')
-    return `${mins}:${secs}`
+  function resolveComplexExercises(saved?: unknown[]): string[] {
+    if (Array.isArray(saved) && saved.length) return saved as string[]
+    if (isComplex.value && Array.isArray(exercise.value?.complexItems))
+      return [...exercise.value.complexItems]
+    return []
   }
 
   function getNewWorkoutDefaults() {
     const defaults = resolveFormDefaults(exercise.value?.ease ?? [])
-    const templateItems = isComplex.value && Array.isArray(exercise.value?.complexItems) && exercise.value.complexItems.length > 0
-      ? [...exercise.value.complexItems]
-      : []
 
     return {
       approaches: defaults.approaches,
       workout: {
         exercisesId: exercise.value?.id ?? '',
-        date: nowDate,
+        date: new Date().getTime(),
         interval: defaults.interval,
         ease: defaults.ease,
         rubber: '',
         approach: [],
         weight: [],
-        complexExercises: templateItems,
+        complexExercises: resolveComplexExercises(),
         rounds: undefined,
         desc: '',
         res: 0,
@@ -68,7 +66,6 @@ export function useWorkoutForm({
 
   function reset() {
     const defaults = getNewWorkoutDefaults()
-    selectUpdateWorkout.value = null
     error.value = false
     complexTime.value = ''
     approaches.value = defaults.approaches
@@ -104,43 +101,43 @@ export function useWorkoutForm({
     }
   })
 
-  if (import.meta.client && !selectUpdateWorkout.value) {
+  function restoreFromDraft() {
     const newWorkoutRaw = idbStorage.getItem(IDB_KEYS.NEW_WORKOUT)
     const approachesRaw = idbStorage.getItem(IDB_KEYS.APPROACHES)
 
-    if (newWorkoutRaw) {
-      const fallbackDefaults = resolveFormDefaults(exercise.value?.ease ?? [])
-      const newWorkout = safeParseJson<Partial<TypeWorkoutCreate> & { resWeidth?: number }>(newWorkoutRaw, {})
-      const parsedApproachesRaw = approachesRaw
-        ? safeParseJson<unknown>(approachesRaw, fallbackDefaults.approaches)
-        : fallbackDefaults.approaches
-      const parsedApproaches = Number(parsedApproachesRaw)
-      approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : fallbackDefaults.approaches
+    if (!newWorkoutRaw) return
 
-      const idbComplexExercises = Array.isArray(newWorkout.complexExercises) && newWorkout.complexExercises.length > 0
-        ? newWorkout.complexExercises
-        : (isComplex.value && Array.isArray(exercise.value?.complexItems) ? [...(exercise.value.complexItems ?? [])] : [])
+    const fallbackDefaults = resolveFormDefaults(exercise.value?.ease ?? [])
+    const newWorkout = safeParseJson<Partial<TypeWorkoutCreate> & { resWeidth?: number }>(newWorkoutRaw, {})
+    const parsedApproachesRaw = approachesRaw
+      ? safeParseJson<unknown>(approachesRaw, fallbackDefaults.approaches)
+      : fallbackDefaults.approaches
+    const parsedApproaches = Number(parsedApproachesRaw)
+    approaches.value = Number.isFinite(parsedApproaches) ? parsedApproaches : fallbackDefaults.approaches
 
-      workout.value = {
-        exercisesId: exercise.value?.id ?? '',
-        date: newWorkout.date ?? nowDate,
-        interval: newWorkout.interval ?? fallbackDefaults.interval,
-        approach: Array.isArray(newWorkout.approach) ? newWorkout.approach : [],
-        ease: newWorkout.ease ?? fallbackDefaults.ease,
-        rpe: normalizeRpe(newWorkout.rpe),
-        rubber: newWorkout.rubber || '',
-        weight: Array.isArray(newWorkout.weight) ? newWorkout.weight : [],
-        complexExercises: idbComplexExercises,
-        rounds: Number.isFinite(Number(newWorkout.rounds)) && Number(newWorkout.rounds) > 0 ? Number(newWorkout.rounds) : undefined,
-        desc: newWorkout.desc || '',
-        res: 0,
-        resWeigth: newWorkout.resWeigth ?? newWorkout.resWeidth ?? 0
-      }
-
-      if (isComplex.value && Number.isFinite(Number(newWorkout.res))) {
-        complexTime.value = formatTimer(Number(newWorkout.res))
-      }
+    workout.value = {
+      exercisesId: exercise.value?.id ?? '',
+      date: newWorkout.date ?? new Date().getTime(),
+      interval: newWorkout.interval ?? fallbackDefaults.interval,
+      approach: Array.isArray(newWorkout.approach) ? newWorkout.approach : [],
+      ease: newWorkout.ease ?? fallbackDefaults.ease,
+      rpe: normalizeRpe(newWorkout.rpe),
+      rubber: newWorkout.rubber || '',
+      weight: Array.isArray(newWorkout.weight) ? newWorkout.weight : [],
+      complexExercises: resolveComplexExercises(newWorkout.complexExercises),
+      rounds: Number.isFinite(Number(newWorkout.rounds)) && Number(newWorkout.rounds) > 0 ? Number(newWorkout.rounds) : undefined,
+      desc: newWorkout.desc || '',
+      res: 0,
+      resWeigth: newWorkout.resWeigth ?? newWorkout.resWeidth ?? 0
     }
+
+    if (isComplex.value && Number.isFinite(Number(newWorkout.res))) {
+      complexTime.value = formatTimer(Number(newWorkout.res))
+    }
+  }
+
+  if (import.meta.client && !selectUpdateWorkout.value) {
+    restoreFromDraft()
   }
 
   function clearDraftStorage() {
