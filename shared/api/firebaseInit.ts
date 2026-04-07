@@ -1,9 +1,9 @@
 import type { DataSnapshot } from 'firebase/database'
 import { child, onValue, push, ref, remove, set, update } from 'firebase/database'
-import { dbPath, getFirebaseApp, getFirebaseAuth, getFirebaseDb, logFirebaseError } from '~/shared/api/firebase/client'
+import { dbPath, getFirebaseDb, logFirebaseError } from '~/shared/api/firebase/client'
 import { getOnlineStatus } from '~/shared/api/platform/ios'
 import { emitCachedSnapshot, updateCachedPath } from '~/shared/api/firebase/offlineCache'
-import { clearOfflineUserData, enqueueOperation, flushOfflineQueue, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/shared/api/firebase/offlineQueue'
+import { enqueueOperation, getCurrentUserId, getWriteTimeout, initOfflineSync } from '~/shared/api/firebase/offlineQueue'
 
 // Compat exports for stale cached chunks (PWA/SW) that may still import these names.
 export const data = undefined
@@ -31,17 +31,11 @@ function createWriteTimeoutError(): Error & { code: string } {
 }
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(createWriteTimeoutError()), timeoutMs)
-
-    promise.then((value) => {
-      clearTimeout(timer)
-      resolve(value)
-    }).catch((error) => {
-      clearTimeout(timer)
-      reject(error)
-    })
+  let timer: ReturnType<typeof setTimeout>
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(createWriteTimeoutError()), timeoutMs)
   })
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer)) as Promise<T>
 }
 
 function isRetriableWriteError(error: unknown): boolean {
@@ -90,10 +84,9 @@ export const createData = async <T>(path: string, data: T) => {
   const key = push(child(ref(getFirebaseDb()), path)).key
   if (!key) throw new Error('Не удалось создать ключ записи')
   const fullPath = `${path}/${key}`
+  const uid = getCurrentUserId()
 
   try {
-    const uid = getCurrentUserId()
-
     if (isOfflineClient()) {
       if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, fullPath, data)
@@ -105,8 +98,6 @@ export const createData = async <T>(path: string, data: T) => {
     updateCachedPath(uid, fullPath, data)
     return key
   } catch (error) {
-    const uid = getCurrentUserId()
-
     if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'set', fullPath, data)
       return key
@@ -120,9 +111,9 @@ export const createData = async <T>(path: string, data: T) => {
 export const createDataWithoutKey = async <T>(path: string, data: T) => {
   initOfflineSync()
 
-  try {
-    const uid = getCurrentUserId()
+  const uid = getCurrentUserId()
 
+  try {
     if (isOfflineClient()) {
       if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, path, data)
@@ -133,7 +124,6 @@ export const createDataWithoutKey = async <T>(path: string, data: T) => {
     await withTimeout(set(ref(getFirebaseDb(), dbPath(path)), data), getWriteTimeout())
     updateCachedPath(uid, path, data)
   } catch (error) {
-    const uid = getCurrentUserId()
     if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'set', path, data)
       return
@@ -147,9 +137,9 @@ export const createDataWithoutKey = async <T>(path: string, data: T) => {
 export const updateData = async <T extends object>(path: string, data: T) => {
   initOfflineSync()
 
-  try {
-    const uid = getCurrentUserId()
+  const uid = getCurrentUserId()
 
+  try {
     if (isOfflineClient()) {
       if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, path, data, { merge: true })
@@ -160,7 +150,6 @@ export const updateData = async <T extends object>(path: string, data: T) => {
     await withTimeout(update(ref(getFirebaseDb(), dbPath(path)), data), getWriteTimeout())
     updateCachedPath(uid, path, data, { merge: true })
   } catch (error) {
-    const uid = getCurrentUserId()
     if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'update', path, data)
       return
@@ -174,9 +163,9 @@ export const updateData = async <T extends object>(path: string, data: T) => {
 export const removeData = async (path: string) => {
   initOfflineSync()
 
-  try {
-    const uid = getCurrentUserId()
+  const uid = getCurrentUserId()
 
+  try {
     if (isOfflineClient()) {
       if (!uid) throw new Error('Пользователь не авторизован')
       updateCachedPath(uid, path, null, { remove: true })
@@ -187,7 +176,6 @@ export const removeData = async (path: string) => {
     await withTimeout(remove(ref(getFirebaseDb(), dbPath(path))), getWriteTimeout())
     updateCachedPath(uid, path, null, { remove: true })
   } catch (error) {
-    const uid = getCurrentUserId()
     if (isRetriableWriteError(error) && uid) {
       fallbackToOfflineWrite(uid, 'remove', path)
       return

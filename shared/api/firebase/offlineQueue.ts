@@ -3,8 +3,8 @@ import { setOfflinePendingOperations, setOnlineStatus, setRetryDelay } from '~/s
 import { dbPath, getFirebaseAuth, getFirebaseDb, logFirebaseError } from './client'
 import { readLastAuthUid } from './authSession'
 import { clearOfflineCacheForUid, cloneValue } from './offlineCache'
+import { createPersister, readJson } from './idbPersist'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
-import { idbStorage } from '~/shared/api/storage/idb'
 import { getOnlineStatus } from '~/shared/api/platform/ios'
 
 const OFFLINE_QUEUE_KEY = IDB_KEYS.OFFLINE_QUEUE
@@ -26,46 +26,13 @@ type PendingOperation = {
 }
 
 let pendingOperationsMemory: PendingOperation[] | null = null
-let pendingOpsPersistTimer: ReturnType<typeof setTimeout> | null = null
 let flushRetryTimer: ReturnType<typeof setTimeout> | null = null
 let flushFailureCount = 0
 let offlineSyncInitialized = false
 let isFlushingQueue = false
 let isFirebaseConnected = true
 
-function readJson<T>(key: string, fallback: T): T {
-  if (!process.client) return fallback
-
-  const raw = idbStorage.getItem(key)
-  if (!raw) return fallback
-
-  try {
-    return JSON.parse(raw) as T
-  } catch {
-    return fallback
-  }
-}
-
-function writeJson(key: string, value: unknown) {
-  if (!process.client) return
-  idbStorage.setItem(key, JSON.stringify(value))
-}
-
-function schedulePersist(valueGetter: () => unknown) {
-  if (!process.client) return
-
-  if (pendingOpsPersistTimer) {
-    clearTimeout(pendingOpsPersistTimer)
-  }
-
-  pendingOpsPersistTimer = setTimeout(() => {
-    try {
-      writeJson(OFFLINE_QUEUE_KEY, valueGetter())
-    } finally {
-      pendingOpsPersistTimer = null
-    }
-  }, PERSIST_DELAY_MS)
-}
+const schedulePersist = createPersister(OFFLINE_QUEUE_KEY, PERSIST_DELAY_MS)
 
 function getCurrentUid(): string | null {
   return getFirebaseAuth().currentUser?.uid || readLastAuthUid() || null
@@ -177,7 +144,7 @@ function compactOperations(operations: PendingOperation[]): PendingOperation[] {
       continue
     }
 
-    // Ниже обрабатывается case current.type === 'update'
+    // current.type === 'update'
     if (last.type === 'remove') {
       compacted[lastIndex] = {
         ...current,
@@ -187,16 +154,7 @@ function compactOperations(operations: PendingOperation[]): PendingOperation[] {
       continue
     }
 
-    if (last.type === 'set') {
-      compacted[lastIndex] = {
-        ...last,
-        id: current.id,
-        data: mergeUpdatePayload(last.data, current.data),
-        createdAt: current.createdAt
-      }
-      continue
-    }
-
+    // last.type === 'set' | 'update': merge payloads
     compacted[lastIndex] = {
       ...last,
       id: current.id,
@@ -276,9 +234,8 @@ export async function flushOfflineQueue() {
   }
 
   const queue = prunePendingOperationsToUid(uid)
-  const currentUserQueue = queue
 
-  if (!currentUserQueue.length) {
+  if (!queue.length) {
     updatePendingStatus()
     return
   }
@@ -290,7 +247,7 @@ export async function flushOfflineQueue() {
     let hadError = false
 
     const blockedPaths = new Set<string>()
-    for (const operation of currentUserQueue) {
+    for (const operation of queue) {
       if (blockedPaths.has(operation.path)) continue
 
       try {

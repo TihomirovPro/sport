@@ -1,6 +1,6 @@
 import type { DataSnapshot } from 'firebase/database'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
-import { idbStorage } from '~/shared/api/storage/idb'
+import { createPersister, readJson } from './idbPersist'
 
 const OFFLINE_CACHE_KEY = IDB_KEYS.OFFLINE_CACHE
 const PERSIST_DELAY_MS = 120
@@ -8,25 +8,8 @@ const PERSIST_DELAY_MS = 120
 type OfflineCache = Record<string, Record<string, unknown>>
 
 let offlineCacheMemory: OfflineCache | null = null
-let offlineCachePersistTimer: ReturnType<typeof setTimeout> | null = null
 
-function readJson<T>(key: string, fallback: T): T {
-  if (!process.client) return fallback
-
-  const raw = idbStorage.getItem(key)
-  if (!raw) return fallback
-
-  try {
-    return JSON.parse(raw) as T
-  } catch {
-    return fallback
-  }
-}
-
-function writeJson(key: string, value: unknown) {
-  if (!process.client) return
-  idbStorage.setItem(key, JSON.stringify(value))
-}
+const schedulePersist = createPersister(OFFLINE_CACHE_KEY, PERSIST_DELAY_MS)
 
 export function cloneValue<T>(value: T): T {
   try {
@@ -35,22 +18,6 @@ export function cloneValue<T>(value: T): T {
   } catch {
     return value
   }
-}
-
-function schedulePersist(valueGetter: () => unknown) {
-  if (!process.client) return
-
-  if (offlineCachePersistTimer) {
-    clearTimeout(offlineCachePersistTimer)
-  }
-
-  offlineCachePersistTimer = setTimeout(() => {
-    try {
-      writeJson(OFFLINE_CACHE_KEY, valueGetter())
-    } finally {
-      offlineCachePersistTimer = null
-    }
-  }, PERSIST_DELAY_MS)
 }
 
 function splitPath(path: string): string[] {
