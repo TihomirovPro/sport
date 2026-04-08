@@ -2,8 +2,6 @@
 import { signOut } from 'firebase/auth'
 import { storeToRefs } from 'pinia'
 import { getFirebaseAuth } from '~/shared/api/firebase/client'
-import { prepareLogout } from '~/composables/useUser'
-import { stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 import packageJson from '~/package.json'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'

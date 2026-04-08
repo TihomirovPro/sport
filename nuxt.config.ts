@@ -64,10 +64,17 @@ export default defineNuxtConfig({
   imports: {
     dirs: [
       'shared/config',
+      'shared/lib',
       'shared/api',
       'shared/api/storage',
       'shared/api/platform',
       'shared/api/firebase',
+      'features/user/model',
+      'features/user/api',
+      'features/weight/model',
+      'features/weight/api',
+      'features/measure/model',
+      'features/measure/api',
       'features/exercise/model',
       'features/exercise/api',
       'features/workout/model',

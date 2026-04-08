@@ -2,12 +2,6 @@
 import { Chart as _Chart } from 'vue-chartjs'
 const Chart = _Chart as any
 import { storeToRefs } from 'pinia'
-import {
-  subscribeMeasureEntries,
-  stopMeasureEntriesSubscription,
-  addMeasureEntry,
-  removeMeasureEntry,
-} from '~/composables/useMeasure'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
 import {

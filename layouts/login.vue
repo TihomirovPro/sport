@@ -2,7 +2,7 @@
 .flex-center.h-full
   .h-full.overflow-auto
     slot
-  GlobalNotifications
+  UiGlobalNotifications
 </template>
 
 <style>

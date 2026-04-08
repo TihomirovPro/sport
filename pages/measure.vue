@@ -1,12 +1,5 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
-import {
-  subscribeMeasureTypes,
-  stopMeasureTypesSubscription,
-  addMeasureType,
-  removeMeasureType,
-} from '~/composables/useMeasure'
-
 definePageMeta({
   backTo: '/settings'
 })

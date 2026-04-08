@@ -1,6 +1,6 @@
 import type { DataSnapshot } from 'firebase/database'
 import { createData, onData, removeData } from '~/shared/api/firebaseInit'
-import type { WeightEntry } from '~/stores/weight'
+import type { WeightEntry } from '~/features/weight/model/store'
 
 type WeightRecord = {
   value?: unknown

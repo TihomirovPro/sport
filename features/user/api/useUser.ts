@@ -7,7 +7,7 @@ import { clearLastAuthUid, readLastAuthUid, writeLastAuthUid } from '~/shared/ap
 let authUnsubscribe: (() => void) | null = null
 let userUnsubscribe: (() => void) | null = null
 let createUserTimeout: ReturnType<typeof setTimeout> | null = null
-// Флаг явного выхода: на iOS navigator.onLine ненадёжен (см. composables/platform/ios.ts),
+// Флаг явного выхода: на iOS navigator.onLine ненадёжен (см. shared/api/platform/ios.ts),
 // поэтому onAuthStateChanged(null) при холодном старте нельзя трактовать как реальный логаут.
 let intentionalLogout = false
 
@@ -53,7 +53,7 @@ export const initUser = () => {
   const workoutStore = useWorkoutStore()
 
   // Немедленно загружаем данные из кэша, не дожидаясь onAuthStateChanged.
-  // На iOS navigator.onLine ненадёжен (см. composables/platform/ios.ts): Firebase пытается
+  // На iOS navigator.onLine ненадёжен (см. shared/api/platform/ios.ts): Firebase пытается
   // обновить токен по сети и это может занять > 2500ms (таймаут middleware).
   // Предзагрузка из кэша устраняет пустой экран при холодном старте.
   if (process.client) {
@@ -70,7 +70,7 @@ export const initUser = () => {
       const previousUid = userStore.activeUser.uid
       const rememberedUid = readLastAuthUid()
       const offlineUid = previousUid || rememberedUid
-      // navigator.onLine ненадёжен на iOS (см. composables/platform/ios.ts) —
+      // navigator.onLine ненадёжен на iOS (см. shared/api/platform/ios.ts) —
       // используем явный флаг intentionalLogout.
       const shouldKeepOfflineSession = !intentionalLogout && !!offlineUid
 

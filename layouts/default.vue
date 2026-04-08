@@ -27,7 +27,7 @@ if (savedColor) {
 
   main.px-2.py-3.max-w-2xl.size-full.mx-auto.relative
     slot
-  GlobalNotifications
+  UiGlobalNotifications
 </template>
 
 <style>

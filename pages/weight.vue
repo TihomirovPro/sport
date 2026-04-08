@@ -2,7 +2,6 @@
 import { Chart as _Chart } from 'vue-chartjs'
 const Chart = _Chart as any
 import { storeToRefs } from 'pinia'
-import { addWeight, removeWeight, stopWeightSubscription, subscribeWeights } from '~/composables/useWeight'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
 import {
