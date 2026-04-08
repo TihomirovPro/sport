@@ -1,54 +1,49 @@
-# Power Progress (Nuxt 4)
+# Power Progress
 
-Приложение-дневник тренировок на Nuxt 4.
+> Офлайн-первый PWA-дневник тренировок с системой прогрессии нагрузок.
+> Стек: Nuxt 4 · Vue 3 · Firebase · Pinia · Tailwind CSS 4 · IndexedDB
 
 ## Требования
 
-- Node.js 20+
-- npm 10+
+| Инструмент | Версия |
+|------------|--------|
+| Node.js    | 20+    |
+| npm        | 10.9+  |
 
-## Установка
+## Быстрый старт
 
 ```bash
+# 1. Установить зависимости
 npm install
-```
 
-## Локальная разработка
+# 2. Скопировать и заполнить переменные окружения
+cp .env.example .env
 
-Запуск dev-сервера на [http://localhost:3000](http://localhost:3000):
-
-```bash
+# 3. Запустить dev-сервер → http://localhost:3000
 npm run dev
 ```
 
-## Quality Gate
+## Команды
 
-```bash
-npm run typecheck
-npm run lint
-npm run test
-```
+| Команда             | Описание                                    |
+|---------------------|---------------------------------------------|
+| `npm run dev`       | Dev-сервер (SPA, порт 3000)                 |
+| `npm run build`     | Продакшен-сборка                            |
+| `npm run preview`   | Локальный preview после сборки              |
+| `npm run typecheck` | Проверка TypeScript (strict mode)           |
+| `npm run lint`      | Псевдоним для typecheck                     |
+| `npm run test`      | Запуск тестов (Node built-in test runner)   |
 
-## Оффлайн-режим
+## Переменные окружения
 
-- Статические ресурсы кэшируются через PWA (`@vite-pwa/nuxt`).
-- App shell (`/` и `index.html`) принудительно добавляется в precache для холодного старта без сети.
-- Данные пользователя (`user`, `exercises`, `workout/*`) кэшируются локально.
-- Изменения при отсутствии сети сохраняются в локальную очередь и автоматически отправляются при восстановлении интернета.
-- Последняя авторизованная сессия сохраняется локально: после первичного онлайн-входа приложение запускается офлайн даже после полного закрытия.
-- В хедере показывается текущий статус: `Оффлайн` или количество операций в синхронизации.
-- Ограничение: первичная авторизация через Google требует интернет.
+Все значения берутся из Firebase Console → Project Settings.
 
-## Продакшен сборка
-
-Сборка:
-
-```bash
-npm run build
-```
-
-Локальный preview:
-
-```bash
-npm run preview
+```env
+FIREBASE_API_KEY=
+AUTH_DOMAIN=your-project.firebaseapp.com
+DATABASE_URL=https://your-project-default-rtdb.firebaseio.com
+PROJECT_ID=
+STORAGE_BUCKET=
+MESSAGING_SENDER_ID=
+APP_ID=
 ```
