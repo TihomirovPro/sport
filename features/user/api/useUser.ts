@@ -11,6 +11,11 @@ let createUserTimeout: ReturnType<typeof setTimeout> | null = null
 // поэтому onAuthStateChanged(null) при холодном старте нельзя трактовать как реальный логаут.
 let intentionalLogout = false
 
+export type InitUserCallbacks = {
+  onLogin: () => void
+  onLogout: () => void
+}
+
 export function prepareLogout() {
   intentionalLogout = true
   clearLastAuthUid()
@@ -28,14 +33,12 @@ const defaultStatus = 'user'
 function resetActiveUserState() {
   const userStore = useUserStore()
   const catalogStore = useCatalogStore()
-  const weightStore = useWeightStore()
   userStore.activeUser.uid = ''
   userStore.activeUser.name = ''
   userStore.activeUser.email = ''
   userStore.activeUser.photoURL = ''
   userStore.activeUser.status = defaultStatus
   catalogStore.setRubbersFromUser(null)
-  weightStore.setWeightEntries([])
 }
 
 function stopUserDataSubscription() {
@@ -44,13 +47,11 @@ function stopUserDataSubscription() {
   userUnsubscribe = null
 }
 
-export const initUser = () => {
+export const initUser = (callbacks: InitUserCallbacks) => {
   if (authUnsubscribe) return authUnsubscribe
 
   const auth = getFirebaseAuth()
   const userStore = useUserStore()
-  const exerciseStore = useExerciseStore()
-  const workoutStore = useWorkoutStore()
 
   // Немедленно загружаем данные из кэша, не дожидаясь onAuthStateChanged.
   // На iOS navigator.onLine ненадёжен (см. shared/api/platform/ios.ts): Firebase пытается
@@ -61,7 +62,7 @@ export const initUser = () => {
     if (preloadUid) {
       userStore.activeUser.uid = preloadUid
       getUserData()
-      getAllExercises()
+      callbacks.onLogin()
     }
   }
 
@@ -89,13 +90,13 @@ export const initUser = () => {
           if (!userStore.activeUser.name && !userStore.activeUser.email) void createUserData()
         }, 3000)
 
-        getAllExercises()
+        callbacks.onLogin()
       } else {
         if (shouldKeepOfflineSession) {
           userStore.activeUser.uid = offlineUid
           writeLastAuthUid(offlineUid)
           getUserData()
-          getAllExercises()
+          callbacks.onLogin()
           return
         }
 
@@ -110,15 +111,8 @@ export const initUser = () => {
         clearOfflineUserData(previousUid)
 
         stopUserDataSubscription()
-        stopAllExercisesSubscription()
-        stopWorkoutsSubscription()
         resetActiveUserState()
-        exerciseStore.allExercises = []
-        exerciseStore.allExercisesLoaded = false
-        workoutStore.workouts = []
-        workoutStore.filteredWorkouts = []
-        workoutStore.workoutsLoaded = false
-        workoutStore.selectUpdateWorkout = null
+        callbacks.onLogout()
       }
     })
   } catch (error) {

@@ -178,7 +178,7 @@ onUnmounted(() => {
         button.text-sm.text-error.px-2(type="button" @click="removeComplexExercise(idx)") удалить
       UiButton(text="Добавить упражнение" @click="addComplexExercise")
 
-  TabsEases(
+  UiTabsEases(
     v-if="!isComplex && eases.length > 1"
     :eases="eases"
     :selected="workout.ease"
@@ -253,7 +253,7 @@ onUnmounted(() => {
       UiButton(red :disabled="isSaving" @click="removeConfirm = true" text="Удалить")
       UiButton(:disabled="isSaving" @click="updateSelectWorkout" :text="isSaving ? 'Сохранение...' : 'Сохранить'")
 
-  ModalRemoveConfirm(
+  UiModalRemoveConfirm(
     text="Точно хочешь удалить данную запись?"
     :isShow="removeConfirm"
     @hiden="removeConfirm = false"

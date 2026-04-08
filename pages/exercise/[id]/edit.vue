@@ -347,7 +347,7 @@ watch(() => exercise.value.name, (name) => {
       />
     </div>
 
-    <ModalRemoveConfirm
+    <UiModalRemoveConfirm
       :text="text"
       :isShow="removeConfirm"
       @hiden="removeConfirm = false"
@@ -355,7 +355,7 @@ watch(() => exercise.value.name, (name) => {
       @remove="remove"
     />
 
-    <ModalColor
+    <UiModalColor
       :isShow="showModalColor"
       :activeColor="exercise.color"
       @hiden="showModalColor = false"

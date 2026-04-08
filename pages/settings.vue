@@ -221,7 +221,7 @@ async function signOutUser() {
   //- Version
   p.text-center.text-xs.opacity-30 версия {{ appVersion }}
 
-  ModalColor(
+  UiModalColor(
     :isShow="showModalColor"
     :activeColor="baseColor"
     @hiden="showModalColor = false"

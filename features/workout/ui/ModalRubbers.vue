@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 
-defineProps<{ 
+defineProps<{
   isShow: boolean
 }>()
 

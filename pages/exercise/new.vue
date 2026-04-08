@@ -284,7 +284,7 @@ watch(() => exercise.value.name, (name) => {
       />
     </div>
 
-    <ModalColor
+    <UiModalColor
       :isShow="showModalColor"
       :activeColor="exercise.color"
       @hiden="showModalColor = false"
