@@ -33,17 +33,3 @@ npm run dev
 | `npm run typecheck` | Проверка TypeScript (strict mode)           |
 | `npm run lint`      | Псевдоним для typecheck                     |
 | `npm run test`      | Запуск тестов (Node built-in test runner)   |
-
-## Переменные окружения
-
-Все значения берутся из Firebase Console → Project Settings.
-
-```env
-FIREBASE_API_KEY=
-AUTH_DOMAIN=your-project.firebaseapp.com
-DATABASE_URL=https://your-project-default-rtdb.firebaseio.com
-PROJECT_ID=
-STORAGE_BUCKET=
-MESSAGING_SENDER_ID=
-APP_ID=
-```
