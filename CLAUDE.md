@@ -22,13 +22,14 @@ npm run test      # Node built-in test runner (no test files yet)
 
 ## Directory Layout
 
-**Feature-Sliced Design (FSD).** New business logic → `features/` or `shared/`. Legacy `composables/` and `components/` retain only what hasn't been migrated.
+**Feature-Sliced Design (FSD).** Migration is complete — no legacy `stores/`, `components/`, or `composables/` directories.
 
 ```
 shared/
   api/     # firebaseInit.ts, offlineState.ts, firebase/, storage/, platform/
   config/  # enums.ts, storageKeys.ts
   lib/     # useDebounceFn.ts, useNotifications.ts
+  model/   # useAppStore.ts, useCatalogStore.ts (global/shared stores)
   ui/      # Button, Toggle, InputRange, Icon, Modal, GlobalNotifications…
 features/
   workout/ → model/, api/, lib/, ui/
@@ -36,11 +37,19 @@ features/
   measure/ → model/, api/
   user/    → model/, api/
   weight/  → model/, api/
-components/ # Header.vue, TabsEases.vue, modal/ (not yet migrated)
-stores/     # catalog.ts, app.ts
-pages/      # 10 routes
+widgets/
+  header/ui/  # Header.vue
+pages/      # nested routes under /exercise/[id]/
 plugins/    # 4 client-only init plugins (numbered for order)
 middleware/ # auth.global.ts
+```
+
+Component auto-import paths (nuxt.config.ts):
+```typescript
+{ path: '~/shared/ui', prefix: 'Ui', pathPrefix: false }
+{ path: '~/widgets/header/ui', pathPrefix: false }
+{ path: '~/features/exercise/ui', pathPrefix: false }
+{ path: '~/features/workout/ui', pathPrefix: false }
 ```
 
 ## Key Types
@@ -80,17 +89,17 @@ interface TypeWorkout {
 
 ## Pinia Stores
 
-All feature stores live at `features/{name}/model/store.ts`.
+Feature stores: `features/{name}/model/store.ts`. Shared/global stores: `shared/model/`.
 
-| Store | State | Notes |
-|-------|-------|-------|
-| `useWorkoutStore` | `workouts`, `filteredWorkouts`, `workoutsLoaded`, `selectUpdateWorkout`, `activeFilters {ease,interval,approach}`, `formDefaults` | `resolveFormDefaults(availableEases)` |
-| `useExerciseStore` | `allExercises`, `allExercisesLoaded`, `activeExercise`, `selectUpdateExercise` | `setActiveExercise()` persists to IDB |
-| `useUserStore` | `uid, name, email, photoURL, status ('user'\|'admin')` | — |
-| `useWeightStore` | `entries: WeightEntry[]`, `lastWeight` (computed) | sorted by createdAt DESC |
-| `useMeasureStore` | `measureTypes`, `measureEntries` (by type), `activeMeasure` | — |
-| `useCatalogStore` | `rubbersColor: {name,color}[]`, `rubbers`, `icons[]`, `colors[]` | `saveRubbers()`, `resetRubbers()` |
-| `useAppStore` | `headerTitle`, `hideFilterTitles` | `hideFilterTitles` persisted to IDB |
+| Store | Location | State | Notes |
+|-------|----------|-------|-------|
+| `useWorkoutStore` | `features/workout/model/` | `workouts`, `filteredWorkouts`, `workoutsLoaded`, `selectUpdateWorkout`, `activeFilters {ease,interval,approach}`, `formDefaults` | `resolveFormDefaults(availableEases)` |
+| `useExerciseStore` | `features/exercise/model/` | `allExercises`, `allExercisesLoaded`, `activeExercise`, `selectUpdateExercise` | `setActiveExercise()` persists to IDB |
+| `useUserStore` | `features/user/model/` | `uid, name, email, photoURL, status ('user'\|'admin')` | — |
+| `useWeightStore` | `features/weight/model/` | `entries: WeightEntry[]`, `lastWeight` (computed) | sorted by createdAt DESC |
+| `useMeasureStore` | `features/measure/model/` | `measureTypes`, `measureEntries` (by type), `activeMeasure` | — |
+| `useCatalogStore` | `shared/model/` | `rubbersColor: {name,color}[]`, `rubbers`, `icons[]`, `colors[]` | `saveRubbers()`, `resetRubbers()` |
+| `useAppStore` | `shared/model/` | `headerTitle`, `hideFilterTitles` | `hideFilterTitles` persisted to IDB |
 
 ## Firebase DB Paths (all under `users/{uid}/`)
 ```
@@ -139,7 +148,7 @@ onData(path, callback)               // live subscription → returns unsubscrib
 5. **iOS**: `navigator.onLine` unreliable → always `true`; real state via FB `.info/connected`
 
 ## Auth & Routing
-- `plugins/init-auth.client.ts` → calls `initUser()`
+- `plugins/init-auth.client.ts` → calls `initUser()`; on login also calls `getAllExercises()`; on logout clears all store data (exercises, workouts, weights)
 - `middleware/auth.global.ts` — public routes: `['login']`; auth timeout 2.5s; falls back to cached UID
 - Plugin init order: `0.init-storage` → `init-auth` → `offline-sync` → `global-error-handler`
 
@@ -147,14 +156,14 @@ onData(path, callback)               // live subscription → returns unsubscrib
 | Route | Purpose |
 |-------|---------|
 | `/` | Exercise list, draggable sort |
-| `/exercise` | Create/edit exercise |
-| `/exercise-item` | Workout list for active exercise |
-| `/workout` | Create/edit workout form |
+| `/exercise/new` | Create exercise |
+| `/exercise/[id]` | Workout list for exercise |
+| `/exercise/[id]/edit` | Edit exercise |
+| `/exercise/[id]/workout` | Create/edit workout form |
 | `/weight` | Weight tracking + chart |
 | `/settings` | App settings |
-| `/profile` | User info, sign out |
 | `/measure` | Measurements |
-| `/complex` | Complex workouts |
+| `/measure-item` | Measurement detail |
 | `/login` | Google OAuth |
 
 ## Important Business Rules
