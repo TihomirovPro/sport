@@ -245,9 +245,13 @@ export function useWorkoutProgressionUI({
       appliedAt: Date.now()
     }
 
-    void createData('progression/appliedSuggestions', payload).catch((error) => {
-      console.error('[firebase:progressionAppliedSuggestion]', error)
-    })
+    void (async () => {
+      try {
+        await createData('progression/appliedSuggestions', payload)
+      } catch (error) {
+        console.error('[firebase:progressionAppliedSuggestion]', error)
+      }
+    })()
   }
 
   return {

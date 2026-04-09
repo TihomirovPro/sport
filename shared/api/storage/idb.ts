@@ -27,6 +27,8 @@ const KEY_RENAMES: [string, string][] = [
 
 const OLD_PROGRESSION_PREFIX = 'workout-progression-settings-v1:'
 const NEW_PROGRESSION_PREFIX = `${IDB_KEYS.PROGRESSION_SETTINGS}:`
+const VALID_PROGRESSION_SUFFIX = /^[a-zA-Z0-9:|\-_.]+$/
+const MAX_KEY_LENGTH = 200
 
 let db: IDBDatabase | null = null
 const memoryCache = new Map<string, string>()
@@ -108,7 +110,10 @@ function migrateFromLocalStorage(): void {
     for (let i = 0; i < window.localStorage.length; i++) {
       const key = window.localStorage.key(i)
       if (key?.startsWith(OLD_PROGRESSION_PREFIX)) {
-        dynamicKeys.push(key)
+        const suffix = key.slice(OLD_PROGRESSION_PREFIX.length)
+        if (suffix && key.length <= MAX_KEY_LENGTH && VALID_PROGRESSION_SUFFIX.test(suffix)) {
+          dynamicKeys.push(key)
+        }
       }
     }
     for (const key of dynamicKeys) {

@@ -95,7 +95,11 @@ export const sortExercises = (exercises: TypeExercise[]) => {
     newExercises[`${el.id}`] = payload
   })
 
-  void updateData('exercises', newExercises).catch((error) => {
-    console.error('[firebase:sortExercises]', error)
-  })
+  void (async () => {
+    try {
+      await updateData('exercises', newExercises)
+    } catch (error) {
+      console.error('[firebase:sortExercises]', error)
+    }
+  })()
 }

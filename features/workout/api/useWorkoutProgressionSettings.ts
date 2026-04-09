@@ -91,13 +91,17 @@ export function useWorkoutProgressionSettings(params: UseWorkoutProgressionSetti
       if (!params.canManageProgression.value) return
       if (!exerciseId) return
 
-      void updateData(progressionSettingsPathFor(exerciseId), {
-        repMin: progressionRepMin.value,
-        repMax: progressionRepMax.value,
-        updatedAt: Date.now()
-      }).catch((error) => {
-        console.error('[firebase:saveProgressionSettings]', error)
-      })
+      void (async () => {
+        try {
+          await updateData(progressionSettingsPathFor(exerciseId), {
+            repMin: progressionRepMin.value,
+            repMax: progressionRepMax.value,
+            updatedAt: Date.now()
+          })
+        } catch (error) {
+          console.error('[firebase:saveProgressionSettings]', error)
+        }
+      })()
     }
   )
 

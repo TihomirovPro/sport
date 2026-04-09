@@ -32,6 +32,10 @@ let offlineSyncInitialized = false
 let isFlushingQueue = false
 let isFirebaseConnected = true
 
+let onlineHandler: (() => void) | null = null
+let offlineHandler: (() => void) | null = null
+let visibilityHandler: (() => void) | null = null
+
 const schedulePersist = createPersister(OFFLINE_QUEUE_KEY, PERSIST_DELAY_MS)
 
 function getCurrentUid(): string | null {
@@ -124,9 +128,13 @@ function compactOperations(operations: PendingOperation[]): PendingOperation[] {
   const compacted: PendingOperation[] = []
 
   for (const current of operations) {
-    const lastIndex = compacted.findLastIndex(
-      (item) => item.uid === current.uid && item.path === current.path
-    )
+    let lastIndex = -1
+    for (let i = compacted.length - 1; i >= 0; i--) {
+      if (compacted[i].uid === current.uid && compacted[i].path === current.path) {
+        lastIndex = i
+        break
+      }
+    }
     const last = lastIndex >= 0 ? compacted[lastIndex] : null
 
     if (!last) {
@@ -226,6 +234,11 @@ async function runPendingOperation(operation: PendingOperation) {
 
 export async function flushOfflineQueue() {
   if (!process.client || isFlushingQueue || !getOnlineStatus() || !isFirebaseConnected) return
+
+  if (flushRetryTimer) {
+    clearTimeout(flushRetryTimer)
+    flushRetryTimer = null
+  }
 
   const uid = getCurrentUid()
   if (!uid) {
@@ -329,7 +342,7 @@ export function initOfflineSync() {
     logFirebaseError('initOfflineSyncConnection', error)
   }
 
-  window.addEventListener('online', () => {
+  onlineHandler = () => {
     setOnlineStatus(true)
     try {
       goOnline(getFirebaseDb())
@@ -337,22 +350,26 @@ export function initOfflineSync() {
       logFirebaseError('goOnline', error)
     }
     void flushOfflineQueue()
-  })
+  }
 
-  window.addEventListener('offline', () => {
+  offlineHandler = () => {
     setOnlineStatus(false)
     try {
       goOffline(getFirebaseDb())
     } catch (error) {
       logFirebaseError('goOffline', error)
     }
-  })
+  }
 
-  document.addEventListener('visibilitychange', () => {
+  visibilityHandler = () => {
     if (!document.hidden && getOnlineStatus()) {
       void flushOfflineQueue()
     }
-  })
+  }
+
+  window.addEventListener('online', onlineHandler)
+  window.addEventListener('offline', offlineHandler)
+  document.addEventListener('visibilitychange', visibilityHandler)
 
   try {
     onValue(ref(getFirebaseDb(), '.info/connected'), (snap) => {
@@ -366,6 +383,25 @@ export function initOfflineSync() {
   }
 
   void flushOfflineQueue()
+}
+
+export function destroyOfflineSync() {
+  if (!process.client) return
+
+  if (onlineHandler) {
+    window.removeEventListener('online', onlineHandler)
+    onlineHandler = null
+  }
+  if (offlineHandler) {
+    window.removeEventListener('offline', offlineHandler)
+    offlineHandler = null
+  }
+  if (visibilityHandler) {
+    document.removeEventListener('visibilitychange', visibilityHandler)
+    visibilityHandler = null
+  }
+
+  offlineSyncInitialized = false
 }
 
 export function getCurrentUserId() {
