@@ -18,16 +18,14 @@ if (savedColor) {
 
 </script>
 
-<template lang="pug">
-.grid.min-h-full(
-  v-if="activeUser.uid"
-  class="grid-rows-[auto_1fr]"
-)
-  Header
-
-  main.px-2.py-3.max-w-2xl.size-full.mx-auto.relative
-    slot
-  UiGlobalNotifications
+<template>
+<div v-if="activeUser.uid" class="grid min-h-full grid-rows-[auto_1fr]">
+  <Header />
+  <main class="px-2 py-3 max-w-2xl size-full mx-auto relative">
+    <slot />
+  </main>
+  <UiGlobalNotifications />
+</div>
 </template>
 
 <style>

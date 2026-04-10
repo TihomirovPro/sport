@@ -96,76 +96,86 @@ async function reset() {
 }
 </script>
 
-<template lang="pug">
-UiModal(:isShow="isShow" @hiden="emit('hiden')")
-  template(#content)
-    .flex.items-start.justify-between
-      div
-        .text-base.font-semibold Набор резин
-        .text-xs.opacity-50(class="mt-0.5") Изменения применяются в экране тренировки
-      .text-xs.opacity-40.font-medium.tabular-nums(class="pt-0.5") {{ localRubbers.length }} шт
+<template>
+<UiModal :isShow="isShow" @hiden="emit('hiden')">
+  <template #content>
+    <div class="flex items-start justify-between">
+      <div>
+        <div class="text-base font-semibold">Набор резин</div>
+        <div class="text-xs opacity-50 mt-0.5">Изменения применяются в экране тренировки</div>
+      </div>
+      <div class="text-xs opacity-40 font-medium tabular-nums pt-0.5">{{ localRubbers.length }} шт</div>
+    </div>
 
-    .grid.gap-2
-      TransitionGroup(name="rubber-list")
-        .relative.rounded-xl.border.border-faint.overflow-hidden(
+    <div class="grid gap-2">
+      <TransitionGroup name="rubber-list">
+        <div
           v-for="(item, index) in localRubbers"
           :key="index"
-        )
-          .flex.items-center.gap-0
-            label.relative.cursor-pointer.shrink-0.self-stretch.flex.items-center.justify-center(
-              class="w-14"
+          class="relative rounded-xl border border-faint overflow-hidden"
+        >
+          <div class="flex items-center gap-0">
+            <label
+              class="relative cursor-pointer shrink-0 self-stretch flex items-center justify-center w-14"
               :style="`background: ${toHexColor(item.color)}18`"
               :title="'Выбрать цвет'"
-            )
-              .size-8.rounded-full.shadow-md.transition-transform(
-                class="hover:scale-105"
+            >
+              <div
+                class="size-8 rounded-full shadow-md transition-transform hover:scale-105"
                 :style="`background: ${toHexColor(item.color)}`"
-              )
-              input.absolute.inset-0.opacity-0.cursor-pointer.size-full(
+              ></div>
+              <input
                 :value="toHexColor(item.color)"
                 type="color"
+                class="absolute inset-0 opacity-0 cursor-pointer size-full"
                 @input="onColorInput(index, $event)"
-              )
-            .flex-1.flex.flex-col.gap-1.py-2.px-3
-              input.bg-transparent.text-sm.font-medium.w-full.outline-none.placeholder-opacity-40(
+              />
+            </label>
+            <div class="flex-1 flex flex-col gap-1 py-2 px-3">
+              <input
                 v-model="item.name"
                 type="text"
                 placeholder="Название резины"
-                class="border-b border-faint/60 pb-1 focus:border-accent transition-colors"
-              )
-              input.bg-transparent.text-xs.opacity-50.w-full.outline-none(
+                class="bg-transparent text-sm font-medium w-full outline-none placeholder-opacity-40 border-b border-faint/60 pb-1 focus:border-accent transition-colors"
+              />
+              <input
                 v-model="item.color"
                 type="text"
                 placeholder="#3b82f6"
-                class="font-mono focus:opacity-80 transition-opacity"
-              )
-            button.shrink-0.self-stretch.flex.items-center.justify-center.transition-colors(
-              class="w-10 text-error/40 hover:text-error hover:bg-error/8"
+                class="bg-transparent text-xs opacity-50 w-full outline-none font-mono focus:opacity-80 transition-opacity"
+              />
+            </div>
+            <button
+              class="shrink-0 self-stretch flex items-center justify-center transition-colors w-10 text-error/40 hover:text-error hover:bg-error/8"
               type="button"
               @click="removeRubber(index)"
-            )
-              svg.size-4(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
-                path(d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6")
+            >
+              <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </TransitionGroup>
 
-      button.flex.items-center.justify-center.gap-2.rounded-xl.border.border-dashed.border-faint.py-3.w-full.transition-colors(
-        class="text-sm opacity-60 hover:opacity-100 hover:border-accent hover:text-accent"
+      <button
+        class="flex items-center justify-center gap-2 rounded-xl border border-dashed border-faint py-3 w-full transition-colors text-sm opacity-60 hover:opacity-100 hover:border-accent hover:text-accent"
         type="button"
         @click="addRubber"
-      )
-        svg.size-4(xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round")
-          path(d="M12 5v14M5 12h14")
-        span Добавить резину
+      >
+        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        <span>Добавить резину</span>
+      </button>
+    </div>
+  </template>
 
-  template(#bottom)
-    UiButton(
-      red
-      text="Сбросить"
-      @click="reset"
-    )
-    UiButton(
-      text="Сохранить"
-      @click="save"
-    )
+  <template #bottom>
+    <UiButton red text="Сбросить" @click="reset" />
+    <UiButton text="Сохранить" @click="save" />
+  </template>
+</UiModal>
 </template>
 
 <style scoped>

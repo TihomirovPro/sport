@@ -76,85 +76,105 @@ function openType(type: { id: string; name: string; unit: string }) {
 }
 </script>
 
-<template lang="pug">
-.grid.gap-4
+<template>
+<div class="grid gap-4">
 
-  //- Add form
-  .border.border-faint.rounded-xl.overflow-hidden
-    button.w-full.flex.items-center.justify-between.px-4.py-3.cursor-pointer(
+  <!-- Add form -->
+  <div class="border border-faint rounded-xl overflow-hidden">
+    <button
       type="button"
+      class="w-full flex items-center justify-between px-4 py-3 cursor-pointer"
       @click="showAddForm = !showAddForm"
-    )
-      .flex.items-center.gap-3
-        .size-8.rounded-lg.flex-center.bg-faint.opacity-80
-          svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
-            line(x1="12" y1="5" x2="12" y2="19")
-            line(x1="5" y1="12" x2="19" y2="12")
-        span.text-sm Добавить замер
-      svg.opacity-40.transition-transform(
+    >
+      <div class="flex items-center gap-3">
+        <div class="size-8 rounded-lg flex-center bg-faint opacity-80">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </div>
+        <span class="text-sm">Добавить замер</span>
+      </div>
+      <svg
         width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        class="opacity-40 transition-transform"
         :class="showAddForm ? 'rotate-90' : ''"
-      )
-        polyline(points="9 18 15 12 9 6")
+      >
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </button>
 
-    .px-4.pb-4.grid.gap-3(v-if="showAddForm")
-      .h-px.bg-faint.-mx-4.mb-1
-      .grid.grid-cols-2.gap-2
-        .grid.gap-1
-          label.text-xs.text-gray-500(for="measure-name") Название
-          input#measure-name.border.border-faint.p-2.rounded-lg.w-full.bg-transparent.text-sm(
+    <div v-if="showAddForm" class="px-4 pb-4 grid gap-3">
+      <div class="h-px bg-faint -mx-4 mb-1"></div>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="grid gap-1">
+          <label class="text-xs text-gray-500" for="measure-name">Название</label>
+          <input
+            id="measure-name"
             v-model="newName"
             type="text"
             placeholder="Бицепс"
+            class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
             @keyup.enter="submitType"
-          )
-        .grid.gap-1
-          label.text-xs.text-gray-500(for="measure-unit") Единица
-          input#measure-unit.border.border-faint.p-2.rounded-lg.w-full.bg-transparent.text-sm(
+          />
+        </div>
+        <div class="grid gap-1">
+          <label class="text-xs text-gray-500" for="measure-unit">Единица</label>
+          <input
+            id="measure-unit"
             v-model="newUnit"
             type="text"
             placeholder="см"
+            class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
             @keyup.enter="submitType"
-          )
-      UiButton(
-        text="Сохранить"
-        :disabled="isSaving"
-        @click="submitType"
-      )
+          />
+        </div>
+      </div>
+      <UiButton text="Сохранить" :disabled="isSaving" @click="submitType" />
+    </div>
+  </div>
 
-  //- Types list
-  .border.border-faint.rounded-xl.overflow-hidden(v-if="types.length")
-    .flex.items-center.justify-between.px-4(
+  <!-- Types list -->
+  <div class="border border-faint rounded-xl overflow-hidden" v-if="types.length">
+    <div
       v-for="(type, index) in types"
       :key="type.id"
-      class="py-3"
+      class="flex items-center justify-between px-4 py-3"
       :class="index < types.length - 1 ? 'border-b border-faint' : ''"
-    )
-      .flex.items-center.gap-3.flex-1.cursor-pointer.min-w-0(
-        @click="openType(type)"
-      )
-        .size-8.rounded-lg.flex-center.bg-faint.shrink-0
-          svg(width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round")
-            line(x1="18" y1="20" x2="18" y2="10")
-            line(x1="12" y1="20" x2="12" y2="4")
-            line(x1="6" y1="20" x2="6" y2="14")
-        .min-w-0
-          p.text-sm.font-medium.truncate {{ type.name }}
-          p.text-xs.text-gray-500 {{ type.unit }}
-      .flex.items-center.gap-2
-        button.text-xs.text-error.cursor-pointer.py-1.px-2.rounded-lg.border.border-transparent.transition-all.shrink-0(
+    >
+      <div class="flex items-center gap-3 flex-1 cursor-pointer min-w-0" @click="openType(type)">
+        <div class="size-8 rounded-lg flex-center bg-faint shrink-0">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10" />
+            <line x1="12" y1="20" x2="12" y2="4" />
+            <line x1="6" y1="20" x2="6" y2="14" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-medium truncate">{{ type.name }}</p>
+          <p class="text-xs text-gray-500">{{ type.unit }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
           type="button"
+          class="text-xs text-error cursor-pointer py-1 px-2 rounded-lg border border-transparent transition-all shrink-0 hover:border-error/30"
           :disabled="deletingId === type.id"
-          class="hover:border-error/30"
           :class="{ 'opacity-50 pointer-events-none': deletingId === type.id }"
           @click.stop="onRemoveType(type.id)"
-        ) {{ deletingId === type.id ? '...' : 'Удалить' }}
-        svg.opacity-40.shrink-0(
+        >{{ deletingId === type.id ? '...' : 'Удалить' }}</button>
+        <svg
           width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="opacity-40 shrink-0"
           @click="openType(type)"
-        )
-          polyline(points="9 18 15 12 9 6")
+        >
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </div>
+    </div>
+  </div>
 
-  //- Empty state
-  UiEmptyState(v-else icon="📏" title="Замеры не добавлены" hint="Нажмите «Добавить замер» выше")
+  <!-- Empty state -->
+  <UiEmptyState v-else icon="📏" title="Замеры не добавлены" hint="Нажмите «Добавить замер» выше" />
+</div>
 </template>

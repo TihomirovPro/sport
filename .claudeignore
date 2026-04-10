@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.nuxt/
+.output/
+dist/
+
+# Cache
+.cache/
+.nitro/
+
+# Logs
+*.log*
+
+# System
+.DS_Store

@@ -27,7 +27,7 @@ const constEases = [EnumEase.noWeight, EnumEase.weight, EnumEase.rubber]
 
 const exercise = ref<TypeExerciseCreate>({
   name: '',
-  color: '',
+  color: '#334155',
   icon: '',
   ease: constEases,
   isComplex: false,

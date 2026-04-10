@@ -212,97 +212,113 @@ async function onRemoveEntry(id: string) {
 }
 </script>
 
-<template lang="pug">
-.grid.gap-4
+<template>
+<div class="grid gap-4">
 
-  //- Add entry form
-  .border.border-faint.rounded-xl.p-4.grid.gap-3
-    p.font-semibold.text-sm.uppercase.tracking-wide.text-gray-500 Добавить запись
-    .grid.grid-cols-2.gap-2
-      .grid.gap-1
-        label.text-xs.text-gray-500(for="entry-date") Дата
-        input#entry-date.border.border-faint.p-2.rounded-lg.w-full.bg-transparent.text-sm(
+  <!-- Add entry form -->
+  <div class="border border-faint rounded-xl p-4 grid gap-3">
+    <p class="font-semibold text-sm uppercase tracking-wide text-gray-500">Добавить запись</p>
+    <div class="grid grid-cols-2 gap-2">
+      <div class="grid gap-1">
+        <label class="text-xs text-gray-500" for="entry-date">Дата</label>
+        <input
+          id="entry-date"
           v-model="selectedDate"
           type="date"
-        )
-      .grid.gap-1
-        label.text-xs.text-gray-500(for="entry-value") Значение, {{ unit }}
-        input#entry-value.border.border-faint.p-2.rounded-lg.w-full.bg-transparent.text-sm(
+          class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
+        />
+      </div>
+      <div class="grid gap-1">
+        <label class="text-xs text-gray-500" for="entry-value">Значение, {{ unit }}</label>
+        <input
+          id="entry-value"
           v-model="entryValue"
           type="number"
           inputmode="decimal"
           step="0.1"
           min="0.1"
           placeholder="38.5"
+          class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
           @keyup.enter="submitEntry"
-        )
-    UiButton(
-      text="Сохранить"
-      :disabled="isSaving"
-      @click="submitEntry"
-    )
+        />
+      </div>
+    </div>
+    <UiButton text="Сохранить" :disabled="isSaving" @click="submitEntry" />
+  </div>
 
-  //- Period tabs
-  UiPeriodTabs(v-if="activeEntries.length" v-model="activePeriod")
+  <!-- Period tabs -->
+  <UiPeriodTabs v-if="activeEntries.length" v-model="activePeriod" />
 
-  //- Stats
-  template(v-if="stats")
-    .grid.grid-cols-2.gap-2
-      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
-        p.text-xs.text-gray-500 Последний
-        p.text-xl.font-bold.tracking-tight {{ formatValue(stats.latest.value) }}
-        p.text-xs.text-gray-500 {{ formatDate(stats.latest.createdAt) }}
-      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
-        p.text-xs.text-gray-500 Изменение
-        p.text-xl.font-bold.tracking-tight(
+  <!-- Stats -->
+  <template v-if="stats">
+    <div class="grid grid-cols-2 gap-2">
+      <div class="border border-faint rounded-xl p-3 grid gap-0.5">
+        <p class="text-xs text-gray-500">Последний</p>
+        <p class="text-xl font-bold tracking-tight">{{ formatValue(stats.latest.value) }}</p>
+        <p class="text-xs text-gray-500">{{ formatDate(stats.latest.createdAt) }}</p>
+      </div>
+      <div class="border border-faint rounded-xl p-3 grid gap-0.5">
+        <p class="text-xs text-gray-500">Изменение</p>
+        <p
+          class="text-xl font-bold tracking-tight"
           :class="stats.change === null ? '' : stats.change > 0 ? 'text-green-500' : stats.change < 0 ? 'text-error' : ''"
-        ) {{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} ${unit}` }}
-        p.text-xs.text-gray-500 от предыдущего
-      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
-        p.text-xs.text-gray-500 Среднее
-        p.text-xl.font-bold.tracking-tight {{ formatValue(stats.average) }}
-        p.text-xs.text-gray-500 за период
-      .border.border-faint.rounded-xl.p-3.grid(class="gap-0.5")
-        p.text-xs.text-gray-500 Диапазон
-        p.text-base.font-bold.tracking-tight {{ formatValue(stats.min) }}
-        p.text-xs.text-gray-500 — {{ formatValue(stats.max) }}
+        >{{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} ${unit}` }}</p>
+        <p class="text-xs text-gray-500">от предыдущего</p>
+      </div>
+      <div class="border border-faint rounded-xl p-3 grid gap-0.5">
+        <p class="text-xs text-gray-500">Среднее</p>
+        <p class="text-xl font-bold tracking-tight">{{ formatValue(stats.average) }}</p>
+        <p class="text-xs text-gray-500">за период</p>
+      </div>
+      <div class="border border-faint rounded-xl p-3 grid gap-0.5">
+        <p class="text-xs text-gray-500">Диапазон</p>
+        <p class="text-base font-bold tracking-tight">{{ formatValue(stats.min) }}</p>
+        <p class="text-xs text-gray-500">— {{ formatValue(stats.max) }}</p>
+      </div>
+    </div>
+  </template>
 
-  .border.border-faint.rounded-xl.p-4(v-else-if="activeEntries.length")
-    p.text-sm.text-gray-500.text-center За выбранный период нет данных
+  <div class="border border-faint rounded-xl p-4" v-else-if="activeEntries.length">
+    <p class="text-sm text-gray-500 text-center">За выбранный период нет данных</p>
+  </div>
 
-  //- Chart
-  .border.border-faint.rounded-xl.p-4.grid.gap-3(v-if="filteredEntries.length")
-    p.font-semibold.text-sm График
-    .h-48
-      Chart(
-        type="line"
-        :data="chartData"
-        :options="chartOptions"
-      )
+  <!-- Chart -->
+  <div class="border border-faint rounded-xl p-4 grid gap-3" v-if="filteredEntries.length">
+    <p class="font-semibold text-sm">График</p>
+    <div class="h-48">
+      <Chart type="line" :data="chartData" :options="chartOptions" />
+    </div>
+  </div>
 
-  //- History
-  .border.border-faint.rounded-xl.p-4.grid.gap-3(v-if="activeEntries.length")
-    p.font-semibold.text-sm История
-    .grid.gap-0
-      .flex.items-center.justify-between(
+  <!-- History -->
+  <div class="border border-faint rounded-xl p-4 grid gap-3" v-if="activeEntries.length">
+    <p class="font-semibold text-sm">История</p>
+    <div class="grid gap-0">
+      <div
         v-for="(entry, index) in activeEntries"
         :key="entry.id"
-        class="py-2.5"
+        class="flex items-center justify-between py-2.5"
         :class="index < activeEntries.length - 1 ? 'border-b border-faint' : ''"
-      )
-        .flex.items-center.gap-3
-          .w-2.h-2.rounded-full.bg-accent.shrink-0
-          .grid.gap-0
-            p.font-semibold.text-sm {{ formatValue(entry.value) }}
-            p.text-xs.text-gray-500 {{ formatDate(entry.createdAt) }}
-        button.text-xs.text-error.cursor-pointer.py-1.px-2.rounded-lg.border.border-transparent.transition-all(
+      >
+        <div class="flex items-center gap-3">
+          <div class="w-2 h-2 rounded-full bg-accent shrink-0"></div>
+          <div class="grid gap-0">
+            <p class="font-semibold text-sm">{{ formatValue(entry.value) }}</p>
+            <p class="text-xs text-gray-500">{{ formatDate(entry.createdAt) }}</p>
+          </div>
+        </div>
+        <button
           type="button"
+          class="text-xs text-error cursor-pointer py-1 px-2 rounded-lg border border-transparent transition-all hover:border-error/30"
           :disabled="deletingId === entry.id"
-          class="hover:border-error/30"
           :class="{ 'opacity-50 pointer-events-none': deletingId === entry.id }"
           @click="onRemoveEntry(entry.id)"
-        ) {{ deletingId === entry.id ? '...' : 'Удалить' }}
+        >{{ deletingId === entry.id ? '...' : 'Удалить' }}</button>
+      </div>
+    </div>
+  </div>
 
-  //- Empty state
-  UiEmptyState(v-else icon="📐" title="Пока нет записей" hint="Добавьте первую запись выше")
+  <!-- Empty state -->
+  <UiEmptyState v-else icon="📐" title="Пока нет записей" hint="Добавьте первую запись выше" />
+</div>
 </template>

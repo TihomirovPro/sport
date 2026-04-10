@@ -318,42 +318,53 @@ function showChart() {
 }
 </script>
 
-<template lang="pug">
-.filters
-  template(v-if="allFilterElements.eases.length > 1")
-    .flex.border-b.border-faint.mb-2
-      .flex-1.pb-2.text-center.text-sm.cursor-pointer.border-b-2.transition(
+<template>
+<div class="filters">
+  <template v-if="allFilterElements.eases.length > 1">
+    <div class="flex border-b border-faint mb-2">
+      <div
         v-for="ease in allFilterElements.eases"
         :key="ease"
+        class="flex-1 pb-2 text-center text-sm cursor-pointer border-b-2 transition"
         :class="filter.ease === ease ? 'border-accent text-accent font-medium' : 'border-transparent opacity-40'"
         @click="filter.changeEase(ease)"
-      ) {{ ease }}
+      >{{ ease }}</div>
+    </div>
+  </template>
 
-  template(v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0")
-    .pb-1.text-xs(v-if="!hideFilterTitles") Интервал
-    .flex.rounded-xl.p-1.overflow-x-auto.mb-2(class="bg-accent/10 scrollbar-none gap-0.5")
-      .flex-1.shrink-0.text-center.py-1.rounded-lg.text-sm.cursor-pointer.transition(
+  <template v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0">
+    <div v-if="!hideFilterTitles" class="pb-1 text-xs">Интервал</div>
+    <div class="flex rounded-xl p-1 overflow-x-auto mb-2 bg-accent/10 scrollbar-none gap-0.5">
+      <div
         v-for="interval in availableFilterElements.intervals"
         :key="interval"
+        class="flex-1 shrink-0 text-center py-1 rounded-lg text-sm cursor-pointer transition"
         :class="filter.interval === interval ? 'bg-white text-accent font-semibold shadow-sm' : 'text-accent/50'"
         @click="filter.changeInterval(interval)"
-      ) {{ interval }}
+      >{{ interval }}</div>
+    </div>
+  </template>
 
-  template(v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0")
-    .pb-1.text-xs(v-if="!hideFilterTitles") Подходы
-    .flex.rounded-xl.p-1.overflow-x-auto.mb-2(class="bg-accent/10 scrollbar-none gap-0.5")
-      .flex-1.shrink-0.text-center.py-1.rounded-lg.text-sm.cursor-pointer.transition(
+  <template v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0">
+    <div v-if="!hideFilterTitles" class="pb-1 text-xs">Подходы</div>
+    <div class="flex rounded-xl p-1 overflow-x-auto mb-2 bg-accent/10 scrollbar-none gap-0.5">
+      <div
         v-for="approach in availableFilterElements.approaches"
         :key="approach"
+        class="flex-1 shrink-0 text-center py-1 rounded-lg text-sm cursor-pointer transition"
         :class="filter.approach === approach ? 'bg-white text-accent font-semibold shadow-sm' : 'text-accent/50'"
         @click="filter.changeApproach(approach)"
-      ) {{ approach }}
-  Chart(
+      >{{ approach }}</div>
+    </div>
+  </template>
+
+  <Chart
     v-if="showChart()"
     type="line"
     :data="data"
     :options="optionsLines"
     :key="chartKey"
     class="mt-2"
-  )
+  />
+</div>
 </template>

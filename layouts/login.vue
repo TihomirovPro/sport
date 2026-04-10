@@ -1,8 +1,10 @@
-<template lang="pug">
-.flex-center.h-full
-  .h-full.overflow-auto
-    slot
-  UiGlobalNotifications
+<template>
+<div class="flex-center h-full">
+  <div class="h-full overflow-auto">
+    <slot />
+  </div>
+  <UiGlobalNotifications />
+</div>
 </template>
 
 <style>
