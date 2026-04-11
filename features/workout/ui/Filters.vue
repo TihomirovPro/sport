@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Chart as _Chart } from 'vue-chartjs'
-const Chart = _Chart as any
+import type { Component } from 'vue'
+const Chart = _Chart as Component
 import { storeToRefs } from 'pinia'
 import type { Filter } from '~/features/workout/model/types'
 import { EnumEase } from '~/shared/config/enums'

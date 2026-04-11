@@ -80,8 +80,8 @@ function writeToDb(key: string, value: string): void {
   if (!db) return
   try {
     db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(value, key)
-  } catch {
-    // silent
+  } catch (error) {
+    console.warn('[idb:writeToDb]', key, error)
   }
 }
 
@@ -89,8 +89,8 @@ function deleteFromDb(key: string): void {
   if (!db) return
   try {
     db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(key)
-  } catch {
-    // silent
+  } catch (error) {
+    console.warn('[idb:deleteFromDb]', key, error)
   }
 }
 
@@ -176,8 +176,8 @@ export async function initIdbStorage(): Promise<void> {
     if (!entries.has(KEYS_MIGRATION_V2_FLAG)) {
       migrateKeysV2()
     }
-  } catch {
-    // If IDB is unavailable, the in-memory cache still works for the session
+  } catch (error) {
+    console.warn('[idb:initIdbStorage] IDB unavailable, running with in-memory cache only', error)
   }
 }
 

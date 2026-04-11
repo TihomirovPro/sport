@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Chart as _Chart } from 'vue-chartjs'
-const Chart = _Chart as any
+import type { Component } from 'vue'
+const Chart = _Chart as Component
 import { storeToRefs } from 'pinia'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
@@ -38,7 +39,7 @@ useHead({
 const appStore = useAppStore()
 const weightStore = useWeightStore()
 const { entries } = storeToRefs(weightStore)
-const { notifyError } = useNotifications()
+const { notifyError, notifySuccess } = useNotifications()
 
 const weightValue = ref<string | number>('')
 const selectedDate = ref('')
@@ -189,6 +190,7 @@ async function submitWeight() {
   isSaving.value = true
   try {
     await addWeight(value, createdAt)
+    notifySuccess('Вес сохранён')
     weightValue.value = ''
     selectedDate.value = getTodayDate()
   } catch (error) {

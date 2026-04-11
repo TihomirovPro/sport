@@ -106,7 +106,7 @@ function deleted() {
   if (isSaving.value) return
   text.value = workouts.value.length
     ? 'Ты уверен, что хочешь удалить? Все добавленные записи будут удалены'
-    : 'Ты уверен, что хочешь удалить?)'
+    : 'Ты уверен, что хочешь удалить?'
   removeConfirm.value = true
 }
 

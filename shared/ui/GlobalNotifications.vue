@@ -8,7 +8,10 @@ const { notifications, removeNotification } = useNotifications()
       <div
         v-for="notification in notifications"
         :key="notification.id"
-        class="pointer-events-auto rounded-md border border-error/70 bg-black/85 px-4 py-3 text-sm text-white shadow-lg"
+        class="pointer-events-auto rounded-md px-4 py-3 text-sm text-white shadow-lg"
+        :class="notification.type === 'success'
+          ? 'border border-green-500/70 bg-black/85'
+          : 'border border-error/70 bg-black/85'"
       >
         <div class="flex items-start justify-between gap-3">
           <p>{{ notification.message }}</p>

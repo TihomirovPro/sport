@@ -130,7 +130,8 @@ function compactOperations(operations: PendingOperation[]): PendingOperation[] {
   for (const current of operations) {
     let lastIndex = -1
     for (let i = compacted.length - 1; i >= 0; i--) {
-      if (compacted[i].uid === current.uid && compacted[i].path === current.path) {
+      const item = compacted[i]
+      if (item?.uid === current.uid && item?.path === current.path) {
         lastIndex = i
         break
       }

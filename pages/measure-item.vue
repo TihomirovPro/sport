@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Chart as _Chart } from 'vue-chartjs'
-const Chart = _Chart as any
+import type { Component } from 'vue'
+const Chart = _Chart as Component
 import { storeToRefs } from 'pinia'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
@@ -35,7 +36,7 @@ const appStore = useAppStore()
 const measureStore = useMeasureStore()
 const { activeType, activeEntries } = storeToRefs(measureStore)
 const router = useRouter()
-const { notifyError } = useNotifications()
+const { notifyError, notifySuccess } = useNotifications()
 
 const entryValue = ref<string | number>('')
 const selectedDate = ref('')
@@ -182,6 +183,7 @@ async function submitEntry() {
   isSaving.value = true
   try {
     await addMeasureEntry(activeType.value.id, value, createdAt)
+    notifySuccess('Запись сохранена')
     entryValue.value = ''
     selectedDate.value = getTodayDate()
   } catch (error) {

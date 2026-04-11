@@ -79,9 +79,9 @@ function selectUpdate() {
   <div class="border-t border-faint p-2 mt-2" v-if="desc">{{ desc }}</div>
 
   <div class="flex justify-end pt-3">
-    <div @click="selectUpdate">
+    <button type="button" aria-label="Редактировать тренировку" @click="selectUpdate">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 511" width="20" height="20"><path fill="var(--color-accent)" d="M405 256c-11 0-21 10-21 22v170c0 12-10 22-21 22H64c-12 0-21-10-21-22V150c0-12 9-22 21-22h171a21 21 0 1 0 0-42H64c-35 0-64 29-64 64v298c0 36 29 64 64 64h299c35 0 64-28 64-64V278c0-12-10-22-22-22zm0 0"/><path fill="var(--color-accent)" d="M200 237a11 11 0 0 0-3 5l-15 76c-1 3 0 7 3 10a11 11 0 0 0 7 3l3-1 75-15c2 0 4-1 5-3l169-168-75-76zM496 16a53 53 0 0 0-75 0l-30 30 76 75 29-29a53 53 0 0 0 0-76zm0 0"/></svg>
-    </div>
+    </button>
   </div>
 </div>
 </template>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia'
 import { Chart as _Chart } from 'vue-chartjs'
-const Chart = _Chart as any
+import type { Component } from 'vue'
+const Chart = _Chart as Component
 import {
   Chart as ChartJS,
   CategoryScale,

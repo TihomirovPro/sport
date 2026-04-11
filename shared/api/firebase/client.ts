@@ -42,17 +42,20 @@ function ensureFirebaseInit() {
 
 export const getFirebaseApp = () => {
   ensureFirebaseInit()
-  return firebaseApp as FirebaseApp
+  if (!firebaseApp) throw new Error('Firebase App не инициализирован')
+  return firebaseApp
 }
 
 export const getFirebaseDb = () => {
   ensureFirebaseInit()
-  return db as Database
+  if (!db) throw new Error('Firebase Database не инициализирована')
+  return db
 }
 
 export const getFirebaseAuth = () => {
   ensureFirebaseInit()
-  return auth as Auth
+  if (!auth) throw new Error('Firebase Auth не инициализирован')
+  return auth
 }
 
 export function dbPath(path: string): string {

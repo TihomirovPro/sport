@@ -83,10 +83,9 @@ export const sortExercises = (exercises: TypeExercise[]) => {
     const payload: TypeExerciseCreate = {
       name: el.name,
       ease: el.ease,
-      order: i
+      order: i,
+      color: el.color ?? '#334155'
     }
-
-    if (el.color !== undefined) payload.color = el.color
     if (el.icon !== undefined) payload.icon = el.icon
     if (el.isComplex !== undefined) payload.isComplex = el.isComplex
     if (el.complexDesc !== undefined) payload.complexDesc = el.complexDesc

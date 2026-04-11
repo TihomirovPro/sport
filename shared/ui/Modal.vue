@@ -12,6 +12,8 @@ const slots = useSlots()
     @click.self="emit('hiden')"
   >
     <div
+      role="dialog"
+      aria-modal="true"
       class="modal-sheet overflow-auto grid gap-4 pt-3 pb-6 px-3 rounded-t-2xl w-full mt-auto bg-glass backdrop-blur-md max-h-[85%]"
       style="box-shadow: 0 -4px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.5);"
     >

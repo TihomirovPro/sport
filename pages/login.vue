@@ -7,9 +7,10 @@ definePageMeta({
   layout: 'login'
 })
 
+const { notifyError } = useNotifications()
+
 async function loginWithGoogle() {
   if (!getOnlineStatus()) {
-    const { notifyError } = useNotifications()
     notifyError('Для входа через Google нужен интернет')
     return
   }
@@ -20,6 +21,7 @@ async function loginWithGoogle() {
     await navigateTo('/')
   } catch (error) {
     console.error('[firebase:loginWithGoogle]', error)
+    notifyError('Не удалось войти. Попробуйте снова.')
   }
 }
 </script>

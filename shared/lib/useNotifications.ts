@@ -1,6 +1,6 @@
 export type AppNotification = {
   id: number
-  type: 'error'
+  type: 'error' | 'success'
   message: string
 }
 
@@ -13,23 +13,23 @@ export function useNotifications() {
     notifications.value = notifications.value.filter((notification) => notification.id !== id)
   }
 
-  const notifyError = (message: string) => {
+  function notify(type: AppNotification['type'], message: string, duration = 5000) {
     const id = ++notificationId
 
-    notifications.value = [...notifications.value, {
-      id,
-      type: 'error',
-      message,
-    }]
+    notifications.value = [...notifications.value, { id, type, message }]
 
     setTimeout(() => {
       removeNotification(id)
-    }, 5000)
+    }, duration)
   }
+
+  const notifyError = (message: string) => notify('error', message)
+  const notifySuccess = (message: string) => notify('success', message, 3000)
 
   return {
     notifications,
     notifyError,
+    notifySuccess,
     removeNotification,
   }
 }
