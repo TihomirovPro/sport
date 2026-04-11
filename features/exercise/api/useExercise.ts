@@ -36,7 +36,7 @@ export const getAllExercises = () => {
 
         nextExercises.push({
           name: exercise.name,
-          color: exercise.color,
+          color: exercise.color ?? '#334155',
           icon: exercise.icon,
           ease: exercise.ease,
           isComplex: exercise.isComplex,

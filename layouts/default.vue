@@ -7,13 +7,10 @@ const userStore = useUserStore()
 const { activeUser } = storeToRefs(userStore)
 
 const savedColor = idbStorage.getItem(IDB_KEYS.BASE_COLOR)
-if (savedColor) {
-  const r = parseInt(savedColor.slice(1, 3), 16)
-  const g = parseInt(savedColor.slice(3, 5), 16)
-  const b = parseInt(savedColor.slice(5, 7), 16)
 
+if (savedColor) {
   const html = document.querySelector('html')
-  html?.style.setProperty('--colorAccent', `${r} ${g} ${b}`)
+  html?.style.setProperty('--color-accent', `${savedColor}`)
 }
 
 </script>

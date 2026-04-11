@@ -6,6 +6,7 @@ import type { Filter } from '~/features/workout/model/types'
 import { EnumEase } from '~/shared/config/enums'
 import { IDB_KEYS } from '~/shared/config/storageKeys'
 import { idbStorage } from '~/shared/api/storage/idb'
+import { useRgbColor } from '~/shared/lib/useRgbColor'
 
 import {
   Chart as ChartJS,
@@ -227,12 +228,9 @@ const filter = ref<Filter>({
 })
 
 const color = idbStorage.getItem(IDB_KEYS.BASE_COLOR) || '#3b82f6'
-const r = parseInt(color.slice(1, 3), 16)
-const g = parseInt(color.slice(3, 5), 16)
-const b = parseInt(color.slice(5, 7), 16)
 
 const baseColor = color
-const secondColor = `rgba(${r},${g},${b},0.2)`
+const secondColor = `rgba(${useRgbColor(color)},0.2)`
 
 type ChartDataset = {
   label: string
@@ -332,31 +330,21 @@ function showChart() {
     </div>
   </template>
 
-  <template v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0">
-    <div v-if="!hideFilterTitles" class="pb-1 text-xs">Интервал</div>
-    <div class="flex rounded-xl p-1 overflow-x-auto mb-2 bg-accent/10 scrollbar-none gap-0.5">
-      <div
-        v-for="interval in availableFilterElements.intervals"
-        :key="interval"
-        class="flex-1 shrink-0 text-center py-1 rounded-lg text-sm cursor-pointer transition"
-        :class="filter.interval === interval ? 'bg-white text-accent font-semibold shadow-sm' : 'text-accent/50'"
-        @click="filter.changeInterval(interval)"
-      >{{ interval }}</div>
-    </div>
-  </template>
+  <FilterChips
+    v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0"
+    title="Интервал"
+    :items="availableFilterElements.intervals"
+    :modelValue="filter.interval"
+    @update:modelValue="filter.changeInterval($event)"
+  />
 
-  <template v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0">
-    <div v-if="!hideFilterTitles" class="pb-1 text-xs">Подходы</div>
-    <div class="flex rounded-xl p-1 overflow-x-auto mb-2 bg-accent/10 scrollbar-none gap-0.5">
-      <div
-        v-for="approach in availableFilterElements.approaches"
-        :key="approach"
-        class="flex-1 shrink-0 text-center py-1 rounded-lg text-sm cursor-pointer transition"
-        :class="filter.approach === approach ? 'bg-white text-accent font-semibold shadow-sm' : 'text-accent/50'"
-        @click="filter.changeApproach(approach)"
-      >{{ approach }}</div>
-    </div>
-  </template>
+  <FilterChips
+    v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0"
+    title="Подходы"
+    :items="availableFilterElements.approaches"
+    :modelValue="filter.approach"
+    @update:modelValue="filter.changeApproach($event)"
+  />
 
   <Chart
     v-if="showChart()"

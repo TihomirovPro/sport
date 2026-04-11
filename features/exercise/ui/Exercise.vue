@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { TypeExercise } from '~/features/exercise/model/types'
+import { useRgbColor } from '~/shared/lib/useRgbColor'
 
 const props = defineProps<TypeExercise>()
 
@@ -15,17 +16,25 @@ function active() {
   if (!props.isComplex) router.push(`/exercise/${props.id}`)
   else router.push(`/exercise/${props.id}?complex=true`)
 }
+
+const rgbColor = useRgbColor(props.color)
 </script>
 
 <template>
-<div class="group flex items-center gap-3.5 px-3 py-2.5 rounded-2xl transition-all duration-200 active:scale-[0.97] cursor-pointer select-none"
-  :style="`background: color-mix(in srgb, ${color ?? 'rgb(var(--colorAccent))'} 10%, transparent); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid color-mix(in srgb, ${color ?? 'rgb(var(--colorAccent))'} 20%, transparent)`"
+<div
+  :class="`
+    group flex items-center
+    gap-3.5 px-3 py-2.5
+    rounded-2xl border
+    backdrop-blur-md
+  `"
+  :style="`border-color: rgba(${rgbColor}, 0.1); background-color: rgba(${rgbColor}, 0.1)`"
   @click="active"
 >
   <!-- Avatar -->
   <div
     class="shrink-0 flex-center size-12 p-1.5 rounded-[14px] text-white shadow-sm transition-transform duration-200 group-active:scale-90"
-    :style="`background: ${color ?? 'rgb(var(--colorAccent))'}`"
+    :style="`background: ${color}`"
     @click.stop="update"
   >
     <div class="text-xl font-semibold" v-if="!icon">{{ name[0] }}</div>
@@ -33,7 +42,7 @@ function active() {
   </div>
 
   <!-- Name -->
-  <div class="flex-1 min-w-0 text-[rgb(var(--colorText))] text-base font-medium leading-snug truncate">
+  <div class="flex-1 min-w-0 text-text text-base font-medium leading-snug truncate">
     {{ name }}
   </div>
 

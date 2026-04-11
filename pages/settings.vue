@@ -60,13 +60,10 @@ function selectColor(color: string) {
   baseColor.value = color
   idbStorage.setItem(IDB_KEYS.BASE_COLOR, color)
 
-  const r = parseInt(color.slice(1, 3), 16)
-  const g = parseInt(color.slice(3, 5), 16)
-  const b = parseInt(color.slice(5, 7), 16)
-
   const html = document.querySelector('html')
+
   if (!html) return
-  html.style.setProperty('--colorAccent', `${r} ${g} ${b}`)
+  html.style.setProperty('--color-accent', color)
 }
 
 function changeTheme() {

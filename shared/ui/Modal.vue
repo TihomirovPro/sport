@@ -10,11 +10,11 @@ const slots = useSlots()
 <Transition>
   <div
     v-if="isShow"
-    class="size-full top-0 left-0 fixed flex bg-[rgba(0,0,0,.7)] z-[100]"
+    class="size-full top-0 left-0 fixed flex bg-page/80 backdrop-blur-md z-[100]"
     @click.self="emit('hiden')"
   >
     <div
-      class="overflow-auto grid gap-4 py-5 px-3 rounded-t-lg w-full mt-auto bg-[rgb(var(--colorBg))] max-h-[80%]"
+      class="overflow-auto grid gap-4 py-5 px-3 rounded-t-lg w-full mt-auto bg-page max-h-[80%]"
     >
       <slot name="content" />
 

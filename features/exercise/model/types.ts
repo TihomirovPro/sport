@@ -5,7 +5,7 @@ export interface TypeExercise {
   name: string
   ease: EnumEase[]
   order: number
-  color?: string
+  color: string
   icon?: string
   isComplex?: boolean
   complexDesc?: string

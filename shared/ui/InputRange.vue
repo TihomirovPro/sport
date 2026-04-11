@@ -64,31 +64,31 @@ const fillPercent = computed(() => {
 </div>
 </template>
 
-<style scoped lang="stylus">
-input
-  &:focus
-    outline none
+<style scoped>
+input::-webkit-slider-runnable-track {
+  height: 10px;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) var(--fill),
+    var(--color-faint) var(--fill)
+  );
+  border-radius: 12px;
+}
+  
 
-  &::-webkit-slider-runnable-track
-    height 10px
-    background linear-gradient(
-      to right,
-      unquote('rgb(var(--colorAccent))') var(--fill),
-      unquote('rgb(var(--colorFaint))') var(--fill)
-    )
-    border-radius 12px
+input::-webkit-slider-thumb {
+  height: 26px;
+  width: 26px;
+  background-color: var(--color-accent);
+  border-radius: 50%;
+  transform: translateY(-8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  -webkit-appearance: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
-  &::-webkit-slider-thumb
-    height 26px
-    width 26px
-    background-color unquote('rgb(var(--colorAccent))')
-    border-radius 50%
-    transform translateY(-8px)
-    box-shadow 0 2px 10px rgba(0, 0, 0, 0.25)
-    -webkit-appearance none
-    transition transform 0.15s ease, box-shadow 0.15s ease
-
-  &:active::-webkit-slider-thumb
-    transform translateY(-8px) scale(1.2)
-    box-shadow 0 4px 16px rgba(0, 0, 0, 0.35)
+input:active::-webkit-slider-thumb {
+  transform: translateY(-8px) scale(1.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
 </style>

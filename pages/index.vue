@@ -21,7 +21,7 @@ appStore.headerTitle = 'Упражнения'
 <template>
   <draggable
     v-if="allExercises.length"
-    class="grid gap-4"
+    class="grid gap-3"
     v-model="allExercises"
     @end="sortExercises(allExercises)"
     item-key="id"

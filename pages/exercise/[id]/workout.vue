@@ -142,7 +142,7 @@ onUnmounted(() => {
 <template>
 <div class="flex flex-col gap-3 min-h-full">
   <label
-    class="grid gap-1 py-3 text-center rounded-xl border-2 cursor-pointer min-h-[52px] bg-[rgba(var(--colorAccent),0.3)] border-[rgb(var(--colorAccent))]"
+    class="grid gap-1 py-3 text-center rounded-xl border-2 cursor-pointer min-h-[52px] bg-accent/30 border-accent"
     @click="openDatePicker"
   >
     <input
@@ -196,13 +196,13 @@ onUnmounted(() => {
     <p class="text-sm leading-relaxed font-medium opacity-95">{{ activeSuggestionSummaryText }}</p>
     <p class="text-xs opacity-70">{{ activeSuggestionConfidenceLine }}</p>
     <div class="grid grid-cols-2 gap-3">
-      <div class="border border-faint rounded-lg px-3 py-2 grid gap-1 border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]">
+      <div class="border border-faint rounded-lg px-3 py-2 grid gap-1 bg-faint/10">
         <span class="opacity-70 text-[11px]">Рекомендуемые повторы</span>
         <span class="font-semibold text-[13px]">{{ recommendationRepsLine }}</span>
       </div>
       <div
         v-if="isWeightMode"
-        class="border border-faint rounded-lg px-3 py-2 grid gap-1 border-[rgba(var(--colorIcon),0.16)] bg-[rgba(var(--colorIcon),0.06)]"
+        class="border border-faint rounded-lg px-3 py-2 grid gap-1 bg-faint/10"
       >
         <span class="opacity-70 text-[11px]">Рекомендуемые веса</span>
         <span class="font-semibold text-[13px]">{{ recommendationWeightsLine }}</span>
