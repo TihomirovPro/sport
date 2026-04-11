@@ -83,9 +83,21 @@ function toSettings() {
     </svg>
   </UiButtonGlass>
 
-  <!-- Center: title -->
-  <div class="header-title flex-1 text-center text-[17px] font-semibold tracking-[-0.2px] text-text overflow-hidden text-ellipsis whitespace-nowrap px-1">
-    {{ headerTitle }}
+  <!-- Center: title + offline pill -->
+  <div class="flex flex-col flex-1 items-center overflow-hidden">
+    <div class="header-title w-full text-center text-[17px] font-semibold tracking-[-0.2px] text-text overflow-hidden text-ellipsis whitespace-nowrap px-1">
+      {{ headerTitle }}
+    </div>
+    <div
+      v-if="!isOnline || pendingOperations"
+      class="flex items-center justify-center gap-[5px] w-fit px-[10px] py-[3px] rounded-[20px] text-[11px] font-medium tracking-[0.1px] bg-white/55 backdrop-blur-[16px] border border-white/50 text-black/50 shadow-[0_1px_6px_rgba(0,0,0,0.06)] dark:bg-[rgba(44,44,46,0.7)] dark:border-white/8 dark:text-white/45"
+    >
+      <span
+        class="shrink-0 size-1.5 rounded-full"
+        :class="isOnline ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"
+      ></span>
+      {{ offlineStatus }}
+    </div>
   </div>
 
   <!-- Right: add -->
@@ -95,17 +107,5 @@ function toSettings() {
       <line x1="5" y1="12" x2="19" y2="12"/>
     </svg>
   </UiButtonGlass>
-
-  <!-- Offline pill — floats below bar -->
-  <div
-    v-if="!isOnline || pendingOperations"
-    class="flex items-center justify-center gap-[5px] w-fit mt-[5px] mx-auto px-[10px] py-[3px] rounded-[20px] text-[11px] font-medium tracking-[0.1px] bg-white/55 backdrop-blur-[16px] border border-white/50 text-black/50 shadow-[0_1px_6px_rgba(0,0,0,0.06)] dark:bg-[rgba(44,44,46,0.7)] dark:border-white/8 dark:text-white/45"
-  >
-    <span
-      class="shrink-0 size-1.5 rounded-full"
-      :class="isOnline ? 'bg-[#ff9500]' : 'bg-[#ff3b30]'"
-    ></span>
-    {{ offlineStatus }}
-  </div>
 </header>
 </template>
