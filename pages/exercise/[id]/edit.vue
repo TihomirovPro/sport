@@ -42,15 +42,15 @@ const exercise = ref<TypeExerciseCreate>({
   order: 0
 })
 
-watchEffect(() => {
-  if (sourceExercise.value) {
-    const { id: _id, ...data } = sourceExercise.value
+watch(sourceExercise, (newExercise) => {
+  if (newExercise) {
+    const { id: _id, ...data } = newExercise
     exercise.value = { ...data }
     if (!exercise.value.ease) exercise.value.ease = constEases
     if (!exercise.value.complexItems) exercise.value.complexItems = []
     appStore.headerTitle = exercise.value.isComplex ? 'Изменить комплекс' : 'Изменить упражнение'
   }
-})
+}, { immediate: true })
 
 useHead(() => ({ title: appStore.headerTitle }))
 
@@ -121,8 +121,8 @@ function selectIcon(icon: string) {
 }
 
 function selectEase(ease: EnumEase) {
-  if (exercise.value.ease.includes(ease)) exercise.value.ease = [...exercise.value.ease.filter(el => el !== ease)]
-  else exercise.value.ease.push(ease)
+  if (exercise.value.ease.includes(ease)) exercise.value.ease = exercise.value.ease.filter(el => el !== ease)
+  else exercise.value.ease = [...exercise.value.ease, ease]
 }
 
 function toggleComplex() {
