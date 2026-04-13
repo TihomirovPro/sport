@@ -5,6 +5,6 @@
     "strict": true,
   },
   "vueCompilerOptions": {
-    "plugins": ["@vue/language-plugin-pug"]
+    "plugins": []
   }
 }
