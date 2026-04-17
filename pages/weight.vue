@@ -229,16 +229,15 @@ async function onRemoveWeight(id: string) {
     <div class="grid grid-cols-2 gap-2">
       <div class="grid gap-1">
         <label class="text-xs text-gray-500" for="weight-date">Дата</label>
-        <input
+        <UiInput
           id="weight-date"
           v-model="selectedDate"
           type="date"
-          class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
         />
       </div>
       <div class="grid gap-1">
         <label class="text-xs text-gray-500" for="weight-value">Вес, кг</label>
-        <input
+        <UiInput
           id="weight-value"
           v-model="weightValue"
           type="number"
@@ -246,7 +245,6 @@ async function onRemoveWeight(id: string) {
           step="0.1"
           min="1"
           placeholder="82.5"
-          class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
           @keyup.enter="submitWeight"
         />
       </div>
