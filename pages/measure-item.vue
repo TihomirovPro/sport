@@ -223,16 +223,15 @@ async function onRemoveEntry(id: string) {
     <div class="grid grid-cols-2 gap-2">
       <div class="grid gap-1">
         <label class="text-xs text-gray-500" for="entry-date">Дата</label>
-        <input
+        <UiInput
           id="entry-date"
           v-model="selectedDate"
           type="date"
-          class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
         />
       </div>
       <div class="grid gap-1">
         <label class="text-xs text-gray-500" for="entry-value">Значение, {{ unit }}</label>
-        <input
+        <UiInput
           id="entry-value"
           v-model="entryValue"
           type="number"
@@ -240,7 +239,6 @@ async function onRemoveEntry(id: string) {
           step="0.1"
           min="0.1"
           placeholder="38.5"
-          class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
           @keyup.enter="submitEntry"
         />
       </div>

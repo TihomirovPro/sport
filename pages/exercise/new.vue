@@ -114,7 +114,7 @@ watch(() => exercise.value.name, (name) => {
 <template>
   <div class="flex flex-col gap-4 h-full">
 
-    <div class="flex items-center gap-3">
+    <div class="grid grid-cols-[auto_1fr] items-center gap-3">
       <div
         class="size-14 rounded-xl flex-center flex-shrink-0 p-2 bg-accent"
         :style="exercise.color ? `background: ${exercise.color}` : ''"

@@ -14,7 +14,7 @@ function updateValue(e:Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
 
-const classes = 'border border-faint p-2 rounded-xl w-full max-width-full bg-transparent'
+const classes = 'border border-faint p-2 rounded-xl max-w-full min-w-0 bg-transparent'
 </script>
 
 <template>

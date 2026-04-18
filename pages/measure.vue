@@ -109,23 +109,21 @@ function openType(type: { id: string; name: string; unit: string }) {
       <div class="grid grid-cols-2 gap-2">
         <div class="grid gap-1">
           <label class="text-xs text-gray-500" for="measure-name">Название</label>
-          <input
+          <UiInput
             id="measure-name"
             v-model="newName"
             type="text"
             placeholder="Бицепс"
-            class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
             @keyup.enter="submitType"
           />
         </div>
         <div class="grid gap-1">
           <label class="text-xs text-gray-500" for="measure-unit">Единица</label>
-          <input
+          <UiInput
             id="measure-unit"
             v-model="newUnit"
             type="text"
             placeholder="см"
-            class="border border-faint p-2 rounded-lg w-full bg-transparent text-sm"
             @keyup.enter="submitType"
           />
         </div>

@@ -212,7 +212,7 @@ onUnmounted(() => {
   </div>
 
   <div class="approaches" v-if="!isComplex">
-    <div v-for="index in +approaches" :key="index" class="flex items-center gap-3 mb-3">
+    <div v-for="index in +approaches" :key="index" class="grid grid-flow-col grid-cols-[min-content] items-center gap-3 mb-3">
       <div class="text-sm">{{ timerApproach(index-1) }}</div>
       <UiInput
         v-model="workout.approach[index-1]"
