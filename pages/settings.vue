@@ -10,8 +10,8 @@ definePageMeta({
   backTo: '/'
 })
 
-useHead({
-  title: 'Настройки',
+watchEffect(() => {
+  useHead({ title: t('settings.title') })
 })
 
 const appStore = useAppStore()
@@ -24,6 +24,7 @@ const { activeUser } = storeToRefs(userStore)
 const { lastWeight } = storeToRefs(weightStore)
 const router = useRouter()
 const colorMode = useColorMode()
+const { t, locale, setLocale, availableLocales } = useI18n()
 const baseColor = ref('rgb(var(--colorAccent))')
 const showModalColor = ref(false)
 const showModalRubbers = ref(false)
@@ -32,7 +33,9 @@ const appVersion = packageJson.version || 'dev'
 const storedBaseColor = idbStorage.getItem(IDB_KEYS.BASE_COLOR)
 if (storedBaseColor) baseColor.value = storedBaseColor
 
-appStore.headerTitle = 'Настройки'
+watchEffect(() => {
+  appStore.headerTitle = t('settings.title')
+})
 
 onMounted(() => {
   subscribeWeights()
@@ -50,8 +53,8 @@ const userInitial = computed(() => {
 })
 
 const lastWeightText = computed(() => {
-  if (!lastWeight.value) return 'Нет данных'
-  return `${lastWeight.value.value.toFixed(1).replace('.', ',')} кг`
+  if (!lastWeight.value) return t('settings.noData')
+  return `${lastWeight.value.value.toFixed(1).replace('.', ',')} ${t('common.kg')}`
 })
 
 function selectColor(color: string) {
@@ -81,7 +84,7 @@ function toMeasurePage() {
 
 function confirmSignOut() {
   if (!process.client) return
-  if (!window.confirm('Выйти из аккаунта?')) return
+  if (!window.confirm(t('settings.signOutConfirm'))) return
   void signOutUser()
 }
 
@@ -107,21 +110,21 @@ async function signOutUser() {
       :style="`background: ${baseColor}`"
     >{{ userInitial }}</div>
     <div class="flex flex-col gap-1 min-w-0">
-      <p class="text-base font-medium truncate">{{ activeUser.name || activeUser.email || 'Пользователь' }}</p>
+      <p class="text-base font-medium truncate">{{ activeUser.name || activeUser.email || t('settings.user') }}</p>
       <div class="flex items-center gap-1">
         <div class="size-2 rounded-full bg-green"></div>
-        <p class="text-sm opacity-50">{{ activeUser.status || 'Пользователь' }}</p>
+        <p class="text-sm opacity-50">{{ activeUser.status || t('settings.user') }}</p>
       </div>
     </div>
   </div>
 
   <!-- Section: Appearance -->
   <div class="flex flex-col gap-1">
-    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">Внешний вид</p>
+    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('settings.appearance') }}</p>
     <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
 
       <!-- Theme -->
-      <UiSettingsItem label="Тёмная тема" @click="changeTheme">
+      <UiSettingsItem :label="t('settings.darkTheme')" @click="changeTheme">
         <template #icon>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5" />
@@ -141,7 +144,7 @@ async function signOutUser() {
       <div class="h-px bg-faint mx-4"></div>
 
       <!-- Accent color -->
-      <UiSettingsItem label="Акцентный цвет" @click="showModalColor = true">
+      <UiSettingsItem :label="t('settings.accentColor')" @click="showModalColor = true">
         <template #icon>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
@@ -163,11 +166,11 @@ async function signOutUser() {
 
   <!-- Section: Workouts -->
   <div class="flex flex-col gap-1">
-    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">Тренировки</p>
+    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('settings.workouts') }}</p>
     <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
 
       <!-- Hide filter titles -->
-      <UiSettingsItem label="Скрыть заголовки фильтров" @click="hideFilterTitles = !hideFilterTitles">
+      <UiSettingsItem :label="t('settings.hideFilterTitles')" @click="hideFilterTitles = !hideFilterTitles">
         <template #icon>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="8" y1="6" x2="21" y2="6" />
@@ -184,14 +187,14 @@ async function signOutUser() {
       <div class="h-px bg-faint mx-4"></div>
 
       <!-- Rubbers -->
-      <UiSettingsItem label="Набор резин" @click="showModalRubbers = true">
+      <UiSettingsItem :label="t('settings.rubbers')" @click="showModalRubbers = true">
         <template #icon>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
           </svg>
         </template>
         <div class="flex items-center gap-2">
-          <span class="text-sm opacity-50">{{ rubbersColor.length }} шт</span>
+          <span class="text-sm opacity-50">{{ rubbersColor.length }} {{ t('common.pieces') }}</span>
           <svg class="opacity-40" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6" />
           </svg>
@@ -202,11 +205,11 @@ async function signOutUser() {
 
   <!-- Section: Profile -->
   <div class="flex flex-col gap-1">
-    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">Профиль</p>
+    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('settings.profile') }}</p>
     <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
 
       <!-- Weight -->
-      <UiSettingsItem label="Мой вес" @click="toWeightPage">
+      <UiSettingsItem :label="t('settings.myWeight')" @click="toWeightPage">
         <template #icon>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
@@ -223,7 +226,7 @@ async function signOutUser() {
       <div class="h-px bg-faint mx-4"></div>
 
       <!-- Body measurements -->
-      <UiSettingsItem label="Замеры тела" @click="toMeasurePage">
+      <UiSettingsItem :label="t('settings.bodyMeasurements')" @click="toMeasurePage">
         <template #icon>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M2 12h20" />
@@ -241,14 +244,41 @@ async function signOutUser() {
     </div>
   </div>
 
+  <!-- Section: Language -->
+  <div class="flex flex-col gap-1">
+    <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('settings.language') }}</p>
+    <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
+      <template v-for="(lang, idx) in availableLocales" :key="lang.code">
+        <div v-if="idx > 0" class="h-px bg-faint mx-4"></div>
+        <button
+          type="button"
+          class="flex items-center justify-between px-4 py-3 w-full text-left transition-opacity active:opacity-60"
+          @click="setLocale(lang.code)"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-xl leading-none">{{ lang.flag }}</span>
+            <span class="text-sm font-medium">{{ lang.name }}</span>
+          </div>
+          <svg
+            v-if="locale.locale === lang.code"
+            class="text-accent"
+            width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </button>
+      </template>
+    </div>
+  </div>
+
   <!-- Sign out -->
   <button
-    class="w-full py-3 rounded-xl text-sm font-medium border border-error text-error transition-opacity active_opacity-60"
+    class="w-full py-3 rounded-xl text-sm font-medium border border-error text-error transition-opacity active:opacity-60"
     @click="confirmSignOut"
-  >Выйти из аккаунта</button>
+  >{{ t('settings.signOut') }}</button>
 
   <!-- Version -->
-  <p class="text-center text-xs opacity-30">версия {{ appVersion }}</p>
+  <p class="text-center text-xs opacity-30">{{ t('settings.version') }} {{ appVersion }}</p>
 
   <UiModalColor
     :isShow="showModalColor"

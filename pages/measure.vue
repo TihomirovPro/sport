@@ -4,17 +4,17 @@ definePageMeta({
   backTo: '/settings'
 })
 
-useHead({
-  title: 'Замеры тела',
-})
-
 const appStore = useAppStore()
 const measureStore = useMeasureStore()
 const { types } = storeToRefs(measureStore)
 const router = useRouter()
 const { notifyError } = useNotifications()
+const { t } = useI18n()
 
-appStore.headerTitle = 'Замеры тела'
+watchEffect(() => {
+  useHead({ title: t('measure.title') })
+  appStore.headerTitle = t('measure.title')
+})
 
 const showAddForm = ref(false)
 const newName = ref('')
@@ -33,7 +33,7 @@ onUnmounted(() => {
 async function submitType() {
   if (isSaving.value) return
   if (!newName.value.trim()) {
-    notifyError('Введите название замера')
+    notifyError(t('measure.errorNoName'))
     return
   }
 
@@ -45,7 +45,7 @@ async function submitType() {
     showAddForm.value = false
   } catch (error) {
     console.error('[measure:submitType]', error)
-    notifyError('Не удалось сохранить. Попробуйте снова.')
+    notifyError(t('measure.errorSaveFailed'))
   } finally {
     isSaving.value = false
   }
@@ -53,7 +53,7 @@ async function submitType() {
 
 async function onRemoveType(id: string) {
   if (!id || deletingId.value) return
-  if (!window.confirm('Удалить замер и все его записи?')) return
+  if (!window.confirm(t('measure.deleteConfirm'))) return
 
   const prev = [...types.value]
   measureStore.setTypes(prev.filter(t => t.id !== id))
@@ -64,7 +64,7 @@ async function onRemoveType(id: string) {
   } catch (error) {
     console.error('[measure:removeType]', error)
     measureStore.setTypes(prev)
-    notifyError('Не удалось удалить. Попробуйте снова.')
+    notifyError(t('measure.errorDeleteFailed'))
   } finally {
     deletingId.value = null
   }
@@ -93,7 +93,7 @@ function openType(type: { id: string; name: string; unit: string }) {
             <line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </div>
-        <span class="text-sm">Добавить замер</span>
+        <span class="text-sm">{{ t('measure.add') }}</span>
       </div>
       <svg
         width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -108,27 +108,27 @@ function openType(type: { id: string; name: string; unit: string }) {
       <div class="h-px bg-faint -mx-4 mb-1"></div>
       <div class="grid grid-cols-2 gap-2">
         <div class="grid gap-1">
-          <label class="text-xs text-gray-500" for="measure-name">Название</label>
+          <label class="text-xs text-gray-500" for="measure-name">{{ t('measure.name') }}</label>
           <UiInput
             id="measure-name"
             v-model="newName"
             type="text"
-            placeholder="Бицепс"
+            :placeholder="t('measure.namePlaceholder')"
             @keyup.enter="submitType"
           />
         </div>
         <div class="grid gap-1">
-          <label class="text-xs text-gray-500" for="measure-unit">Единица</label>
+          <label class="text-xs text-gray-500" for="measure-unit">{{ t('measure.unit') }}</label>
           <UiInput
             id="measure-unit"
             v-model="newUnit"
             type="text"
-            placeholder="см"
+            :placeholder="t('measure.unitPlaceholder')"
             @keyup.enter="submitType"
           />
         </div>
       </div>
-      <UiButton text="Сохранить" :disabled="isSaving" @click="submitType" />
+      <UiButton :text="t('common.save')" :disabled="isSaving" @click="submitType" />
     </div>
   </div>
 
@@ -160,7 +160,7 @@ function openType(type: { id: string; name: string; unit: string }) {
           :disabled="deletingId === type.id"
           :class="{ 'opacity-50 pointer-events-none': deletingId === type.id }"
           @click.stop="onRemoveType(type.id)"
-        >{{ deletingId === type.id ? '...' : 'Удалить' }}</button>
+        >{{ deletingId === type.id ? t('measure.deleting') : t('common.delete') }}</button>
         <svg
           width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
           class="opacity-40 shrink-0"
@@ -173,6 +173,6 @@ function openType(type: { id: string; name: string; unit: string }) {
   </div>
 
   <!-- Empty state -->
-  <UiEmptyState v-else icon="📏" title="Замеры не добавлены" hint="Нажмите «Добавить замер» выше" />
+  <UiEmptyState v-else icon="📏" :title="t('measure.empty')" :hint="t('measure.emptyHint')" />
 </div>
 </template>

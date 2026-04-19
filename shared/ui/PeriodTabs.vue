@@ -9,12 +9,14 @@ const emit = defineEmits<{
   'update:modelValue': [value: Period]
 }>()
 
-const tabs: { value: Period; label: string }[] = [
-  { value: 'all', label: 'Всё' },
-  { value: 'year', label: 'Год' },
-  { value: 'month', label: 'Месяц' },
-  { value: 'week', label: 'Неделя' },
-]
+const { t } = useI18n()
+
+const tabs = computed(() => [
+  { value: 'all' as Period, label: t('periods.all') },
+  { value: 'year' as Period, label: t('periods.year') },
+  { value: 'month' as Period, label: t('periods.month') },
+  { value: 'week' as Period, label: t('periods.week') },
+])
 </script>
 
 <template>

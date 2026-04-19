@@ -32,14 +32,16 @@ ChartJS.register(
   Legend
 )
 
-useHead({
-  title: 'Вес',
-})
-
 const appStore = useAppStore()
 const weightStore = useWeightStore()
 const { entries } = storeToRefs(weightStore)
 const { notifyError, notifySuccess } = useNotifications()
+const { t, getIntlLocale } = useI18n()
+
+watchEffect(() => {
+  useHead({ title: t('weight.pageTitle') })
+  appStore.headerTitle = t('weight.title')
+})
 
 const weightValue = ref<string | number>('')
 const selectedDate = ref('')
@@ -47,8 +49,6 @@ const isSaving = ref(false)
 const deletingId = ref<string | null>(null)
 const chartColor = ref('#3b82f6')
 const activePeriod = ref<'all' | 'year' | 'month' | 'week'>('all')
-
-appStore.headerTitle = 'Мой вес'
 
 onMounted(() => {
   subscribeWeights()
@@ -99,17 +99,17 @@ const stats = computed(() => {
 })
 
 function formatWeight(value: number): string {
-  return `${value.toFixed(1).replace('.', ',')} кг`
+  return `${value.toFixed(1).replace('.', ',')} ${t('common.kg')}`
 }
 
 function formatDate(timestamp: number): string {
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat(getIntlLocale(), {
     dateStyle: 'short',
   }).format(timestamp)
 }
 
 function formatShortDate(timestamp: number): string {
-  return new Intl.DateTimeFormat('ru-RU', {
+  return new Intl.DateTimeFormat(getIntlLocale(), {
     day: '2-digit',
     month: '2-digit',
   }).format(timestamp)
@@ -144,7 +144,7 @@ const chartData = computed(() => {
     labels: ordered.map((entry) => formatShortDate(entry.createdAt)),
     datasets: [
       {
-        label: 'Вес',
+        label: t('filters.weight'),
         data: ordered.map((entry) => entry.value),
         borderColor: chartColor.value,
         backgroundColor: chartColor.value,
@@ -177,25 +177,25 @@ async function submitWeight() {
     ? rawValue
     : Number(String(rawValue).replace(',', '.'))
   if (!Number.isFinite(value) || value <= 0) {
-    notifyError('Введите корректный вес, например 82.5')
+    notifyError(t('weight.errorInvalidWeight'))
     return
   }
 
   const createdAt = getTimestampFromDate(selectedDate.value)
   if (!Number.isFinite(createdAt)) {
-    notifyError('Выберите корректную дату')
+    notifyError(t('weight.errorInvalidDate'))
     return
   }
 
   isSaving.value = true
   try {
     await addWeight(value, createdAt)
-    notifySuccess('Вес сохранён')
+    notifySuccess(t('weight.saved'))
     weightValue.value = ''
     selectedDate.value = getTodayDate()
   } catch (error) {
     console.error('[weight:submitWeight]', error)
-    notifyError('Не удалось сохранить вес. Попробуйте снова.')
+    notifyError(t('weight.errorSaveFailed'))
   } finally {
     isSaving.value = false
   }
@@ -213,7 +213,7 @@ async function onRemoveWeight(id: string) {
   } catch (error) {
     console.error('[weight:removeWeight]', error)
     weightStore.setWeightEntries(prevEntries)
-    notifyError('Не удалось удалить запись. Попробуйте снова.')
+    notifyError(t('weight.errorDeleteFailed'))
   } finally {
     deletingId.value = null
   }
@@ -225,10 +225,10 @@ async function onRemoveWeight(id: string) {
 
   <!-- Add weight form -->
   <div class="border border-faint rounded-xl p-4 grid gap-3">
-    <p class="font-semibold text-sm uppercase tracking-wide text-gray-500">Добавить запись</p>
+    <p class="font-semibold text-sm uppercase tracking-wide text-gray-500">{{ t('weight.addRecord') }}</p>
     <div class="grid grid-cols-2 gap-2">
       <div class="grid gap-1">
-        <label class="text-xs text-gray-500" for="weight-date">Дата</label>
+        <label class="text-xs text-gray-500" for="weight-date">{{ t('weight.date') }}</label>
         <UiInput
           id="weight-date"
           v-model="selectedDate"
@@ -236,7 +236,7 @@ async function onRemoveWeight(id: string) {
         />
       </div>
       <div class="grid gap-1">
-        <label class="text-xs text-gray-500" for="weight-value">Вес, кг</label>
+        <label class="text-xs text-gray-500" for="weight-value">{{ t('weight.weightKg') }}</label>
         <UiInput
           id="weight-value"
           v-model="weightValue"
@@ -249,7 +249,7 @@ async function onRemoveWeight(id: string) {
         />
       </div>
     </div>
-    <UiButton text="Сохранить" :disabled="isSaving" @click="submitWeight" />
+    <UiButton :text="t('common.save')" :disabled="isSaving" @click="submitWeight" />
   </div>
 
   <!-- Period tabs -->
@@ -259,25 +259,25 @@ async function onRemoveWeight(id: string) {
   <template v-if="stats">
     <div class="grid grid-cols-2 gap-2">
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Последний</p>
+        <p class="text-xs text-gray-500">{{ t('weight.statsLast') }}</p>
         <p class="text-xl font-bold tracking-tight">{{ formatWeight(stats.latest.value) }}</p>
         <p class="text-xs text-gray-500">{{ formatDate(stats.latest.createdAt) }}</p>
       </div>
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Изменение</p>
+        <p class="text-xs text-gray-500">{{ t('weight.statsChange') }}</p>
         <p
           class="text-xl font-bold tracking-tight"
           :class="stats.change === null ? '' : stats.change > 0 ? 'text-error' : stats.change < 0 ? 'text-green-500' : ''"
-        >{{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} кг` }}</p>
-        <p class="text-xs text-gray-500">от предыдущего</p>
+        >{{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} ${t('common.kg')}` }}</p>
+        <p class="text-xs text-gray-500">{{ t('weight.statsFromPrevious') }}</p>
       </div>
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Среднее</p>
+        <p class="text-xs text-gray-500">{{ t('weight.statsAverage') }}</p>
         <p class="text-xl font-bold tracking-tight">{{ formatWeight(stats.average) }}</p>
-        <p class="text-xs text-gray-500">за период</p>
+        <p class="text-xs text-gray-500">{{ t('weight.statsForPeriod') }}</p>
       </div>
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Диапазон</p>
+        <p class="text-xs text-gray-500">{{ t('weight.statsRange') }}</p>
         <p class="text-base font-bold tracking-tight">{{ formatWeight(stats.min) }}</p>
         <p class="text-xs text-gray-500">— {{ formatWeight(stats.max) }}</p>
       </div>
@@ -285,12 +285,12 @@ async function onRemoveWeight(id: string) {
   </template>
 
   <div class="border border-faint rounded-xl p-4" v-else-if="entries.length">
-    <p class="text-sm text-gray-500 text-center">За выбранный период нет данных</p>
+    <p class="text-sm text-gray-500 text-center">{{ t('weight.noDataPeriod') }}</p>
   </div>
 
   <!-- Chart -->
   <div class="border border-faint rounded-xl p-4 grid gap-3" v-if="filteredEntries.length">
-    <p class="font-semibold text-sm">График</p>
+    <p class="font-semibold text-sm">{{ t('weight.chart') }}</p>
     <div class="h-48">
       <Chart type="line" :data="chartData" :options="chartOptions" />
     </div>
@@ -298,7 +298,7 @@ async function onRemoveWeight(id: string) {
 
   <!-- History -->
   <div class="border border-faint rounded-xl p-4 grid gap-3" v-if="entries.length">
-    <p class="font-semibold text-sm">История</p>
+    <p class="font-semibold text-sm">{{ t('weight.history') }}</p>
     <div class="grid gap-0">
       <div
         v-for="(entry, index) in entries"
@@ -319,12 +319,12 @@ async function onRemoveWeight(id: string) {
           :disabled="deletingId === entry.id"
           :class="{ 'opacity-50 pointer-events-none': deletingId === entry.id }"
           @click="onRemoveWeight(entry.id)"
-        >{{ deletingId === entry.id ? '...' : 'Удалить' }}</button>
+        >{{ deletingId === entry.id ? '...' : t('common.delete') }}</button>
       </div>
     </div>
   </div>
 
   <!-- Empty state -->
-  <UiEmptyState v-else icon="⚖️" title="Пока нет данных о весе" hint="Добавьте первую запись выше" />
+  <UiEmptyState v-else icon="⚖️" :title="t('weight.empty')" :hint="t('weight.emptyHint')" />
 </div>
 </template>

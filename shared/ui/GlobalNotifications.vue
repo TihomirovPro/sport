@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const { notifications, removeNotification } = useNotifications()
+const { t } = useI18n()
 </script>
 
 <template>
@@ -18,7 +19,7 @@ const { notifications, removeNotification } = useNotifications()
           <button
             class="text-white/80 transition hover:text-white"
             type="button"
-            aria-label="Закрыть уведомление"
+            :aria-label="t('notifications.close')"
             @click="removeNotification(notification.id)"
           >
             ×

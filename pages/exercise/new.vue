@@ -8,10 +8,13 @@ definePageMeta({
   backTo: '/'
 })
 
-useHead({ title: 'Добавить упражнение' })
-
 const appStore = useAppStore()
-appStore.headerTitle = 'Добавить упражнение'
+const { t } = useI18n()
+
+watchEffect(() => {
+  useHead({ title: t('exercises.addTitle') })
+  appStore.headerTitle = t('exercises.addTitle')
+})
 
 const exerciseStore = useExerciseStore()
 const { allExercises } = storeToRefs(exerciseStore)
@@ -47,7 +50,7 @@ async function newExercise() {
     await router.push('/')
   } catch (e) {
     console.error('[firebase:newExercise]', e)
-    notifyError('Не удалось добавить упражнение. Попробуйте снова.')
+    notifyError(t('exercises.errorAddFailed'))
   } finally {
     isSaving.value = false
   }
@@ -90,12 +93,12 @@ function validateExercise(): boolean {
   const name = exercise.value.name.trim()
   if (!name) {
     error.value = true
-    notifyError('Введите название упражнения')
+    notifyError(t('exercises.errorNoName'))
     return false
   }
   exercise.value.name = name
   if (!Array.isArray(exercise.value.ease) || exercise.value.ease.length === 0) {
-    notifyError('Выберите хотя бы один тип сложности')
+    notifyError(t('exercises.errorNoEase'))
     return false
   }
   exercise.value.complexDesc = exercise.value.isComplex ? (exercise.value.complexDesc?.trim() || '') : ''
@@ -126,14 +129,14 @@ watch(() => exercise.value.name, (name) => {
         v-model="exercise.name"
         type="text"
         :error="error"
-        placeholder="Название упражнения"
+        :placeholder="t('exercises.namePlaceholder')"
       />
     </div>
 
     <div class="flex flex-col gap-1">
-      <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">Оформление</p>
+      <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('exercises.appearance') }}</p>
       <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
-        <UiSettingsItem label="Цвет" @click="showModalColor = true">
+        <UiSettingsItem :label="t('exercises.color')" @click="showModalColor = true">
           <template #icon>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
@@ -157,7 +160,7 @@ watch(() => exercise.value.name, (name) => {
 
         <div class="h-px bg-faint mx-4" />
 
-        <UiSettingsItem label="Иконка" @click="showModalIcon = true">
+        <UiSettingsItem :label="t('exercises.icon')" @click="showModalIcon = true">
           <template #icon>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
@@ -178,10 +181,10 @@ watch(() => exercise.value.name, (name) => {
     </div>
 
     <div class="flex flex-col gap-1">
-      <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">Тип нагрузки</p>
+      <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('exercises.loadType') }}</p>
       <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
 
-        <UiSettingsItem :label="EnumEase.noWeight" @click="selectEase(EnumEase.noWeight)">
+        <UiSettingsItem :label="t('ease.noWeight')" @click="selectEase(EnumEase.noWeight)">
           <template #icon>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="7" r="4" />
@@ -196,7 +199,7 @@ watch(() => exercise.value.name, (name) => {
 
         <div class="h-px bg-faint mx-4" />
 
-        <UiSettingsItem :label="EnumEase.weight" @click="selectEase(EnumEase.weight)">
+        <UiSettingsItem :label="t('ease.weight')" @click="selectEase(EnumEase.weight)">
           <template #icon>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="6" y1="12" x2="18" y2="12" />
@@ -214,7 +217,7 @@ watch(() => exercise.value.name, (name) => {
 
         <div class="h-px bg-faint mx-4" />
 
-        <UiSettingsItem :label="EnumEase.rubber" @click="selectEase(EnumEase.rubber)">
+        <UiSettingsItem :label="t('ease.rubber')" @click="selectEase(EnumEase.rubber)">
           <template #icon>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="9" />
@@ -230,9 +233,9 @@ watch(() => exercise.value.name, (name) => {
     </div>
 
     <div class="flex flex-col gap-1">
-      <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">Комплекс</p>
+      <p class="text-xs font-semibold uppercase opacity-40 px-1 pb-1">{{ t('exercises.complexSection') }}</p>
       <div class="flex flex-col rounded-xl overflow-hidden border border-faint">
-        <UiSettingsItem label="Комплекс" @click="toggleComplex">
+        <UiSettingsItem :label="t('exercises.complexLabel')" @click="toggleComplex">
           <template #icon>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -250,19 +253,19 @@ watch(() => exercise.value.name, (name) => {
             <UiInput
               v-model="exercise.complexDesc"
               type="textarea"
-              placeholder="Описание"
+              :placeholder="t('exercises.description')"
             />
           </div>
           <div class="h-px bg-faint mx-4" />
           <div class="px-4 pt-3 pb-1">
-            <p class="text-xs font-semibold uppercase opacity-40">Упражнения</p>
+            <p class="text-xs font-semibold uppercase opacity-40">{{ t('exercises.exercisesSubheader') }}</p>
           </div>
           <div
             v-for="(item, idx) in exercise.complexItems"
             :key="`ci-${idx}`"
             class="flex items-center gap-2 px-3 py-2 border-t border-faint"
           >
-            <UiInput v-model="(exercise.complexItems as string[])[idx]" type="text" placeholder="Бурпи x10" />
+            <UiInput v-model="(exercise.complexItems as string[])[idx]" type="text" :placeholder="t('exercises.exercisePlaceholder')" />
             <button
               type="button"
               class="text-xs text-error shrink-0 px-2 py-1"
@@ -270,7 +273,7 @@ watch(() => exercise.value.name, (name) => {
             >—</button>
           </div>
           <div class="px-4 py-3 border-t border-faint">
-            <UiButton text="+ Упражнение" @click="addComplexItem" />
+            <UiButton :text="t('exercises.addExerciseItem')" @click="addComplexItem" />
           </div>
         </template>
       </div>
@@ -278,7 +281,7 @@ watch(() => exercise.value.name, (name) => {
 
     <div class="mt-auto">
       <UiButton
-        :text="isSaving ? 'Сохранение...' : 'Добавить'"
+        :text="isSaving ? t('common.saving') : t('exercises.add')"
         :disabled="isSaving"
         @click="newExercise"
       />

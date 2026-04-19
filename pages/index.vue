@@ -6,16 +6,16 @@ const exerciseStore = useExerciseStore()
 const appStore = useAppStore()
 const { allExercises, allExercisesLoaded } = storeToRefs(exerciseStore)
 const router = useRouter()
+const { t } = useI18n()
 
 function toCreateExercise() {
   void router.push('/exercise')
 }
 
-useHead({
-  title: 'Упражнения',
+watchEffect(() => {
+  useHead({ title: t('exercises.title') })
+  appStore.headerTitle = t('exercises.title')
 })
-
-appStore.headerTitle = 'Упражнения'
 </script>
 
 <template>
@@ -47,8 +47,8 @@ appStore.headerTitle = 'Упражнения'
     v-else-if="allExercisesLoaded"
     class="grid gap-3 p-4 rounded-xl border border-faint text-center bg-faint/20"
   >
-    <p class="text-sm opacity-75">У вас пока нет упражнений</p>
-    <p class="text-xs opacity-60">Нажмите на плюс в правом верхнем углу или добавьте первое упражнение кнопкой ниже</p>
-    <UiButton text="Добавить упражнение" @click="toCreateExercise" />
+    <p class="text-sm opacity-75">{{ t('exercises.empty') }}</p>
+    <p class="text-xs opacity-60">{{ t('exercises.emptyHint') }}</p>
+    <UiButton :text="t('exercises.add')" @click="toCreateExercise" />
   </div>
 </template>

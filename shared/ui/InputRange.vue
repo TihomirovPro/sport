@@ -25,10 +25,12 @@ function updateValue(e:Event) {
   emit('update:modelValue', (e.target as HTMLInputElement).value)
 }
 
+const { t } = useI18n()
+
 const title = computed(() => {
-  if (props.view === 'interval') return `Интервал: В ${props.modelValue} мин`
+  if (props.view === 'interval') return t('inputRange.interval', { value: props.modelValue })
   if (props.view === 'rpe') return `RPE: ${props.modelValue}`
-  return `Подходы: ${props.modelValue}`
+  return t('inputRange.approaches', { value: props.modelValue })
 })
 
 const fillPercent = computed(() => {

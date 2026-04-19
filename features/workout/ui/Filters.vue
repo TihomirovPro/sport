@@ -36,6 +36,7 @@ ChartJS.register(
   Legend
 )
 
+const { t, translateEase, getIntlLocale } = useI18n()
 const appStore = useAppStore()
 const workoutStore = useWorkoutStore()
 const { hideFilterTitles } = storeToRefs(appStore)
@@ -250,7 +251,7 @@ const data = computed(() => {
   const weights: Array<number | null> = []
   const datasets: ChartDataset[] = [
     {
-      label: 'Повторений',
+      label: t('filters.reps'),
       borderColor: baseColor,
       backgroundColor: baseColor,
       data: approaches,
@@ -267,7 +268,7 @@ const data = computed(() => {
   }
 
   filteredWorkouts.value.forEach(item => {
-    const formatDate = new Intl.DateTimeFormat('ru-RU', {
+    const formatDate = new Intl.DateTimeFormat(getIntlLocale(), {
       year: '2-digit',
       month: 'numeric',
       day: 'numeric'
@@ -283,7 +284,7 @@ const data = computed(() => {
 
   if (weights.some((item) => item !== null)) {
     options.datasets.push({
-      label: 'Вес',
+      label: t('filters.weight'),
       borderColor: secondColor,
       backgroundColor: secondColor,
       data: weights,
@@ -327,13 +328,13 @@ function showChart() {
         class="flex-1 pb-2 text-center text-sm cursor-pointer border-b-2 transition"
         :class="filter.ease === ease ? 'border-accent text-accent font-medium' : 'border-transparent opacity-40'"
         @click="filter.changeEase(ease)"
-      >{{ ease }}</div>
+      >{{ translateEase(ease) }}</div>
     </div>
   </template>
 
   <FilterChips
     v-if="allFilterElements.intervals.length > 1 && availableFilterElements.intervals.length > 0"
-    title="Интервал"
+    :title="t('filters.interval')"
     :items="availableFilterElements.intervals"
     :modelValue="filter.interval"
     @update:modelValue="filter.changeInterval($event)"
@@ -341,7 +342,7 @@ function showChart() {
 
   <FilterChips
     v-if="allFilterElements.approaches.length > 1 && availableFilterElements.approaches.length > 0"
-    title="Подходы"
+    :title="t('filters.approaches')"
     :items="availableFilterElements.approaches"
     :modelValue="filter.approach"
     @update:modelValue="filter.changeApproach($event)"

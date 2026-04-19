@@ -37,6 +37,7 @@ const measureStore = useMeasureStore()
 const { activeType, activeEntries } = storeToRefs(measureStore)
 const router = useRouter()
 const { notifyError, notifySuccess } = useNotifications()
+const { t, getIntlLocale } = useI18n()
 
 const entryValue = ref<string | number>('')
 const selectedDate = ref('')
@@ -45,11 +46,8 @@ const deletingId = ref<string | null>(null)
 const chartColor = ref('#3b82f6')
 const activePeriod = ref<'all' | 'year' | 'month' | 'week'>('all')
 
-appStore.headerTitle = activeType.value?.name ?? 'Замер'
-
-useHead({
-  title: activeType.value?.name ?? 'Замер',
-})
+appStore.headerTitle = activeType.value?.name ?? t('measure.title')
+useHead({ title: activeType.value?.name ?? t('measure.title') })
 
 onMounted(() => {
   if (!activeType.value) {
@@ -112,11 +110,11 @@ function formatValue(value: number): string {
 }
 
 function formatDate(timestamp: number): string {
-  return new Intl.DateTimeFormat('ru-RU', { dateStyle: 'short' }).format(timestamp)
+  return new Intl.DateTimeFormat(getIntlLocale(), { dateStyle: 'short' }).format(timestamp)
 }
 
 function formatShortDate(timestamp: number): string {
-  return new Intl.DateTimeFormat('ru-RU', { day: '2-digit', month: '2-digit' }).format(timestamp)
+  return new Intl.DateTimeFormat(getIntlLocale(), { day: '2-digit', month: '2-digit' }).format(timestamp)
 }
 
 const chartOptions = reactive({
@@ -170,25 +168,25 @@ async function submitEntry() {
     : Number(String(rawValue).replace(',', '.'))
 
   if (!Number.isFinite(value) || value <= 0) {
-    notifyError('Введите корректное значение, например 38.5')
+    notifyError(t('measure.errorInvalidValue'))
     return
   }
 
   const createdAt = getTimestampFromDate(selectedDate.value)
   if (!Number.isFinite(createdAt)) {
-    notifyError('Выберите корректную дату')
+    notifyError(t('measure.errorInvalidDate'))
     return
   }
 
   isSaving.value = true
   try {
     await addMeasureEntry(activeType.value.id, value, createdAt)
-    notifySuccess('Запись сохранена')
+    notifySuccess(t('measure.saved'))
     entryValue.value = ''
     selectedDate.value = getTodayDate()
   } catch (error) {
     console.error('[measure-item:submitEntry]', error)
-    notifyError('Не удалось сохранить. Попробуйте снова.')
+    notifyError(t('measure.errorSaveFailed'))
   } finally {
     isSaving.value = false
   }
@@ -207,7 +205,7 @@ async function onRemoveEntry(id: string) {
   } catch (error) {
     console.error('[measure-item:removeEntry]', error)
     measureStore.setEntries(typeId, prev)
-    notifyError('Не удалось удалить. Попробуйте снова.')
+    notifyError(t('measure.errorDeleteFailed'))
   } finally {
     deletingId.value = null
   }
@@ -219,10 +217,10 @@ async function onRemoveEntry(id: string) {
 
   <!-- Add entry form -->
   <div class="border border-faint rounded-xl p-4 grid gap-3">
-    <p class="font-semibold text-sm uppercase tracking-wide text-gray-500">Добавить запись</p>
+    <p class="font-semibold text-sm uppercase tracking-wide text-gray-500">{{ t('measure.addRecord') }}</p>
     <div class="grid grid-cols-2 gap-2">
       <div class="grid gap-1">
-        <label class="text-xs text-gray-500" for="entry-date">Дата</label>
+        <label class="text-xs text-gray-500" for="entry-date">{{ t('measure.date') }}</label>
         <UiInput
           id="entry-date"
           v-model="selectedDate"
@@ -230,7 +228,7 @@ async function onRemoveEntry(id: string) {
         />
       </div>
       <div class="grid gap-1">
-        <label class="text-xs text-gray-500" for="entry-value">Значение, {{ unit }}</label>
+        <label class="text-xs text-gray-500" for="entry-value">{{ t('measure.value', { unit }) }}</label>
         <UiInput
           id="entry-value"
           v-model="entryValue"
@@ -243,7 +241,7 @@ async function onRemoveEntry(id: string) {
         />
       </div>
     </div>
-    <UiButton text="Сохранить" :disabled="isSaving" @click="submitEntry" />
+    <UiButton :text="t('common.save')" :disabled="isSaving" @click="submitEntry" />
   </div>
 
   <!-- Period tabs -->
@@ -253,25 +251,25 @@ async function onRemoveEntry(id: string) {
   <template v-if="stats">
     <div class="grid grid-cols-2 gap-2">
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Последний</p>
+        <p class="text-xs text-gray-500">{{ t('measure.statsLast') }}</p>
         <p class="text-xl font-bold tracking-tight">{{ formatValue(stats.latest.value) }}</p>
         <p class="text-xs text-gray-500">{{ formatDate(stats.latest.createdAt) }}</p>
       </div>
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Изменение</p>
+        <p class="text-xs text-gray-500">{{ t('measure.statsChange') }}</p>
         <p
           class="text-xl font-bold tracking-tight"
           :class="stats.change === null ? '' : stats.change > 0 ? 'text-green-500' : stats.change < 0 ? 'text-error' : ''"
         >{{ stats.change === null ? '—' : `${stats.change > 0 ? '+' : ''}${stats.change.toFixed(1).replace('.', ',')} ${unit}` }}</p>
-        <p class="text-xs text-gray-500">от предыдущего</p>
+        <p class="text-xs text-gray-500">{{ t('measure.statsFromPrevious') }}</p>
       </div>
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Среднее</p>
+        <p class="text-xs text-gray-500">{{ t('measure.statsAverage') }}</p>
         <p class="text-xl font-bold tracking-tight">{{ formatValue(stats.average) }}</p>
-        <p class="text-xs text-gray-500">за период</p>
+        <p class="text-xs text-gray-500">{{ t('measure.statsForPeriod') }}</p>
       </div>
       <div class="border border-faint rounded-xl p-3 grid gap-0.5">
-        <p class="text-xs text-gray-500">Диапазон</p>
+        <p class="text-xs text-gray-500">{{ t('measure.statsRange') }}</p>
         <p class="text-base font-bold tracking-tight">{{ formatValue(stats.min) }}</p>
         <p class="text-xs text-gray-500">— {{ formatValue(stats.max) }}</p>
       </div>
@@ -279,12 +277,12 @@ async function onRemoveEntry(id: string) {
   </template>
 
   <div class="border border-faint rounded-xl p-4" v-else-if="activeEntries.length">
-    <p class="text-sm text-gray-500 text-center">За выбранный период нет данных</p>
+    <p class="text-sm text-gray-500 text-center">{{ t('measure.noDataPeriod') }}</p>
   </div>
 
   <!-- Chart -->
   <div class="border border-faint rounded-xl p-4 grid gap-3" v-if="filteredEntries.length">
-    <p class="font-semibold text-sm">График</p>
+    <p class="font-semibold text-sm">{{ t('measure.chart') }}</p>
     <div class="h-48">
       <Chart type="line" :data="chartData" :options="chartOptions" />
     </div>
@@ -292,7 +290,7 @@ async function onRemoveEntry(id: string) {
 
   <!-- History -->
   <div class="border border-faint rounded-xl p-4 grid gap-3" v-if="activeEntries.length">
-    <p class="font-semibold text-sm">История</p>
+    <p class="font-semibold text-sm">{{ t('measure.history') }}</p>
     <div class="grid gap-0">
       <div
         v-for="(entry, index) in activeEntries"
@@ -313,12 +311,12 @@ async function onRemoveEntry(id: string) {
           :disabled="deletingId === entry.id"
           :class="{ 'opacity-50 pointer-events-none': deletingId === entry.id }"
           @click="onRemoveEntry(entry.id)"
-        >{{ deletingId === entry.id ? '...' : 'Удалить' }}</button>
+        >{{ deletingId === entry.id ? t('measure.deleting') : t('common.delete') }}</button>
       </div>
     </div>
   </div>
 
   <!-- Empty state -->
-  <UiEmptyState v-else icon="📐" title="Пока нет записей" hint="Добавьте первую запись выше" />
+  <UiEmptyState v-else icon="📐" :title="t('measure.noRecords')" :hint="t('measure.noRecordsHint')" />
 </div>
 </template>

@@ -21,6 +21,7 @@ const { rubbersColor } = storeToRefs(catalogStore)
 const { headerTitle } = storeToRefs(appStore)
 const { activeUser } = storeToRefs(userStore)
 const { notifyError } = useNotifications()
+const { t } = useI18n()
 const removeConfirm = ref(false)
 const isSaving = ref(false)
 
@@ -124,7 +125,7 @@ function timerApproach(time: number) {
 }
 
 watchEffect(() => {
-  headerTitle.value = selectUpdateWorkout.value ? 'Изменить тренировку' : 'Добавить тренировку'
+  headerTitle.value = selectUpdateWorkout.value ? t('workout.editTitle') : t('workout.addTitle')
 })
 
 useHead(() => ({ title: headerTitle.value }))
@@ -159,19 +160,19 @@ onUnmounted(() => {
     <UiInputRange v-model="approaches" max="10" step="1" view="approaches" />
   </template>
   <template v-else>
-    <UiInput v-model="complexTime" type="text" :error="error" placeholder="Время выполнения (ММ:СС)" />
-    <UiInput v-model="complexRounds" type="text" inputmode="numeric" placeholder="Кол-во кругов (необязательно)" />
+    <UiInput v-model="complexTime" type="text" :error="error" :placeholder="t('workout.timePlaceholder')" />
+    <UiInput v-model="complexRounds" type="text" inputmode="numeric" :placeholder="t('workout.roundsPlaceholder')" />
     <div class="grid gap-2">
-      <div class="text-sm opacity-70">Упражнения в этой тренировке</div>
+      <div class="text-sm opacity-70">{{ t('workout.exercisesLabel') }}</div>
       <div
         v-for="(item, idx) in complexExercises"
         :key="`complex-exercise-${idx}`"
         class="flex items-center gap-2"
       >
-        <UiInput v-model="complexExercises[idx]" type="text" placeholder="Упражнение" />
-        <button type="button" class="text-sm text-error px-2" @click="removeComplexExercise(idx)">удалить</button>
+        <UiInput v-model="complexExercises[idx]" type="text" :placeholder="t('workout.exercisePlaceholder')" />
+        <button type="button" class="text-sm text-error px-2" @click="removeComplexExercise(idx)">{{ t('workout.deleteExercise') }}</button>
       </div>
-      <UiButton text="Добавить упражнение" @click="addComplexExercise" />
+      <UiButton :text="t('workout.addExercise')" @click="addComplexExercise" />
     </div>
   </template>
 
@@ -197,18 +198,18 @@ onUnmounted(() => {
     <p class="text-xs opacity-70">{{ activeSuggestionConfidenceLine }}</p>
     <div class="grid grid-cols-2 gap-3">
       <div class="border border-faint rounded-lg px-3 py-2 grid gap-1 bg-faint/10">
-        <span class="opacity-70 text-[11px]">Рекомендуемые повторы</span>
+        <span class="opacity-70 text-[11px]">{{ t('workout.recommendedReps') }}</span>
         <span class="font-semibold text-[13px]">{{ recommendationRepsLine }}</span>
       </div>
       <div
         v-if="isWeightMode"
         class="border border-faint rounded-lg px-3 py-2 grid gap-1 bg-faint/10"
       >
-        <span class="opacity-70 text-[11px]">Рекомендуемые веса</span>
+        <span class="opacity-70 text-[11px]">{{ t('workout.recommendedWeight') }}</span>
         <span class="font-semibold text-[13px]">{{ recommendationWeightsLine }}</span>
       </div>
     </div>
-    <UiButton text="Применить рекомендацию" @click="applyProgressionSuggestion" />
+    <UiButton :text="t('workout.applyRecommendation')" @click="applyProgressionSuggestion" />
   </div>
 
   <div class="approaches" v-if="!isComplex">
@@ -219,7 +220,7 @@ onUnmounted(() => {
         type="text"
         :error="error"
         inputmode="numeric"
-        :placeholder="`Подход ${index}`"
+        :placeholder="t('workout.approachPlaceholder', { index })"
       />
       <UiInput
         v-if="workout.ease === EnumEase.weight"
@@ -227,7 +228,7 @@ onUnmounted(() => {
         @update:model-value="(value) => updateWeight(index - 1, value)"
         type="text"
         inputmode="decimal"
-        :placeholder="`Вес ${index}`"
+        :placeholder="t('workout.weightPlaceholder', { index })"
       />
     </div>
   </div>
@@ -241,25 +242,25 @@ onUnmounted(() => {
     step="0.5"
     view="rpe"
   />
-  <p class="text-xs opacity-70" v-if="!isComplex">RPE оценивается по последнему рабочему подходу.</p>
+  <p class="text-xs opacity-70" v-if="!isComplex">{{ t('workout.rpeHint') }}</p>
 
-  <UiInput v-model="workout.desc" type="textarea" placeholder="Заметка" />
+  <UiInput v-model="workout.desc" type="textarea" :placeholder="t('workout.note')" />
 
   <div class="grid grid-flow-col place-items-center gap-5 mt-auto">
     <UiButton
       v-if="!selectUpdateWorkout"
       :disabled="isSaving"
       @click="add"
-      :text="isSaving ? 'Сохранение...' : 'Добавить'"
+      :text="isSaving ? t('common.saving') : t('workout.add')"
     />
     <template v-else>
-      <UiButton red :disabled="isSaving" @click="removeConfirm = true" text="Удалить" />
-      <UiButton :disabled="isSaving" @click="updateSelectWorkout" :text="isSaving ? 'Сохранение...' : 'Сохранить'" />
+      <UiButton red :disabled="isSaving" @click="removeConfirm = true" :text="t('common.delete')" />
+      <UiButton :disabled="isSaving" @click="updateSelectWorkout" :text="isSaving ? t('common.saving') : t('common.save')" />
     </template>
   </div>
 
   <UiModalRemoveConfirm
-    text="Точно хочешь удалить данную запись?"
+    :text="t('workout.deleteConfirm')"
     :isShow="removeConfirm"
     @hiden="removeConfirm = false"
     @cancelRemove="removeConfirm = false"

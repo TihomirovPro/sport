@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n()
+
 defineProps<{
   isShow: boolean
   text: string
@@ -19,12 +21,12 @@ const emit = defineEmits<{
 
     <template #bottom>
       <UiButton
-        text="Отменить"
+        :text="t('confirm.cancel')"
         @click="emit('cancelRemove')"
       />
       <UiButton
         red
-        text="Удалить"
+        :text="t('confirm.delete')"
         @click="emit('remove')"
       />
     </template>

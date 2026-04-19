@@ -14,6 +14,7 @@ type RubberItem = {
   color: string
 }
 
+const { t } = useI18n()
 const catalogStore = useCatalogStore()
 const { rubbersColor } = storeToRefs(catalogStore)
 const { notifyError } = useNotifications()
@@ -30,7 +31,7 @@ watch(
 
 function addRubber() {
   localRubbers.value.push({
-    name: `Новая резина ${localRubbers.value.length + 1}`,
+    name: t('rubbers.newName', { index: localRubbers.value.length + 1 }),
     color: '#3b82f6',
   })
 }
@@ -81,7 +82,7 @@ async function save() {
     emit('hiden')
   } catch (error) {
     console.error('[firebase:saveRubbers]', error)
-    notifyError('Не удалось сохранить набор резин')
+    notifyError(t('rubbers.errorSaveFailed'))
   }
 }
 
@@ -91,7 +92,7 @@ async function reset() {
     emit('hiden')
   } catch (error) {
     console.error('[firebase:resetRubbers]', error)
-    notifyError('Не удалось сбросить набор резин')
+    notifyError(t('rubbers.errorResetFailed'))
   }
 }
 </script>
@@ -101,10 +102,10 @@ async function reset() {
   <template #content>
     <div class="flex items-start justify-between">
       <div>
-        <div class="text-base font-semibold">Набор резин</div>
-        <div class="text-xs opacity-50 mt-0.5">Изменения применяются в экране тренировки</div>
+        <div class="text-base font-semibold">{{ t('rubbers.title') }}</div>
+        <div class="text-xs opacity-50 mt-0.5">{{ t('rubbers.subtitle') }}</div>
       </div>
-      <div class="text-xs opacity-40 font-medium tabular-nums pt-0.5">{{ localRubbers.length }} шт</div>
+      <div class="text-xs opacity-40 font-medium tabular-nums pt-0.5">{{ localRubbers.length }} {{ t('common.pieces') }}</div>
     </div>
 
     <div class="grid gap-2">
@@ -118,7 +119,7 @@ async function reset() {
             <label
               class="relative cursor-pointer shrink-0 self-stretch flex items-center justify-center w-14"
               :style="`background: ${toHexColor(item.color)}18`"
-              :title="'Выбрать цвет'"
+              :title="t('rubbers.colorSelect')"
             >
               <div
                 class="size-8 rounded-full shadow-md transition-transform hover:scale-105"
@@ -135,7 +136,7 @@ async function reset() {
               <input
                 v-model="item.name"
                 type="text"
-                placeholder="Название резины"
+                :placeholder="t('rubbers.namePlaceholder')"
                 class="bg-transparent text-sm font-medium w-full outline-none placeholder-opacity-40 border-b border-faint/60 pb-1 focus:border-accent transition-colors"
               />
               <input
@@ -166,14 +167,14 @@ async function reset() {
         <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <path d="M12 5v14M5 12h14" />
         </svg>
-        <span>Добавить резину</span>
+        <span>{{ t('rubbers.add') }}</span>
       </button>
     </div>
   </template>
 
   <template #bottom>
-    <UiButton red text="Сбросить" @click="reset" />
-    <UiButton text="Сохранить" @click="save" />
+    <UiButton red :text="t('rubbers.reset')" @click="reset" />
+    <UiButton :text="t('common.save')" @click="save" />
   </template>
 </UiModal>
 </template>
